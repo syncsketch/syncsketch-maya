@@ -13,6 +13,7 @@ import sys
 import time
 import webbrowser
 import tempfile
+import yaml
 from functools import partial
 
 from vendor.Qt.QtWebKit import *
@@ -29,7 +30,6 @@ from syncsketchGUI.lib.gui.icons import *
 from syncsketchGUI.lib.gui.icons import _get_qicon
 from syncsketchGUI.lib.connection import *
 from vendor import mayapalette
-from vendor import yaml
 from vendor.Qt import QtCompat
 from vendor.Qt import QtCore
 from vendor.Qt import QtGui
