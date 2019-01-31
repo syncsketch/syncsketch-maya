@@ -1,0 +1,7 @@
+<!DOCTYPE RCC><RCC version="1.0">
+	<qresource>
+		<file alias="manage_presets_icon.png">manage_presets_icon_100.png</file>
+		<file>manage_presets_icon_150.png</file>
+		<file>manage_presets_icon_200.png</file>
+	</qresource>
+</RCC>

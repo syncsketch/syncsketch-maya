@@ -1,0 +1,82 @@
+- shelfButton:
+    annotation  : Main Menu
+    command     : import syncsketch; reload (syncsketch); syncsketch.reload_toolkit (); syncsketch.show_menu_window ()
+    image       : syncsketch_ui_100.png
+    image1      : syncsketch_ui_100.png
+    image2      : syncsketch_ui_150.png
+    image3      : syncsketch_ui_200.png
+    label       : Main Menu
+    sourceType  : python
+
+- shelfButton:
+    annotation  : Target
+    command     : import syncsketch; reload (syncsketch); syncsketch.reload_toolkit (); syncsketch.show_syncsketch_browser_window()
+    image       : target_icon_100.png
+    image1      : target_icon_100.png
+    image2      : target_icon_150.png
+    image3      : target_icon_200.png
+    label       : Target
+    sourceType  : python
+
+- shelfButton:
+    annotation  : Record
+    command     : import syncsketch; reload (syncsketch); syncsketch.reload_toolkit (); syncsketch.record ()
+    image       : record_icon_100.png
+    image1      : record_icon_100.png
+    image2      : record_icon_150.png
+    image3      : record_icon_200.png
+    label       : Record
+    sourceType  : python
+
+- shelfButton:
+    annotation  : Play
+    command     : import syncsketch; reload (syncsketch); syncsketch.reload_toolkit (); syncsketch.play ()
+    image       : play_icon_100.png
+    image1      : play_icon_100.png
+    image2      : play_icon_150.png
+    image3      : play_icon_200.png
+    label       : Play
+    sourceType  : python
+
+- shelfButton:
+    annotation  : Upload
+    command     : import syncsketch; reload (syncsketch); syncsketch.reload_toolkit (); syncsketch.upload ()
+    image       : upload_icon_100.png
+    image1      : upload_icon_100.png
+    image2      : upload_icon_150.png
+    image3      : upload_icon_200.png
+    label       : Upload
+    sourceType  : python
+
+
+- shelfButton:
+    annotation  : Download
+    command     : import syncsketch; reload (syncsketch); syncsketch.reload_toolkit (); syncsketch.show_download_window ()
+    image       : download_icon_100.png
+    image1      : download_icon_100.png
+    image2      : download_icon_150.png
+    image3      : download_icon_200.png
+    label       : Download
+    sourceType  : python
+
+- shelfButton:
+    annotation  : Cycle Presets
+    command     : import syncsketch; syncsketch.cycle_viewport_presets()
+    image       : cycle_icon_100.png
+    image1      : cycle_icon_100.png
+    image2      : cycle_icon_150.png
+    image3      : cycle_icon_200.png
+    label       : Cycle Presets
+    sourceType  : python
+
+
+- shelfButton:
+    annotation  : Manage Presets
+    command     : import syncsketch; syncsketch.show_viewport_preset_window()
+    image       : manage_presets_icon_100.png
+    image1      : manage_presets_icon_100.png
+    image2      : manage_presets_icon_150.png
+    image3      : manage_presets_icon_100.png
+    label       : Preset 1
+    sourceType  : python
+

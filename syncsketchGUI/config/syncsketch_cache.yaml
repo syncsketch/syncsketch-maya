@@ -1,0 +1,37 @@
+F: 'true'
+breadcrumb: ''
+current_preset: HD720p (Windows)
+current_range_type: Start / End
+current_viewport_preset: silhouette
+frame_end: '200'
+frame_start: '1'
+last_recorded:
+  camera: persp
+  compression: H.264
+  end_frame: '200'
+  filename: C:/Users/chavez/Documents/Desktop/playblasts/playblast.avi
+  format: avi
+  height: 768
+  off_screen: true
+  overwrite: false
+  show_ornaments: false
+  start_frame: '1'
+  viewer: false
+  width: 1280
+last_recorded_selection: C:/Users/chavez/Documents/Desktop/playblasts/playblast.avi
+playground_email: bernhard.haux@gmail.com
+ps_clipname_lineEdit: ''
+ps_directory_lineEdit: C:/Users/chavez/Documents/Desktop/playblasts
+ps_open_afterUpload_checkBox: 'true'
+ps_play_after_creation_checkBox: 'true'
+ps_upload_after_creation_checkBox: 'false'
+selected_camera: persp
+target_media_id: ''
+target_review_id: ''
+target_url_description: null
+target_url_item_name: Playground
+target_url_type: playground
+target_url_username: ''
+upload_to_value: null
+us_filename_lineEdit: playblast
+us_last_upload_url_pushButton: https://syncsketchGUI.com/sketch/283128#658737

@@ -1,0 +1,7 @@
+<!DOCTYPE RCC><RCC version="1.0">
+	<qresource>
+		<file alias="cycle_icon.png">cycle_icon_100.png</file>
+		<file>cycle_icon_150.png</file>
+		<file>cycle_icon_200.png</file>
+	</qresource>
+</RCC>
