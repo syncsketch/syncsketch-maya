@@ -10,9 +10,11 @@ The easiest way to install it is to download the [installCrossPlatform.mel](http
 To instal it yourself, you only need run the following pip commands
 
 1)  Install the Syncsketch-API and additional packages pyyamls and requests with the security  extras(to support old OpenSSL Versions)
+
 `pip2.7.exe install --ignore-installed --user https://github.com/syncsketch/python-api/archive/v1.0.1.zip pyyaml requests[security]`
 
 2) Install the Syncsketch-GUI
+
 `pip2.7.exe install --ignore-installed --target=C:\Users\chavez\Documents\maya\2018\scripts https://github.com/syncsketch/syncsketchGUI/archive/v1.0.4.zip`
 
-Note: Manual install expects you to have `ffmpeg` and `pip` already installed and set-up correctly
+__Note__: Manual install expects you to have `ffmpeg` and `pip` already installed and set-up correctly
