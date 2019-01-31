@@ -6,9 +6,9 @@
 # ======================================================================
 import codecs
 import os
+import yaml
 
 from syncsketchGUI.lib import path
-from syncsketchGUI.vendor import yaml
 
 # ======================================================================
 # Global Variables

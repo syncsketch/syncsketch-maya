@@ -7,7 +7,7 @@
 import getpass
 import os
 
-from syncsketchGUI.vendor import yaml
+import yaml
 import syncsketch
 import requests
 

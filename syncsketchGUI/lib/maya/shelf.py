@@ -35,7 +35,7 @@ from maya import cmds
 from maya import mel
 
 from syncsketchGUI.lib import path
-from syncsketchGUI.vendor import yaml
+import yaml
 
 # ======================================================================
 # Global Variables
