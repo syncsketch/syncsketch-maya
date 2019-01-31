@@ -8,6 +8,7 @@ setup(
     author_email = "dev@syncsketch.com",
     description = "Syncsketch GUI for Autodesk Maya",
     packages = find_packages(),
+    include_package_data = True,
     #todo: Refactor this to use manifest file
     package_data = {'syncsketchGUI.config': ['*.yaml']},
     install_requires = [],
