@@ -7,7 +7,7 @@ The easiest way to install it is to download the [installCrossPlatform.mel](http
 
 ## Install it manually:
 
-To instal it yourself, you only need run the following pip commands
+To install it yourself, you only need run the following pip commands
 
 1)  Install the Syncsketch-API and additional packages pyyamls and requests with the security  extras(to support old OpenSSL Versions)
 
