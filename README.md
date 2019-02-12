@@ -26,7 +26,6 @@ If you want to contribute to this project, your help is very welcome. We are try
 
 
 ### Short: Fork our project and send us a pull request.
-
 ============
 
 ### How to make a clean pull request
