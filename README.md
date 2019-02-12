@@ -25,9 +25,9 @@ Contributing
 If you want to contribute to this project, your help is very welcome. We are trying to give a minimal version of a Publish workflow, which you can either adapt or get inspired by. 
 
 
-### Contributing
-============
-### How to make a clean pull request
+##  Quick: Just fork this repo and start a pull request:
+
+### Long: How to make a clean pull request
 
 - Create a personal fork of our Github.
 - Clone the fork on your local machine. Your remote repo on Github is called `origin`.
