@@ -22,11 +22,14 @@ __Note__: Manual install expects you to have `ffmpeg` and `pip` already installe
 
 Contributing
 ============
-If you want to contribute to this project, your help is very welcome. We are trying to give a minimal version of a Publish workflow, which you can either adapt or get inspired by.
+If you want to contribute to this project, your help is very welcome. We are trying to give a minimal version of a Publish workflow, which you can either adapt or get inspired by. 
+
+
+### Short: Fork our project and send us a pull request.
+
+============
 
 ### How to make a clean pull request
-
-`short: Fork our project and send us a pull request.`
 
 - Create a personal fork of our Github.
 - Clone the fork on your local machine. Your remote repo on Github is called `origin`.
