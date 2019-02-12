@@ -20,7 +20,7 @@ If you are familiar with python and pip, you can go for a manual installation  a
 __Note__: Manual install expects you to have `ffmpeg` and `pip` already installed and set-up correctly.
 
 
-Contributing (Fork and send pull request)
+### Contributing (Fork and send pull request)
 ============
 If you want to contribute to this project, your help is very welcome. We are trying to give a minimal version of a Publish workflow, which you can either adapt or get inspired by. 
 
