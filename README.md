@@ -25,7 +25,7 @@ Contributing
 If you want to contribute to this project, your help is very welcome. We are trying to give a minimal version of a Publish workflow, which you can either adapt or get inspired by. 
 
 
-### Short: Fork our project and send us a pull request
+Contributing
 ============
 ### How to make a clean pull request
 
