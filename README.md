@@ -10,10 +10,10 @@ The easiest way to install this application is to download the [installCrossPlat
 If you are familiar with python and pip, you can go for a manual installation  and follow these steps:
 
 1) Install the Syncsketch-API + extras
-   `pip2.7.exe install --ignore-installed --user https://github.com/syncsketch/python-api/archive/v1.0.1.zip pyyaml requests[security]`
+⋅⋅⋅`pip2.7.exe install --ignore-installed --user https://github.com/syncsketch/python-api/archive/v1.0.1.zip pyyaml requests[security]`
 
 2) Install the Syncsketch-GUI
-   `pip2.7.exe install --ignore-installed --target=C:\Users\USERNAME\Documents\maya\2018\scripts https://github.com/syncsketch/syncsketchGUI/archive/v1.0.4.zip`
+⋅⋅⋅`pip2.7.exe install --ignore-installed --target=C:\Users\USERNAME\Documents\maya\2018\scripts https://github.com/syncsketch/syncsketchGUI/archive/v1.0.4.zip`
 
 __Note__: Manual install expects you to have `ffmpeg` and `pip` already installed and set-up correctly.
 
