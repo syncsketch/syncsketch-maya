@@ -2,7 +2,7 @@
 
 ##  Drag & Drop Install:
 
-The easiest way to install this application is to download the [installCrossPlatform.mel](https://github.com/syncsketch/syncsketchGUI/releases/download/v1.0.5/installCrossPlatformGUI.mel#install) file and drag it into a maya-viewport (2018 tested only. It will automatically install all the dependencies without requiring admin priviliges into your user-directory.
+The easiest way to install this application is to download the [installCrossPlatform.mel](https://github.com/syncsketch/syncsketchGUI/releases/download/release/installCrossPlatformGUI.mel#install) file and drag it into a maya-viewport (2018 tested only. It will automatically install all the dependencies without requiring admin priviliges into your user-directory.
 
 
 ## Install it manually:
