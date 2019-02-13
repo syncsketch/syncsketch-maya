@@ -15,6 +15,8 @@ If you are familiar with python and pip, you can go for a manual installation  a
 2. Install the Syncsketch-GUI
 `pip2.7.exe install --ignore-installed --target=C:\Users\USERNAME\Documents\maya\2018\scripts https://github.com/syncsketch/syncsketchGUI/archive/release.zip`
 
+__Test in Dev__: `pip install --ignore-installed --verbose --user --target=/Users/USERNAME/Library/Preferences/Autodesk/maya/2018/scripts/  https://github.com/syncsketch/python-api/archive/v1.0.5.zip
+`
 __Note__: Manual install expects you to have `ffmpeg` and `pip` already installed and set-up correctly.
 
 
