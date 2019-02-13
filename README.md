@@ -1,5 +1,5 @@
 # syncsketchGUI
-https://img.shields.io/badge/left-right-f39f37.svg
+- Tested![coverage](https://img.shields.io/badge/coverage-80%25-yellowgreen.svg?maxAge=2592000)
 
 ##  Drag & Drop Install:
 
