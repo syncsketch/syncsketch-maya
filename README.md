@@ -1,4 +1,5 @@
 # syncsketchGUI
+https://img.shields.io/badge/left-right-f39f37.svg
 
 ##  Drag & Drop Install:
 
