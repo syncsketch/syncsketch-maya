@@ -1,4 +1,4 @@
-[coverage](https://img.shields.io/badge/Maya2017-tested-brightgreen.svg)
+![coverage](https://img.shields.io/badge/Maya2017-tested-brightgreen.svg)
 # syncsketchGUI
 
 ##  Drag & Drop Install:
