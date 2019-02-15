@@ -289,8 +289,9 @@ class SyncSketchInstaller(QObject):
         self.installer.animatedGif.hide()
 
         #Install the Shelf
-        from syncsketchGUI import install_shelf
-        install_shelf()
+        if InstallOptions.installShelf:
+            from syncsketchGUI import install_shelf
+            install_shelf()
 
     def __syncsketchIntall(self):
         self.installer.installButton.hide()
@@ -426,6 +427,7 @@ class installThread(QThread):
             print(subprocess.check_output(cmd))
 
             #Install SyncsketchGUI
+            #Todo: We might wan't to check first if there is already a syncsketchGUI installed in a different path
             cmd = '{0} install --ignore-installed --target={1} https://github.com/syncsketch/syncsketchGUI/archive/v1.0.4.zip'.format(PIP_PATH, tmpdir).split(' ')
             print('Calling shell command: {0}'.format(cmd))
             print(subprocess.check_output(cmd))
