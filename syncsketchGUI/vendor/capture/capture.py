@@ -165,8 +165,8 @@ def capture(camera=None,
                             height=height + padding,
                             off_screen=off_screen) as panel:
         cmds.setFocus(panel)
+        #todo: remove after test
         print compression,format,100,quality,viewer,start_frame,end_frame,off_screen,show_ornaments,overwrite,filename,width, height,raw_frame_numbers,frame_padding
-        compression = "none"
         with contextlib.nested(
              _disabled_inview_messages(),
              _maintain_camera(panel, camera),

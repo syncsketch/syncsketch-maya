@@ -9,7 +9,7 @@ last_recorded:
   camera: persp
   compression: H.264
   end_frame: '200'
-  filename: C:/Users/chavez/Documents/Desktop/playblasts/playblast.avi
+  filename: ""
   format: avi
   height: 768
   off_screen: true
@@ -18,10 +18,10 @@ last_recorded:
   start_frame: '1'
   viewer: false
   width: 1280
-last_recorded_selection: C:/Users/chavez/Documents/Desktop/playblasts/playblast.avi
-playground_email: bernhard.haux@gmail.com
+last_recorded_selection: ""
+playground_email: ""
 ps_clipname_lineEdit: ''
-ps_directory_lineEdit: C:/Users/chavez/Documents/Desktop/playblasts
+ps_directory_lineEdit: ""
 ps_open_afterUpload_checkBox: 'true'
 ps_play_after_creation_checkBox: 'true'
 ps_upload_after_creation_checkBox: 'false'
@@ -34,4 +34,4 @@ target_url_type: playground
 target_url_username: ''
 upload_to_value: null
 us_filename_lineEdit: playblast
-us_last_upload_url_pushButton: https://syncsketchGUI.com/sketch/283128#658737
+us_last_upload_url_pushButton: ""
