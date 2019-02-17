@@ -9,7 +9,7 @@ import json
 import os
 import subprocess
 import sys
-
+from os.path import expanduser
 from syncsketchGUI.lib import path
 
 
@@ -58,7 +58,9 @@ def probe(filename):
         print u'%s' %(err)
         return
 
-def get_thumb(filepath = None, output_file = "/users/bern/Desktop/output_file.jpg"):
+def get_thumb(filepath = None, output_file = ""):
+    if not output_file:
+        output_file = "{0}/Desktop/output_file.jpg".format(expanduser("~"))
     duration = probe(filepath)["streams"][0]["duration"]
     time = (float(duration) / 2)
     # should make this global

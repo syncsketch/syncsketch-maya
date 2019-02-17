@@ -18,7 +18,7 @@ import maya.cmds
 from functools import partial
 
 
-
+DEV = True
 MAYA_API_VERSION = int(str(cmds.about(apiVersion=True))[:4])
 if MAYA_API_VERSION >= 2017:
     from PySide2.QtCore import *
@@ -28,6 +28,12 @@ if MAYA_API_VERSION >= 2017:
 else:
     from PySide.QtCore import *
     from PySide.QtGui import *
+
+SYNCSKETCH_GUI_RELEASE_PATH = 'https://github.com/syncsketch/syncsketchGUI/archive/release.zip'
+SYNCSKETCH_API_RELEASE_PATH = 'https://github.com/syncsketch/python-api/archive/v1.0.1.zip'
+if DEV:
+    SYNCSKETCH_GUI_RELEASE_PATH = '/Users/chavez/deleteMePls/syncsketchGUI'
+
 
 InstallPath = {
                'Darwin': '{0}/Library/Preferences/Autodesk/maya/{1}/scripts/'.format(expanduser('~'), MAYA_API_VERSION),
@@ -338,10 +344,15 @@ def downloadFFmpegToDisc(platform=None, moveToLocation=None):
     zip_ref.close()
 
     ffmpegBinaryPath = glob.glob(os.path.join(ffmpegExtracted, '*', 'bin', 'ffmpeg*'))[0]
+    ffprobeBinaryPath = glob.glob(os.path.join(ffmpegExtracted, '*', 'bin', 'ffprobe*'))[0]
     print('Moving FFMPEG from to directory: {0}'.format(moveToLocation))
     if not os.path.isdir(moveToLocation):
         os.mkdir(moveToLocation)
+    os.chmod(ffmpegBinaryPath, 0o755)
+    os.chmod(ffprobeBinaryPath, 0o755)
     shutil.copy(ffmpegBinaryPath, moveToLocation)
+    shutil.copy(ffprobeBinaryPath, moveToLocation)
+
 
 
 class installThread(QThread):
@@ -380,7 +391,7 @@ class installThread(QThread):
             MAYA_SCRIPTS_PATH = InstallPath['Darwin']
             PIP_PATH = os.path.join(expanduser('~'),'Library', 'Python', '2.7', 'bin', 'pip2.7')
 
-        FFMPEG_PATH = os.path.join(MAYA_SCRIPTS_PATH, 'ffmpeg')
+        FFMPEG_PATH = os.path.join(MAYA_SCRIPTS_PATH, 'ffmpeg', 'bin')
 
         print(MAYA_SCRIPTS_PATH)
         print(PYTHON_PATH)
@@ -422,29 +433,28 @@ class installThread(QThread):
             print(subprocess.check_output(cmd))
 
             #Install Dependencies
-            cmd = '{0} install --ignore-installed --user https://github.com/syncsketch/python-api/archive/v1.0.1.zip pyyaml requests[security]'.format(PIP_PATH).split(' ')
+            cmd = '{0} install --ignore-installed --user {1} pyyaml requests[security]'.format(PIP_PATH, SYNCSKETCH_API_RELEASE_PATH).split(' ')
             print('Calling shell command: {0}'.format(cmd))
             print(subprocess.check_output(cmd))
 
             #Install SyncsketchGUI
             #Todo: We might wan't to check first if there is already a syncsketchGUI installed in a different path
-            cmd = '{0} install --ignore-installed --target={1} https://github.com/syncsketch/syncsketchGUI/archive/v1.0.4.zip'.format(PIP_PATH, tmpdir).split(' ')
+            #todo: By using target, pip show won't find this package anymore
+            toDir = '{0}/syncsketchGUI'.format(MAYA_SCRIPTS_PATH)
+            if os.path.isdir(toDir):
+                shutil.rmtree(toDir,ignore_errors=True)
+                print('Deleting previous directory for a clean install {0} '.format(toDir))
+
+            cmd = '{0} install --ignore-installed --target={1} {2}'.format(PIP_PATH, MAYA_SCRIPTS_PATH, SYNCSKETCH_GUI_RELEASE_PATH).split(' ')
             print('Calling shell command: {0}'.format(cmd))
             print(subprocess.check_output(cmd))
 
 
             #Finally Move things in place
-            fromDir = os.path.join(tmpdir, 'syncsketchGUI')
-            toDir = '{0}/syncsketchGUI'.format(MAYA_SCRIPTS_PATH)
-            print(fromDir)
-            print(toDir)
-            #todo: keep config files untouched
-            #First remove all files to have a clean install
-            if os.path.isdir(toDir):
-                shutil.rmtree(toDir,ignore_errors=True)
-                print('Deleting previous directory for a clean install {0} '.format(toDir))
-            shutil.move(fromDir, toDir)
-            print('Moving files to directory: {0}'.format(MAYA_SCRIPTS_PATH))
+            #fromDir = os.path.join(tmpdir, 'syncsketchGUI')
+
+            #shutil.move(fromDir, toDir)
+            #print('Moving files to directory: {0}'.format(MAYA_SCRIPTS_PATH))
 
             #Download FFMPeg Binaries
             downloadFFmpegToDisc(platform=PLATFORM, moveToLocation=FFMPEG_PATH)

@@ -377,7 +377,7 @@ def _upload(current_user = None, ):
     # try:
     review_data = current_user.get_review_data_from_id(review_id)
     review_url = review_data.get('reviewURL')
-    uploaded_media_url = 'https://syncsketchGUI.com/sketch/{}#{}'.format(str(review_data.get('id')).rstrip('/'), uploaded_item['id'])
+    uploaded_media_url = 'https://syncsketchGUI.com/sketch/#{}'.format(review_url)
     print 'Upload successful. Uploaded item {} to {}'.format(upload_file, uploaded_media_url)
     # except:
     #     uploaded_media_url = uploaded_item.get('reviewURL')
