@@ -18,7 +18,7 @@ import maya.cmds
 from functools import partial
 
 
-DEV = True
+DEV = False
 MAYA_API_VERSION = int(str(cmds.about(apiVersion=True))[:4])
 if MAYA_API_VERSION >= 2017:
     from PySide2.QtCore import *
@@ -36,9 +36,9 @@ if DEV:
 
 
 InstallPath = {
-               'Darwin': '{0}/Library/Preferences/Autodesk/maya/{1}/scripts/'.format(expanduser('~'), MAYA_API_VERSION),
+               'Darwin': '{0}/Library/Preferences/Autodesk/maya/scripts/'.format(expanduser('~')),
                'linux64': '$HOME/maya/scripts', #Todo: Not tested
-               'Windows':  '{0}/Documents/maya/{1}/scripts'.format(expanduser('~'), MAYA_API_VERSION)
+               'Windows':  '{0}/Documents/maya/scripts'.format(expanduser('~'))
               }
 
 class Icon():
@@ -347,7 +347,7 @@ def downloadFFmpegToDisc(platform=None, moveToLocation=None):
     ffprobeBinaryPath = glob.glob(os.path.join(ffmpegExtracted, '*', 'bin', 'ffprobe*'))[0]
     print('Moving FFMPEG from to directory: {0}'.format(moveToLocation))
     if not os.path.isdir(moveToLocation):
-        os.mkdir(moveToLocation)
+        os.makedirs(moveToLocation)
     os.chmod(ffmpegBinaryPath, 0o755)
     os.chmod(ffprobeBinaryPath, 0o755)
     shutil.copy(ffmpegBinaryPath, moveToLocation)
@@ -443,6 +443,7 @@ class installThread(QThread):
             toDir = '{0}/syncsketchGUI'.format(MAYA_SCRIPTS_PATH)
             if os.path.isdir(toDir):
                 shutil.rmtree(toDir,ignore_errors=True)
+                #todo: delete as well SyncsketchGUI-1.0.0.dist-info
                 print('Deleting previous directory for a clean install {0} '.format(toDir))
 
             cmd = '{0} install --ignore-installed --target={1} {2}'.format(PIP_PATH, MAYA_SCRIPTS_PATH, SYNCSKETCH_GUI_RELEASE_PATH).split(' ')

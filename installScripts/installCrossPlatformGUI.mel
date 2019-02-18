@@ -19,7 +19,7 @@ import maya.cmds\n\
 from functools import partial\n\
 \n\
 \n\
-DEV = True\n\
+DEV = False\n\
 MAYA_API_VERSION = int(str(cmds.about(apiVersion=True))[:4])\n\
 if MAYA_API_VERSION >= 2017:\n\
     from PySide2.QtCore import *\n\
