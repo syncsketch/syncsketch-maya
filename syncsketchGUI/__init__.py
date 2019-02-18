@@ -27,6 +27,20 @@ STANDALONE = False
 if not MAYA and not NUKE:
     STANDALONE = True
 
+import logging
+import logging
+logger = logging.getLogger('syncsketchGUI')
+logger.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setLevel(logging.WARNING)
+
+# create formatter
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+logger.addHandler(ch)
+# prevent logging from bubbling up to maya's logger
+logger.propagate=0
+
 
 # ======================================================================
 # Global Variables
@@ -149,7 +163,7 @@ def play(filename = None):
         filename = get_current_file()
     filename = path.make_safe(filename)
     video.play_in_default_player(filename)
-    print 'Playing current video: {}'.format(filename.replace('"', ''))
+    logger.info('Playing current video: {}'.format(filename.replace('"', '')))
 
 
 def upload(open_after_upload = None, show_success_msg = False):
@@ -174,9 +188,9 @@ def download(current_user = None):
         current_user = user.SyncSketchUser()
     review_id = database.read_cache('target_review_id')
     media_id  = database.read_cache('target_media_id')
-    print "current_user: %s"%current_user
-    print "target_review_id: %s"%review_id
-    print "target_media_id: %s"%media_id
+    logger.info("current_user: %s"%current_user)
+    logger.info("target_review_id: %s"%review_id)
+    logger.info("target_media_id: %s"%media_id)
     return current_user.download_greasepencil(review_id, media_id )
 
 
@@ -235,8 +249,6 @@ def _record():
     preset_data = database._parse_yaml(preset_file)
     preset_name = database.read_cache('current_preset')
     preset = preset_data.get(preset_name)
-    print(preset)
-    print("18888"*1000)
 
     start_frame, end_frame = maya_scene.get_InOutFrames(database.read_cache('current_range_type'))
     start_frame = database.read_cache('frame_start')
@@ -282,7 +294,6 @@ def _record():
     }
 
     # read from database Settings
-    print(recArgs)
     playblast_file = maya_scene.playblast_with_settings(
         viewport_preset=database.read_cache('current_viewport_preset'),
         viewport_preset_yaml=VIEWPORT_PRESET_YAML,
@@ -323,7 +334,7 @@ def _upload(current_user = None, ):
         upload_to_value = 'Playground(public)'
     else:
         upload_to_value = item_name
-        print 'Selected Item: %s'%item_name
+        logger.info('Selected Item: %s'%item_name)
 
     time.sleep(WAIT_TIME)
 
@@ -350,19 +361,20 @@ def _upload(current_user = None, ):
         uploaded_item = user.upload_to_playground(upload_file, playground_email)
 
     elif item_type == 'review':
-        print 'Uploading {} to {}'.format(upload_file, upload_to_value)
+        logger.info('Uploading {} to {}'.format(upload_file, upload_to_value))
         uploaded_item = current_user.upload_media_to_review(review_id, upload_file, noConvertFlag = True, itemParentId = False, data = postData)
-        import pprint
-        pprint.pprint(uploaded_item)
+        from pprint import pformat
+        logger.info(pformat(uploaded_item))
 
     elif item_type == 'media':
-        print 'Updating item {} with file {}'.format(upload_to_value, upload_file)
-        print "item id %s"%item_id
-        print "filepath %s"%upload_file
-        print "Trying to upload %s to item_id %s, review %s"%(upload_file,item_id,review_id)
+        logger.info('Updating item {} with file {}'.format(upload_to_value, upload_file))
+        logger.info("item id %s"%item_id)
+        logger.info("filepath %s"%upload_file)
+        logger.info("Trying to upload %s to item_id %s, review %s"%(upload_file,item_id,review_id))
         uploaded_item = current_user.upload_media_to_review(review_id, upload_file, noConvertFlag = True, itemParentId = item_id, data = postData)
         import pprint
-        pprint.pprint(uploaded_item)
+        from pprint import pformat
+        logger.info(pformat(uploaded_item))
     else:
         uploaded_item = None
         errorLog = 'You cannot upload to %s "%s" directly.\nPlease select a review in the tree widget to upload to!\n'%(item_type, item_name)
@@ -371,7 +383,7 @@ def _upload(current_user = None, ):
         if not errorLog:
             errorLog = 'No Uploaded Item returned from Syncsketch'
 
-        print 'ERROR: This Upload failed: %s'%(errorLog)
+        logger.info('ERROR: This Upload failed: %s'%(errorLog))
         return
 
     # try:
@@ -379,7 +391,7 @@ def _upload(current_user = None, ):
     review_url = review_data.get('reviewURL')
     #todo: what is revision?
     uploaded_media_url = '{}'.format(review_url)
-    print 'Upload successful. Uploaded item {} to {}'.format(upload_file, uploaded_media_url)
+    logger.info('Upload successful. Uploaded item {} to {}'.format(upload_file, uploaded_media_url))
     # except:
     #     uploaded_media_url = uploaded_item.get('reviewURL')
 
@@ -447,18 +459,18 @@ def cycle_viewport_presets():
     cache = path.get_config_yaml(VIEWPORT_PRESET_YAML)
     presets = database._parse_yaml(cache).keys()
     current_viewport_preset = database.read_cache('current_viewport_preset')
-    # print "current_viewport_preset %s"%current_viewport_preset
-    print presets
+    # logger.info("current_viewport_preset %s"%current_viewport_preset)
+    logger.info(presets)
     l = len(presets)
-    # print current_viewport_preset
+    # logger.info(current_viewport_preset)
 
     i = 0
     if current_viewport_preset in presets:
         for k in range(l):
             i = k
-            print "presets[%s] %s"%(i, presets[i])
+            logger.info("presets[%s] %s"%(i, presets[i]))
             if current_viewport_preset == presets[i]:
-                print "%s is a match"%i
+                logger.info("%s is a match"%i)
                 break
     else:
         i = 0

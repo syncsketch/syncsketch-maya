@@ -35,6 +35,9 @@ from vendor.Qt import QtCore
 from vendor.Qt import QtGui
 from vendor.Qt import QtWidgets
 
+import logging
+logger = logging.getLogger(__name__)
+
 # ======================================================================
 # Environment Detection
 
@@ -247,7 +250,7 @@ class WebLoginWindow(QWebView):
                     break
 
                 else:
-                    print "sleeping"
+                    logger.info("sleeping")
                     time.sleep(0.1)
             self.close()
             update_login_ui(self.parent)
@@ -373,9 +376,9 @@ class DownloadWindow(SyncSketch_Window):
             current_user = user.SyncSketchUser()
             self.item_data = current_user.get_item_info(int(database.read_cache('target_media_id')))['objects'][0]
         current_start_frame = cmds.playbackOptions(q=True, animationStartTime = True)
-        print int(current_start_frame)
-        print int(self.item_data['first_frame'])
-        print ( int(current_start_frame) - int(self.item_data['first_frame']) - 1 )
+        logger.info(int(current_start_frame))
+        logger.info(int(self.item_data['first_frame']))
+        logger.info(( int(current_start_frame) - int(self.item_data['first_frame']) - 1 ))
         self.ui.ui_downloadGP_rangeIn_textEdit.setValue( int(current_start_frame) - int(self.item_data['first_frame']) - 1 )
 
     def download_greasepencil(self):
@@ -383,14 +386,14 @@ class DownloadWindow(SyncSketch_Window):
         offset = int(self.ui.ui_downloadGP_rangeIn_textEdit.value())
         if downloaded_item:
             if offset is not 0:
-                print "Offsetting by %s frames"%offset
+                logger.info("Offsetting by %s frames"%offset)
                 downloaded_item = maya_scene.modifyGreasePencil(downloaded_item, offset)
             maya_scene.apply_greasepencil(downloaded_item, clear_existing_frames = True)
         else:
-            print "Error: Could not download grease pencil file..."
+            logger.info("Error: Could not download grease pencil file...")
 
     def download_video_annotated(self):
-        print  "Not Implemented yet"
+        logger.info( "Not Implemented yet")
 
 class FormatPresetWindow(SyncSketch_Window):
     """
@@ -463,7 +466,7 @@ class FormatPresetWindow(SyncSketch_Window):
 
         self.ui.scaleButton_layout = QtWidgets.QHBoxLayout()
         for key,factor in {"¼":0.25, "½":0.5, "¾":0.75, "1":1.0, "2":2.0}.iteritems():
-            print "key: %s\nfactor: %s"%(key, factor)
+            logger.info("key: %s\nfactor: %s"%(key, factor))
             btn = RegularToolButton()
             btn.setText(key)
             self.ui.scaleButton_layout.addWidget(btn)
@@ -585,7 +588,7 @@ class FormatPresetWindow(SyncSketch_Window):
             preset = preset_data.get(preset_name)
             if not preset:
                 return
-            print preset
+            logger.info(preset)
             format = preset.get('format')
             encoding = preset.get('encoding')
             width = preset.get('width')
@@ -760,7 +763,7 @@ class ViewportPresetWindow(SyncSketch_Window):
         # user_input = InputDialog(self, title, message)
         current_preset = self.ui.ui_viewportpreset_comboBox.currentText()
         new_preset_name, response =  QtWidgets.QInputDialog.getText(self, "Rename this preset",  "Please enter a new Name:", QtWidgets.QLineEdit.Normal, current_preset )
-        print new_preset_name
+        logger.info(new_preset_name)
         if not new_preset_name:
             return
         preset_file = path.get_config_yaml(VIEWPORT_YAML)
@@ -949,7 +952,7 @@ def populate_review_panel(self, playground_only = False, item_to_add = None, for
     if not is_connected():
         self.ui.ui_status_label.update(message_is_not_connected, color=error_color)
         isloggedIn(self,loggedIn=False)
-        print "\nNot connected to SyncSketch ..."
+        logger.info("\nNot connected to SyncSketch ...")
         return
 
     self.current_user = user.SyncSketchUser()
@@ -960,7 +963,7 @@ def populate_review_panel(self, playground_only = False, item_to_add = None, for
     if not self.current_user.is_logged_in():
         return
     else:
-        print "Updating Account Data ..."
+        logger.info("Updating Account Data ...")
 
 
 
@@ -998,7 +1001,7 @@ def populate_review_panel(self, playground_only = False, item_to_add = None, for
 
         except Exception, err:
             account_data = None
-            print u'%s' %(err)
+            logger.info(u'%s' %(err))
 
         finally:
             if account_data:
@@ -1016,7 +1019,7 @@ def populate_review_panel(self, playground_only = False, item_to_add = None, for
                 pass
 
     if not account_data or type(account_data) is dict:
-        print "Error: No SyncSketch account data found."
+        logger.info("Error: No SyncSketch account data found.")
         return
 
     # Add account
@@ -1690,7 +1693,7 @@ class MenuWindow(SyncSketch_Window):
             link = database.read_cache('upload_to_value')
         ids = get_ids_from_link(link)
         if not get_current_item_from_ids(self.ui.browser_treeWidget, ids):
-            print "Review does not exist: %s"%ids
+            logger.info("Review does not exist: %s"%ids)
 
     # ==================================================================
     # Video Tab Functions
@@ -1762,7 +1765,7 @@ class MenuWindow(SyncSketch_Window):
 
 
     def update_current_camera(self):
-        print "updating Camera"
+        logger.info("updating Camera")
         value = self.ui.ui_cameraPreset_comboBox.currentText()
         if not value or not len(value) or value == 'null':
             value = database.read_cache('selected_camera')
@@ -1808,7 +1811,7 @@ class MenuWindow(SyncSketch_Window):
         # Update the last recorded file and save the ui state
         # To do - need to update and selc the target url when item is updated
         if recordData.has_key('uploaded_item'):
-            print "uploaded_item %s"%recordData["uploaded_item"]["id"]
+            logger.info("uploaded_item %s"%recordData["uploaded_item"]["id"])
         # To do - do we really have to do this?
         if database.read_cache('ps_upload_after_creation_checkBox') == 'true':
             self.update_target_from_upload(recordData["uploaded_item"]['reviewURL'])
@@ -1904,7 +1907,7 @@ class MenuWindow(SyncSketch_Window):
         if uploaded_media_url:
             uploaded_media_url.replace(path.playground_url, path.playground_display_url)
 
-        print 'u\Uploaded_media_url: %s'%uploaded_media_url
+        logger.info('u\Uploaded_media_url: %s'%uploaded_media_url)
         database.dump_cache({'us_last_upload_url_pushButton' : uploaded_media_url})
         # self.ui.us_last_upload_url_pushButton.setText(uploaded_media_url)
 

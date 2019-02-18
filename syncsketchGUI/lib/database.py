@@ -7,7 +7,9 @@
 import codecs
 import os
 import yaml
-
+import logging
+import logging
+logger = logging.getLogger(__name__)
 from syncsketchGUI.lib import path
 
 # ======================================================================
@@ -27,7 +29,7 @@ def _parse_yaml(yaml_file = CACHE_YAML):
         return
 
     # cache_file = path.get_config_yaml(yaml_file)
-    print(yaml_file)
+    logger.info(yaml_file)
     if not os.path.isfile(yaml_file):
         raise RuntimeError('Please provide valid yaml file.')
 
@@ -56,7 +58,7 @@ def dump_cache(data, yaml_file = CACHE_YAML):
         return
 
     if data == 'clear':
-        print 'should clear'
+        logger.info( 'should clear')
         with codecs.open(cache_file, 'w', encoding = 'utf-8') as f_out:
             yaml.safe_dump(dict(), f_out, default_flow_style = False)
         return
@@ -106,7 +108,7 @@ def delete_key_from_cache(key, yaml_file = CACHE_YAML):
         del parsed_data[key]
         dump_cache('clear', yaml_file)
         dump_cache(parsed_data, yaml_file)
-        print "Deleted preset %s from %s"%(key, CACHE_YAML)
+        logger.info( "Deleted preset %s from %s"%(key, CACHE_YAML))
 
 
 def read_cache(key, yaml_file = CACHE_YAML):

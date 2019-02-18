@@ -20,6 +20,8 @@ from syncsketchGUI.lib import database
 from syncsketchGUI.lib import path
 from syncsketchGUI.vendor.capture import capture
 
+import logging
+logger = logging.getLogger(__name__)
 
 # ======================================================================
 # Module Functions
@@ -121,7 +123,7 @@ def get_active_editor():
     """
     cmds.currentTime(cmds.currentTime(q=True))     # fixes `cmds.playblast` undo bug
     panel = cmds.playblast(activeEditor=True)
-    print "panel %s" %panel.split('|')[-1]
+    logger.info("panel %s" %panel.split('|')[-1])
     return panel.split('|')[-1]
 
 
@@ -196,7 +198,7 @@ def modifyGreasePencil(zipname, offset=0):
     xmlfileName = 'greasePencil.xml'
     with zipfile.ZipFile(zipname, mode='a', compression=zipfile.ZIP_DEFLATED) as zf:
         for f in zf.namelist():
-            print f
+            logger.info(f)
         zipFileXML = zf.open(xmlfileName)
         # Generate temp file name for modified zml file
         tmpname = tempfile.TemporaryFile()
@@ -220,7 +222,7 @@ def apply_greasepencil(filename, clear_existing_frames=False):
         nodeNames = pm.greasePencilCtx(ctxName,sequenceNodeName=True, query=True)
         if nodeNames and clear_existing_frames:
             pm.delete(nodeNames)
-            print 'Deleted Existing Greasepencil frames ...'
+            logger.info('Deleted Existing Greasepencil frames ...')
     active_panel = get_active_editor()
     cmds.modelEditor(active_panel, edit=True, greasePencils=True)
 
@@ -283,7 +285,7 @@ def playblast_with_settings( viewport_preset = None, viewport_preset_yaml = None
     viewport_options = viewportArgs.copy()
     viewport_options.update(recArgs)
 
-    print(viewport_options)
+    logger.info(viewport_options)
 
     playblast_file = capture.capture(**viewport_options)
 
@@ -292,10 +294,10 @@ def playblast_with_settings( viewport_preset = None, viewport_preset_yaml = None
         recArgs["filename"] = playblast_file
         database.save_last_recorded(recArgs)
         database.dump_cache({"last_recorded_selection": playblast_file})
-        print 'Find your recorded file here: {}'.format(playblast_file)
+        logger.info('Find your recorded file here: {}'.format(playblast_file))
         return playblast_file
     else:
-        print "playblast_with_settings failed"
+        logger.info("playblast_with_settings failed")
 
 
 def playblast(filepath = None, width = 1280, height = 720, start_frame = 0, end_frame = 0, view_afterward = False, force_overwrite=False):
@@ -367,7 +369,7 @@ def playblast(filepath = None, width = 1280, height = 720, start_frame = 0, end_
                     return playblast_file
 
                 except Exception, err:
-                    print u'%s' %(err)
+                    logger.info(u'%s' %(err))
 
 
 
@@ -399,7 +401,7 @@ def create_unique_name(existing_keys=[], new_key=None, suffix = None):
         new_key = ' '.join(strList)
     if existing_keys and len(existing_keys):
         while new_key in existing_keys:
-            print "key exists"
+            logger.info("key exists")
             strList = filter(None, ['Copy of',new_key])
             new_key = ' '.join(strList)
     return new_key
@@ -423,16 +425,16 @@ def new_viewport_preset(cache_file, preset_name=None, source_preset=None, panel=
             options = capture.parse_view(panel)
 
     if not preset_name or preset_name in existing_keys:
-        print 'key exists'
+        logger.info('key exists')
         preset_name = create_unique_name(existing_keys, new_key = preset_name, suffix = 'Preset')
-        print preset_name
+        logger.info(preset_name)
 
     if not options:
         options = capture.parse_view(panel)
     else:
         preset_data[preset_name] = options
 
-    print "preset_name %s" + preset_name
+    logger.info("preset_name %s" + preset_name)
 
     preset_data[preset_name] = options
     database.dump_cache(preset_data, cache_file)
@@ -442,13 +444,13 @@ def new_viewport_preset(cache_file, preset_name=None, source_preset=None, panel=
 def apply_viewport_preset(cache_file, presetName, panels=[]):
     options = database.read_cache(presetName, cache_file)
     if not options:
-        print "No preset found"
+        logger.info("No preset found")
         return
     if not len(panels):
         panels = [get_active_editor()]
     for panel in panels:
         capture.apply_view(panel, **options)
-        print "Applies preset %s to modelpanel %s"%(presetName,panel)
+        logger.info("Applies preset %s to modelpanel %s"%(presetName,panel))
 
 
 def screenshot_current_editor(cache_file, presetName, panel=None, camera=None):
@@ -458,7 +460,7 @@ def screenshot_current_editor(cache_file, presetName, panel=None, camera=None):
 
     options = database.read_cache(presetName, cache_file)
     if not options:
-        print "No preset found"
+        logger.info("No preset found")
         return
     frame = cmds.currentTime(q=1)
     # When playblasting outside of an undo queue it seems that undoing
@@ -510,7 +512,7 @@ def getShapeNodes(obj):
     howManyShapes = 0
     getShape = maya.cmds.listRelatives(obj, shapes=True)
     if(getShape == None):
-        print 'ERROR:: getShapeNodes : No Shape Nodes Connected to ' + obj + ' /n'
+        logger.info('ERROR:: getShapeNodes : No Shape Nodes Connected to ' + obj + ' /n')
     else:
         howManyShapes = len(getShape[0])
     return(getShape, howManyShapes)
@@ -521,10 +523,10 @@ def getSyncSketchPlayerBlastNodes():
     imagePlane = cmds.ls("syncSketchPlayer_camera*")[0]
 
 def createOrUpdatePlayblastCam(frameOffset, moviePath, separateCam = False):
-    print "\n\n\creating the cam\n\n\n"
+    logger.info("\n\n\creating the cam\n\n\n")
     if separateCam:
         cam = cmds.ls("syncSketchPlayer_camera*")
-        print "is separate"
+        logger.info("is separate")
     else:
         cam = get_current_camera()
 
@@ -566,7 +568,7 @@ def lookThruPlayblastCam():
         cmds.lookThru(cam[0])
         cmds.refresh(currentView=True)
     else:
-        print "no syncSketchPlayer_camera found"
+        logger.info("no syncSketchPlayer_camera found")
     # currentView(currentPane)
 
 def lookThruActiveCam():
@@ -577,5 +579,5 @@ def lookThruActiveCam():
         cmds.refresh(currentView=False)
     else:
         # Todo: should fall back to default camera
-        print "no syncSketchPlayer_camera found"
+        logger.info("no syncSketchPlayer_camera found")
     # currentView(currentPane)
