@@ -5,7 +5,7 @@
 A Maya Plugin, which will allow you to 
 - upload videos and plablasts to syncsketch in seconds, skipping any conversion process
 - download notes and greasepencil files back to maya, adjust things like frame offset etc
-- manage your viewport presets, for recording
+- manage your viewport presets for recording
 
 See a quick Intro Video for this plugin here: https://vimeo.com/syncsketch/integrationmaya
 
