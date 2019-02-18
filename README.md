@@ -27,8 +27,8 @@ If you are familiar with python and pip, you can go for a manual installation  a
 > `pip2.7.exe install --ignore-installed --target=C:\Users\USERNAME\Documents\maya\2018\scripts https://github.com/syncsketch/syncsketchGUI/archive/release.zip`
 
 3. RunMaya & Install the maya Shelf from the script editor:
-> ```import syncsketchGUI
-syncsketchGUI.install_shelf()```
+> `import syncsketchGUI
+syncsketchGUI.install_shelf()`
 
 __Test in Dev__: 
 >`pip install --ignore-installed --verbose --target=/Users/USERNAME/Library/Preferences/Autodesk/maya/2018/scripts/  https://github.com/syncsketch/python-api/archive/release.zip`
