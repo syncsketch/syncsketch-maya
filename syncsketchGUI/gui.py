@@ -2088,7 +2088,7 @@ def show_viewport_preset_window():
         _call_ui_for_maya(ViewportPresetWindow)
 
 
-def show_syncsketchGUI_browser_window():
+def show_syncsketch_browser_window():
     current_user = user.SyncSketchUser()
     if not current_user:
         show_web_login_window()
