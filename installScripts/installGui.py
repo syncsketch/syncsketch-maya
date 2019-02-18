@@ -29,7 +29,7 @@ else:
     from PySide.QtCore import *
     from PySide.QtGui import *
 
-SYNCSKETCH_GUI_RELEASE_PATH = 'https://github.com/syncsketch/syncsketchGUI/archive/release.zip'
+SYNCSKETCH_GUI_RELEASE_PATH = 'https://github.com/syncsketch/syncsketch-maya/archive/release.zip'
 SYNCSKETCH_API_RELEASE_PATH = 'https://github.com/syncsketch/python-api/archive/v1.0.1.zip'
 if DEV:
     SYNCSKETCH_GUI_RELEASE_PATH = '/Users/chavez/deleteMePls/syncsketchGUI'
@@ -122,11 +122,11 @@ class installerUI(QWidget, UIDesktop):
         QWidget.__init__(self, *args, **kwargs)
 
         size = [500, 200]
-        name = 'Syncsketch GUI Installer'
+        name = 'Syncsketch Maya Installer'
 
         UIDesktop.__init__(self, name, size, *args, **kwargs)
 
-        self.setWindowTitle('Syncsketch GUI Installer')
+        self.setWindowTitle('Syncsketch Maya Installer')
         self.setWindowModality(Qt.ApplicationModal)
 
         self.setWindowFlags(Qt.Tool)
