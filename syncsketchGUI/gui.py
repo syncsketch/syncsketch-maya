@@ -309,6 +309,7 @@ class DownloadWindow(SyncSketch_Window):
         review_id = database.read_cache('target_review_id')
         media_id  = database.read_cache('target_media_id')
         target_url  = database.read_cache('upload_to_value')
+        logger.warning(target_url)
         self.ui.review_target_url.setText(target_url)
         self.ui.thumbnail_pushButton.set_icon_from_url(current_user.get_item_info(media_id)['objects'][0]['thumb'])
         self.ui.review_target_name.setText(self.item_data['name'])
@@ -966,19 +967,6 @@ def populate_review_panel(self, playground_only = False, item_to_add = None, for
         logger.info("Updating Account Data ...")
 
 
-
-    # Add playground
-    playground_data = {u'reviewURL': path.playground_url, u'id' : u'playground'}
-    playground_item = _build_widget_item(  parent = self.ui.browser_treeWidget,
-                                            item_name = 'Playground',
-                                            item_type = 'playground',
-                                            item_icon = playground_icon,
-                                            item_data = playground_data)
-    if playground_only:
-        return
-
-    ### self.ui.ui_status_label.update('Getting data from SyncSketch...')
-
     isloggedIn(self, self.current_user.is_logged_in())
 
     global USER_ACCOUNT_DATA
@@ -1048,8 +1036,8 @@ def populate_review_panel(self, playground_only = False, item_to_add = None, for
                 # Add items
                 items = review.get('items')
                 for media in items:
-
-
+                    #add UUID of the review container to the media, so we can use it in itemdata
+                    media['uuid'] = review['uuid']
                     if not media.get('type'):
                         specified_media_icon = media_unknown_icon
                     elif 'video' in media.get('type').lower():
@@ -1067,6 +1055,7 @@ def populate_review_panel(self, playground_only = False, item_to_add = None, for
                                                                 item_type = 'media',
                                                                 item_icon = specified_media_icon,
                                                                 item_data = media)
+                    logger.warning(media)
 
                     media_treeWidgetItem.sizeHint(80)
 
@@ -1617,6 +1606,10 @@ class MenuWindow(SyncSketch_Window):
     def validate_review_url(self, target = None):
         # self.populate_upload_settings()
         targetdata = update_target_from_tree(self.ui.browser_treeWidget)
+        #todo: don't do that, that's very slow put this in the caching at the beginning
+        #if target:
+        #    logger.warning(self.current_user.get_review_data_from_id(targetdata['review_id']))
+        #{'target_url_type': u'media', 'media_id': 692936, 'review_id': 300639, 'breadcrumb': '', 'target_url': 'https://syncsketch.com/sketch/300639#692936', 'upload_to_value': '', 'name': u'playblast'}
         self.ui.target_lineEdit.setText(database.read_cache('upload_to_value'))
 
         if target or targetdata:
@@ -1999,6 +1992,9 @@ def update_target_from_tree(treeWidget):
     current_data['target_url'] = None
     current_data['name'] = item_data.get('name')
 
+
+
+
     if item_type == 'project':
         review_url = '{}{}'.format(path.project_url, item_data.get('id'))
     elif item_type == 'review': # and not item_data.get('reviewURL'):
@@ -2010,7 +2006,11 @@ def update_target_from_tree(treeWidget):
         parent_data = parent_item.data(1, QtCore.Qt.EditRole)
         current_data['review_id'] = parent_data.get('id')
         current_data['media_id'] = item_data.get('id')
-        current_data['target_url'] = '{}#{}'.format(review_base_url + str(current_data['review_id']), current_data['media_id'])
+        #todo: yfs: clean this
+        #https://syncsketch.com/sketch/300639#692936
+        #https://www.syncsketch.com/sketch/5a8d634c8447#692936/619482
+        #current_data['target_url'] = '{}#{}'.format(review_base_url + str(current_data['review_id']), current_data['media_id'])
+        current_data['target_url'] = '{0}{1}#{2}'.format(review_base_url, item_data.get('uuid'), item_data.get('id'))
 
     if selected_item.text(0) == 'Playground':
         current_data['upload_to_value'] = 'Playground'
@@ -2048,6 +2048,7 @@ def update_target_from_tree(treeWidget):
     # Upload to Value - this is really the 'breadcrumb')
     database.dump_cache({'upload_to_value': current_data['target_url']})
     # url =  database.read_cache('breadcrumb')
+
 
     return current_data
 

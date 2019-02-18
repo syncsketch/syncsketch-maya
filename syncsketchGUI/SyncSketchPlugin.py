@@ -7,6 +7,9 @@ version = '1.0.0'
 from maya import OpenMayaMPx as ommpx
 from maya import OpenMaya as om
 
+import logging
+logger = logging.getLogger(__name__)
+
 # ======================================================================
 # Call Command List
 
@@ -147,7 +150,7 @@ class ExportFBX(ommpx.MPxCommand):
     
     def doIt(self, *arg):
         # TO DO: Replace with syncsketchGUI custom command
-        print 'Exporting to FBX ...'
+        logger.info('Exporting to FBX ...')
     
 class ExportObj(ommpx.MPxCommand):
     '''
@@ -158,7 +161,7 @@ class ExportObj(ommpx.MPxCommand):
     
     def doIt(self, *arg):
         # TO DO: Replace with syncsketchGUI custom command
-        print 'Exporting to Obj ...'
+        logger.info('Exporting to Obj ...')
     
 class BrowserMenu(ommpx.MPxCommand):
     '''

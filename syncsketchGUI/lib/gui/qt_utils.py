@@ -21,9 +21,6 @@ def align_to_center(widget, align_object):
     If not, align to the center of the desktop.
     """
     ui_size = widget.geometry()
-    print ui_size.width()
-    print ui_size.height()
-
     if align_object:
         align_object_center = align_object.frameGeometry().center()
         x_coordinate = align_object_center.x() -(ui_size.width() / 2)
