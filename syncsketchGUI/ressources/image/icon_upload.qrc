@@ -1,0 +1,7 @@
+<!DOCTYPE RCC><RCC version="1.0">
+	<qresource>
+		<file alias="icon_upload.png">icon_upload_100.png</file>
+		<file>icon_upload_150.png</file>
+		<file>icon_upload_200.png</file>
+	</qresource>
+</RCC>

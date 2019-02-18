@@ -76,7 +76,7 @@ class RegularThumbnail(QtWidgets.QPushButton):
         self.setMinimumSize(width,height)
         self.setToolTip('Play Clip')
 
-    def set_icon_from_image(self, imagefile='manage_presets_icon_100.png'):
+    def set_icon_from_image(self, imagefile='icon_manage_presets_100.png'):
         # print "exists: %s"%os.path.exists(imagefile)
         return
         newIcon = icons._get_qicon(icon_name=imagefile)

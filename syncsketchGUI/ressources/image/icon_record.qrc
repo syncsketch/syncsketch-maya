@@ -1,0 +1,7 @@
+<!DOCTYPE RCC><RCC version="1.0">
+	<qresource>
+		<file alias="icon_record.png">icon_preset_100.png</file>
+		<file>icon_preset_150.png</file>
+		<file>icon_preset_200.png</file>
+	</qresource>
+</RCC>
