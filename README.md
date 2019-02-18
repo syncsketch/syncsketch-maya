@@ -1,6 +1,13 @@
 ![maya2017](https://img.shields.io/badge/Maya2017-tested-brightgreen.svg)
 ![maya2018](https://img.shields.io/badge/Maya2018-tested-brightgreen.svg)
-# syncsketchGUI
+
+# syncsketch-maya
+A Maya Plugin for 
+- upload videos and plablasts to syncsketch in seconds, skipping the conversion process
+- download notes and greasepencil files back to maya, adjust things like frame offset etc
+- manage your viewport presets, for recording
+
+See a quick Intro Video for this plugin here: https://vimeo.com/syncsketch/integrationmaya
 
 ##  Drag & Drop Install:
 
