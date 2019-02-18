@@ -19,7 +19,7 @@ import maya.cmds\n\
 from functools import partial\n\
 \n\
 \n\
-DEV = False\n\
+DEV = True\n\
 MAYA_API_VERSION = int(str(cmds.about(apiVersion=True))[:4])\n\
 if MAYA_API_VERSION >= 2017:\n\
     from PySide2.QtCore import *\n\
@@ -30,7 +30,7 @@ else:\n\
     from PySide.QtCore import *\n\
     from PySide.QtGui import *\n\
 \n\
-SYNCSKETCH_GUI_RELEASE_PATH = 'https://github.com/syncsketch/syncsketchGUI/archive/release.zip'\n\
+SYNCSKETCH_GUI_RELEASE_PATH = 'https://github.com/syncsketch/syncsketch-maya/archive/release.zip'\n\
 SYNCSKETCH_API_RELEASE_PATH = 'https://github.com/syncsketch/python-api/archive/v1.0.1.zip'\n\
 if DEV:\n\
     SYNCSKETCH_GUI_RELEASE_PATH = '/Users/chavez/deleteMePls/syncsketchGUI'\n\
@@ -123,11 +123,11 @@ class installerUI(QWidget, UIDesktop):\n\
         QWidget.__init__(self, *args, **kwargs)\n\
 \n\
         size = [500, 200]\n\
-        name = 'Syncsketch GUI Installer'\n\
+        name = 'Syncsketch Maya Installer'\n\
 \n\
         UIDesktop.__init__(self, name, size, *args, **kwargs)\n\
 \n\
-        self.setWindowTitle('Syncsketch GUI Installer')\n\
+        self.setWindowTitle('Syncsketch Maya Installer')\n\
         self.setWindowModality(Qt.ApplicationModal)\n\
 \n\
         self.setWindowFlags(Qt.Tool)\n\
