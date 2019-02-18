@@ -2,8 +2,8 @@
 ![maya2018](https://img.shields.io/badge/Maya2018-tested-brightgreen.svg)
 
 # syncsketch-maya
-A Maya Plugin for 
-- upload videos and plablasts to syncsketch in seconds, skipping the conversion process
+A Maya Plugin, which will allow you to 
+- upload videos and plablasts to syncsketch in seconds, skipping any conversion process
 - download notes and greasepencil files back to maya, adjust things like frame offset etc
 - manage your viewport presets, for recording
 
