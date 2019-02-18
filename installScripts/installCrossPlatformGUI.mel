@@ -37,9 +37,9 @@ if DEV:\n\
 \n\
 \n\
 InstallPath = {\n\
-               'Darwin': '{0}/Library/Preferences/Autodesk/maya/{1}/scripts/'.format(expanduser('~'), MAYA_API_VERSION),\n\
+               'Darwin': '{0}/Library/Preferences/Autodesk/maya/scripts/'.format(expanduser('~')),\n\
                'linux64': '$HOME/maya/scripts', #Todo: Not tested\n\
-               'Windows':  '{0}/Documents/maya/{1}/scripts'.format(expanduser('~'), MAYA_API_VERSION)\n\
+               'Windows':  '{0}/Documents/maya/scripts'.format(expanduser('~'))\n\
               }\n\
 \n\
 class Icon():\n\
@@ -348,7 +348,7 @@ def downloadFFmpegToDisc(platform=None, moveToLocation=None):\n\
     ffprobeBinaryPath = glob.glob(os.path.join(ffmpegExtracted, '*', 'bin', 'ffprobe*'))[0]\n\
     print('Moving FFMPEG from to directory: {0}'.format(moveToLocation))\n\
     if not os.path.isdir(moveToLocation):\n\
-        os.mkdir(moveToLocation)\n\
+        os.makedirs(moveToLocation)\n\
     os.chmod(ffmpegBinaryPath, 0o755)\n\
     os.chmod(ffprobeBinaryPath, 0o755)\n\
     shutil.copy(ffmpegBinaryPath, moveToLocation)\n\
@@ -444,6 +444,7 @@ class installThread(QThread):\n\
             toDir = '{0}/syncsketchGUI'.format(MAYA_SCRIPTS_PATH)\n\
             if os.path.isdir(toDir):\n\
                 shutil.rmtree(toDir,ignore_errors=True)\n\
+                #todo: delete as well SyncsketchGUI-1.0.0.dist-info\n\
                 print('Deleting previous directory for a clean install {0} '.format(toDir))\n\
 \n\
             cmd = '{0} install --ignore-installed --target={1} {2}'.format(PIP_PATH, MAYA_SCRIPTS_PATH, SYNCSKETCH_GUI_RELEASE_PATH).split(' ')\n\
