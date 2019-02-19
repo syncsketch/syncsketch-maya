@@ -164,7 +164,7 @@ class installerUI(QWidget, UIDesktop):
         logo.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
         logo.setMargin(15)
         outer.addWidget(logo, 0)
-        subtext = QLabel(u"SyncSketch Integration for Maya")
+        subtext = QLabel(u'SyncSketch Integration for Maya')
         outer.addWidget(subtext)
         subtext.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
         subtext.setMargin(5)
