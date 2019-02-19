@@ -1996,7 +1996,7 @@ def update_target_from_tree(treeWidget):
         review_url = '{}{}'.format(path.project_url, item_data.get('id'))
     elif item_type == 'review': # and not item_data.get('reviewURL'):
         current_data['review_id'] = item_data.get('id')
-        current_data['target_url'] = review_base_url + str(current_data['review_id'])
+        current_data['target_url'] = '{0}{1}'.format(review_base_url, item_data.get('uuid'), item_data.get('id'))
 
     elif item_type == 'media':
         parent_item = selected_item.parent()
