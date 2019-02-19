@@ -175,8 +175,8 @@ class OpenPlayer(QWebView):
     """
     Login Window Class
     """
-    window_name = 'fdfd'
-    window_label = 'Login fd SyncSketch'
+    window_name = 'Login'
+    window_label = 'Login to SyncSketch'
 
     def __init__(self, parent, url='https://syncsketch.com/pro'):
         super(OpenPlayer, self).__init__(parent)
@@ -1517,8 +1517,6 @@ class MenuWindow(SyncSketch_Window):
         self.ui.login_pushButton.setText("Log In")
         self.ui.help_pushButton = RegularHeaderButton()
         self.ui.help_pushButton.setIcon(help_icon)
-        self.ui.settings_pushButton = RegularHeaderButton()
-        self.ui.settings_pushButton.setIcon(settings_icon)
 
         self.ui.ui_login_layout.addWidget(self.ui.syncsketchGUI_pushButton)
         self.ui.ui_login_layout.addWidget(self.ui.ui_login_label)
@@ -1526,7 +1524,6 @@ class MenuWindow(SyncSketch_Window):
         self.ui.ui_login_layout.addWidget(self.ui.logout_pushButton)
         self.ui.ui_login_layout.addWidget(self.ui.signup_pushButton)
         self.ui.ui_login_layout.addWidget(self.ui.help_pushButton)
-        self.ui.ui_login_layout.addWidget(self.ui.settings_pushButton)
 
         self.ui.ui_status_label = RegularStatusLabel()
         # self.ui.ui_status_label.setStyleSheet("background-color: rgba(255,255,255,.1); border-top: 1px solid red ;")

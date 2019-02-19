@@ -21,7 +21,7 @@ playground_display_url = api_host_url + '/playground/'
 project_url = api_host_url + '/pro/#project/'
 contact_url = api_host_url + '/contact/'
 signup_url = api_host_url + '/register/'
-support_url = 'http://support.syncsketch.com/'
+support_url = 'https://support.syncsketch.com/article/62-maya-syncsketch-integration'
 terms_url = api_host_url + '/terms/'
 
 # ======================================================================
