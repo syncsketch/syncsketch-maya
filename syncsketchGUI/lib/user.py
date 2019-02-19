@@ -71,7 +71,7 @@ def _get_from_yaml_user(key):
 
 def _upload_to_playground(filepath, user_email = ''):
     files = {'file': open(filepath, 'rb')}
-    print "Uploading %s for user %s"%(files,user_email)
+    logger.warning("Uploading %s for user %s"%(files,user_email))
     response = requests.post(path.playground_url,
                               files = files,
                               data = {'userEmail' : user_email,
@@ -79,7 +79,7 @@ def _upload_to_playground(filepath, user_email = ''):
                                         'noConvertFlag' : no_convert})
 
     # for k, v in response.__dict__.items():
-    #     print k.ljust(10), ':', v
+    #     logger.warning(  k.ljust(10), ':', v)
 
     return response.json()
 
@@ -157,7 +157,8 @@ class SyncSketchUser():
 
     # Auto Login
     def auto_login(self):
-        # print " doing autologin: %s"%self.api_host
+        # logger.warning(  " doing autologin: %s"%self.api_host)
+        # todo: debug is set to true, do we wan't this?
         if not self.host_data:
             self.host_data = syncsketch.SyncSketchAPI(self.get_name(),
                                                        self.get_api_key(),
@@ -187,12 +188,12 @@ class SyncSketchUser():
         self.auto_login()
 
         if not self.host_data:
-            print 'Please login first.'
+            logger.warning('Please login first.')
             return
 
 
         if match_user_with_os and not self.get_os_user() == getpass.getuser():
-            print 'Please login first.'
+            logger.warning('Please login first.')
             return
 
 
@@ -204,10 +205,11 @@ class SyncSketchUser():
 
         tree_data = self.host_data.getTree(withItems = True)
 
+        #Return statement without indirection, pls remove
         return tree_data
 
         if not tree_data:
-            print 'Fail to obtain tree data from the server.'
+            logger.warning('Fail to obtain tree data from the server.')
             return
 
         for tree in tree_data:
@@ -241,7 +243,7 @@ class SyncSketchUser():
         '''
         self.auto_login()
         if not self.host_data:
-            print 'Please login first.'
+            logger.warning('Please login first.')
             return
         return self.host_data.getMedia({'id': media_id})
 
@@ -252,7 +254,7 @@ class SyncSketchUser():
 
         self.auto_login()
         if not self.host_data:
-            print 'Please login first.'
+            logger.warning('Please login first.')
             return
 
         uploaded_item = self.host_data.addMedia(review_id, filepath, noConvertFlag = noConvertFlag, itemParentId = itemParentId)
@@ -268,7 +270,7 @@ class SyncSketchUser():
 
         self.auto_login()
         if not self.host_data:
-            print 'Please login first.'
+            logger.warning('Please login first.')
             return
 
         return self.host_data.updateItem(item_id, data)
@@ -289,13 +291,10 @@ class SyncSketchUser():
         :return: filePath to the zip file with the greasePencil data. PLEASE make sure that /tmp is writable
         """
 
-        if reviewId == 'playground':
-            print "No greasepencil download from playground(yet)"
-            return
 
         self.auto_login()
         if not self.host_data:
-            print 'Please login first.'
+            logger.warning('Please login first.')
             return
 
         return self.host_data.getGreasePencilOverlays(reviewId, itemId, local_filename=filepath)

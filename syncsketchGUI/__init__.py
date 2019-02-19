@@ -35,7 +35,7 @@ ch = logging.StreamHandler()
 ch.setLevel(logging.WARNING)
 
 # create formatter
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('[%(asctime)s - %(filename)s:%(lineno)s - %(levelname)s - %(message)s]', "%Y-%m-%d %H:%M:%S")
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 # prevent logging from bubbling up to maya's logger
@@ -330,11 +330,11 @@ def _upload(current_user = None, ):
     current_item = selected_item
     upload_to_value = str()
 
-    if item_type == 'playground':
-        upload_to_value = 'Playground(public)'
-    else:
-        upload_to_value = item_name
-        logger.info('Selected Item: %s'%item_name)
+    # if item_type == 'playground':
+    #     upload_to_value = 'Playground(public)'
+    # else:
+    #     upload_to_value = item_name
+    #     logger.info('Selected Item: %s'%item_name)
 
     time.sleep(WAIT_TIME)
 
@@ -348,19 +348,19 @@ def _upload(current_user = None, ):
         "last_frame": last_recorded_data['end_frame'],
     }
 
-    if item_type == 'playground':
-        playground_email = database.get_playground_email()
-        if not path.validate_email_address(playground_email):
-            user_input = qt_widgets.InputDialog()
-            if not user_input.response:
-                return
+    # if item_type == 'playground':
+    #     playground_email = database.get_playground_email()
+    #     if not path.validate_email_address(playground_email):
+    #         user_input = qt_widgets.InputDialog()
+    #         if not user_input.response:
+    #             return
 
-            playground_email = user_input.response_text
-            database.save_playground_email(playground_email)
+    #         playground_email = user_input.response_text
+    #         database.save_playground_email(playground_email)
 
-        uploaded_item = user.upload_to_playground(upload_file, playground_email)
+    #     uploaded_item = user.upload_to_playground(upload_file, playground_email)
 
-    elif item_type == 'review':
+    if item_type == 'review':
         logger.info('Uploading {} to {}'.format(upload_file, upload_to_value))
         uploaded_item = current_user.upload_media_to_review(review_id, upload_file, noConvertFlag = True, itemParentId = False, data = postData)
         from pprint import pformat
