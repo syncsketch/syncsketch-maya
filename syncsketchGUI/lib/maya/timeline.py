@@ -7,16 +7,6 @@
 from maya import cmds
 from maya import mel
 
-# ======================================================================
-# Global Variables
-
-menuitem_command = 'import syncsketch;'
-menuitem_command += 'reload(syncsketch);'
-menuitem_command += 'syncsketch.reload_toolkit();'
-menuitem_command += 'syncsketch.playblast_and_upload();'
-
-# ======================================================================
-# Module Utilities
 
 def _add_context_menu_item(menu_name = 'TimeSliderMenu'):
     '''
@@ -27,30 +17,29 @@ def _add_context_menu_item(menu_name = 'TimeSliderMenu'):
     if not cmds.menu(menu_name, query = True, exists = True):
         print menu_name, 'doesn\'t exist. SyncSketch menuitem is not added.'
         return
-    
-    if cmds.menuItem('playblast_to_syncsketch', query = True, exists = True):
-        cmds.deleteUI('playblast_to_syncsketch', menuItem = True)
-    
+
     # To add menu item into the TimeSliderMenu,
     # we need to initialize it first
     # Unless the menu items don't exist
     mel.eval('updateTimeSliderMenu TimeSliderMenu;')
     
-    enable_stepped_preview = None
+    if cmds.menuItem('ssPlayblast', query = True, exists = True):
+        cmds.deleteUI('ssPlayblast', menuItem = True)
+
+    if cmds.menuItem('ssPlayblastOB', query = True, exists = True):
+        cmds.deleteUI('ssPlayblastOB', menuItem = True)
+    
+
     menu_items = cmds.menu(menu_name, query = True, itemArray = True)
     if not menu_items:
         return
     
-    menu_label = 'Playblast To SyncSketch'
-    for menu_item in menu_items:
-        label =  cmds.menuItem(menu_item,
-                                query = True,
-                                label = True)
-    
-    cmds.menuItem( 'playblast_to_syncsketch',
-                    parent = 'TimeSliderMenu',
-                    label = menu_label,
-                    command = menuitem_command)
+    cmds.menuItem('ssPlayblast', p='TimeSliderMenu', label='Playblast with Syncsketch', 
+                    annotation='Starts playblast for syncsketch', 
+                    command='import syncsketchGUI; syncsketchGUI.record()')
+    cmds.menuItem('ssPlayblastOB', p='TimeSliderMenu', optionBox=True,  
+                command='from syncsketchGUI import standalone; reload(standalone)')
+
     
 def _remove_context_menu_item():
     '''
@@ -58,7 +47,9 @@ def _remove_context_menu_item():
     To be used when the plugin is uninitialized
     '''
     if cmds.menuItem('playblast_to_syncsketch', query = True, exists = True):
-        cmds.deleteUI('playblast_to_syncsketch', menuItem = True)
+        cmds.deleteUI('ssPlayblast', menuItem = True)
+    if cmds.menuItem('playblast_to_syncsketch', query = True, exists = True):
+        cmds.deleteUI('ssPlayblastOB', menuItem = True)
     
 # ======================================================================
 # Module Functions

@@ -307,26 +307,6 @@ class SyncSketchInstaller(QObject):
             install_shelf()
 
         # Add TimeLineMenu's if they doesn't exist
-        self.createTimeLineMenu()
-
-
-    def createTimeLineMenu(self):
-        '''Install RMB context menu to the timeline'''
-        try:
-            cmds.deleteUI('ssPlayblast')
-        except RuntimeError as e:
-            pass
-        try:
-            cmds.deleteUI('ssPlayblastOB')
-        except RuntimeError as e:
-            pass
-            
-        cmds.menuItem('ssPlayblast', p='TimeSliderMenu', label='Playblast with syncsketch', 
-                        annotation='Starts playblast for syncsketch', 
-                        command='import syncsketchGUI; syncsketchGUI.record()')
-        cmds.menuItem('ssPlayblastOB', p='TimeSliderMenu', optionBox=True,  
-                    command='from syncsketchGUI import standalone; reload(standalone)')
-        
 
     def __syncsketchIntall(self):
         self.installer.installButton.hide()
