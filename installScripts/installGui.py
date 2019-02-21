@@ -17,7 +17,7 @@ import maya.utils
 import maya.cmds
 from functools import partial
 
-DEV = False
+DEV = True
 MAYA_API_VERSION = int(str(cmds.about(apiVersion=True))[:4])
 if MAYA_API_VERSION >= 2017:
     from PySide2.QtCore import *
@@ -140,7 +140,6 @@ class installerUI(QWidget, UIDesktop):
     def checkBoxChanged(self, state, name):
         if name == 'installShelf':
             InstallOptions.installShelf = state
-            print(state)
 
     def createLayout(self):
         outer = QVBoxLayout()
@@ -306,6 +305,28 @@ class SyncSketchInstaller(QObject):
         if InstallOptions.installShelf:
             from syncsketchGUI import install_shelf
             install_shelf()
+
+        # Add TimeLineMenu's if they doesn't exist
+        self.createTimeLineMenu()
+
+
+    def createTimeLineMenu(self):
+        '''Install RMB context menu to the timeline'''
+        try:
+            cmds.deleteUI('ssPlayblast')
+        except RuntimeError as e:
+            pass
+        try:
+            cmds.deleteUI('ssPlayblastOB')
+        except RuntimeError as e:
+            pass
+            
+        cmds.menuItem('ssPlayblast', p='TimeSliderMenu', label='Playblast with syncsketch', 
+                        annotation='Starts playblast for syncsketch', 
+                        command='import syncsketchGUI; syncsketchGUI.record()')
+        cmds.menuItem('ssPlayblastOB', p='TimeSliderMenu', optionBox=True,  
+                    command='from syncsketchGUI import standalone; reload(standalone)')
+        
 
     def __syncsketchIntall(self):
         self.installer.installButton.hide()
