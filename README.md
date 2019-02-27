@@ -16,7 +16,7 @@ See a quick Intro Video for this plugin here: https://vimeo.com/syncsketch/integ
 The easiest way to install this application is to download the [installCrossPlatform.mel](https://github.com/syncsketch/syncsketch-maya/releases/download/release/installCrossPlatformGUI.mel#install) file and drag it into a maya-viewport (2018 tested only. It will automatically install all the dependencies without requiring admin priviliges into your user-directory.
 
 
-## Install it manually:
+## Manually:
 
 If you are familiar with python and pip, you can go for a manual installation  and follow these steps:
 
@@ -38,6 +38,7 @@ __Test in Dev__:
 __Note__: Manual install expects you to have `ffmpeg` and `pip` already installed and set-up correctly.
 
 
+# Contributing
 
 ### Contributing (Fork and send pull request)
 If you want to contribute to this project, your help is very welcome. We are trying to give a minimal version of a Publish workflow, which you can either adapt or get inspired by. 
