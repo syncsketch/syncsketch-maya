@@ -9,7 +9,7 @@ A Maya Plugin, which will allow you to
 
 See a quick Intro Video for this plugin here: https://vimeo.com/syncsketch/integrationmaya
 
-#Install
+# Install
 
 ## Drag & Drop
 
