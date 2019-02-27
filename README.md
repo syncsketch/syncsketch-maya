@@ -9,7 +9,9 @@ A Maya Plugin, which will allow you to
 
 See a quick Intro Video for this plugin here: https://vimeo.com/syncsketch/integrationmaya
 
-##  Drag & Drop Install:
+#Install
+
+## Drag & Drop
 
 The easiest way to install this application is to download the [installCrossPlatform.mel](https://github.com/syncsketch/syncsketch-maya/releases/download/release/installCrossPlatformGUI.mel#install) file and drag it into a maya-viewport (2018 tested only. It will automatically install all the dependencies without requiring admin priviliges into your user-directory.
 
