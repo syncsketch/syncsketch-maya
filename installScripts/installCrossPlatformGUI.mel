@@ -88,7 +88,7 @@ class Literals(object):\n\
         pass\n\
 \n\
     SYNCSKETCH_INSTALL_PATH = ''\n\
-    Literals.PLATFORM = ''\n\
+    PLATFORM = ''\n\
 \n\
 \n\
         \n\
