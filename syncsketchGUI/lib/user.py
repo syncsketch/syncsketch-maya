@@ -14,6 +14,9 @@ import requests
 from syncsketchGUI.lib import database
 from syncsketchGUI.lib import path
 
+import logging
+logger = logging.getLogger(__name__)
+
 # ======================================================================
 # Global Variables
 
@@ -276,7 +279,7 @@ class SyncSketchUser():
         return self.host_data.updateItem(item_id, data)
 
     # Todo set path properly
-    def download_greasepencil(self, reviewId, itemId, filepath = '/Users/bern/Downloads/sycnsketch.greasepencil.zip'):
+    def download_greasepencil(self, reviewId, itemId):
 
         # currently we bail if user is using playground or is
         # not logged in
@@ -291,13 +294,12 @@ class SyncSketchUser():
         :return: filePath to the zip file with the greasePencil data. PLEASE make sure that /tmp is writable
         """
 
-
         self.auto_login()
         if not self.host_data:
             logger.warning('Please login first.')
             return
 
-        return self.host_data.getGreasePencilOverlays(reviewId, itemId, local_filename=filepath)
+        return self.host_data.getGreasePencilOverlays(reviewId, itemId)
 
 
 

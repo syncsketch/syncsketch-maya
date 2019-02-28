@@ -334,8 +334,8 @@ def _upload(current_user = None, ):
     # if item_type == 'playground':
     #     upload_to_value = 'Playground(public)'
     # else:
-    #     upload_to_value = item_name
-    #     logger.info('Selected Item: %s'%item_name)
+    upload_to_value = item_name
+    logger.info('Selected Item: %s'%item_name)
 
     time.sleep(WAIT_TIME)
 
@@ -362,7 +362,7 @@ def _upload(current_user = None, ):
     #     uploaded_item = user.upload_to_playground(upload_file, playground_email)
 
     if item_type == 'review':
-        logger.info('Uploading {} to {}'.format(upload_file, upload_to_value))
+        logger.info('Uploading {} to {} with review_id {}'.format(upload_file, upload_to_value, review_id))
         uploaded_item = current_user.upload_media_to_review(review_id, upload_file, noConvertFlag = True, itemParentId = False, data = postData)
         from pprint import pformat
         logger.info("uploaded_item: {0}".format(pformat(uploaded_item)))

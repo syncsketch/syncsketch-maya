@@ -306,22 +306,21 @@ class DownloadWindow(SyncSketch_Window):
 
         current_user = user.SyncSketchUser()
         
-        #todo better handling
+
         try:
             target_media_id = int(database.read_cache('target_media_id'))
+            logger.info("target_media_id: {}".format(target_media_id))
         except Exception as e:
+            logger.info(e)
             target_media_id = 0
             
-        return
-
-        self.item_data = current_user.get_item_info(target_media_id['objects'][0])
+        self.item_data = current_user.get_item_info(int(database.read_cache('target_media_id')))['objects'][0]
 
         review_id = database.read_cache('target_review_id')
         media_id  = database.read_cache('target_media_id')
         target_url  = database.read_cache('upload_to_value')
-        logger.warning(target_url)
         thumb_url = current_user.get_item_info(media_id)['objects'][0]['thumb']
-        logger.info("thumb_url: {}".format(thumb_url))
+
         
         self.ui.review_target_url.setText(target_url)
         self.ui.thumbnail_pushButton.set_icon_from_url(thumb_url)
@@ -1198,14 +1197,17 @@ class MenuWindow(SyncSketch_Window):
     def __init__(self, parent):
         super(MenuWindow, self).__init__(parent=parent)
         self.setMaximumSize(700, 650)
-
+        logging.info("decorate_ui")
         self.decorate_ui()
+        logging.info("build_connections")
         self.build_connections()
 
+        logging.info("restore_ui_state")
         # Load UI state
         self.restore_ui_state()
-
+        logging.info("update_login_ui")
         update_login_ui(self)
+        logging.info("update_login_ui after")
 
 
     def closeEvent(self, event):
@@ -2044,6 +2046,7 @@ class MenuWindow(SyncSketch_Window):
 
     # Upload Settings
     def download(self):
+        logging.info("Download pressed")
         self.validate_review_url()
         show_download_window()
         return
@@ -2120,11 +2123,11 @@ def update_target_from_tree(self, treeWidget):
     if item_type == 'project':
         review_url = '{}{}'.format(path.project_url, item_data.get('id'))
         #todo: is there a shorter way?
-        self.thumbnail_itemPreview.clear()
+        self.ui.thumbnail_itemPreview.clear()
     elif item_type == 'review': # and not item_data.get('reviewURL'):
         current_data['review_id'] = item_data.get('id')
         current_data['target_url'] = '{0}{1}'.format(review_base_url, item_data.get('uuid'), item_data.get('id'))
-        self.thumbnail_itemPreview.clear()
+        self.ui.thumbnail_itemPreview.clear()
 
     elif item_type == 'media':
         parent_item = selected_item.parent()
@@ -2168,7 +2171,8 @@ def update_target_from_tree(self, treeWidget):
     # Description
     description = item_data.get('description')
     database.dump_cache({'target_url_description': description})
-    database.dump_cache({'target_review_id': item_data.get('uuid')})
+    #database.dump_cache({'target_review_id': item_data.get('uuid')})
+    database.dump_cache({'target_review_id': current_data['review_id']})
     database.dump_cache({'target_media_id': current_data['media_id']})
 
     # Upload to Value - this is really the 'breadcrumb')
@@ -2195,7 +2199,6 @@ def show_menu_window():
     if STANDALONE:
         app = _call_ui_for_standalone(MenuWindow)
 
-        time.sleep(WAIT_TIME)
         panel_is_populated = populate_review_panel(app)
 
         if not panel_is_populated:
@@ -2209,6 +2212,7 @@ def show_menu_window():
 
 
 def show_download_window():
+    logger.info("SHOW DOWNLOAD WINDOW")
     if MAYA:
         _maya_delete_ui(DownloadWindow.window_name)
         _call_ui_for_maya(DownloadWindow)
