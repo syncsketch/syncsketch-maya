@@ -6,6 +6,9 @@ from syncsketchGUI.vendor.Qt import QtGui
 from syncsketchGUI.vendor.Qt import QtWidgets
 
 from syncsketchGUI.lib import database
+import logging
+logger = logging.getLogger(__name__)
+
 # class BrowserDialog(QtWidgets.QFileDialog):
 #     """
 #     Customized file browser dialog
@@ -87,6 +90,9 @@ class RegularThumbnail(QtWidgets.QPushButton):
         newIcon = icons._get_qicon_from_url(url)
         self.setIcon(newIcon)
         return
+
+    def clear(self):
+        self.setIcon(QtGui.QIcon())
 
 class HoverButton(QtWidgets.QPushButton):
 
@@ -316,4 +322,5 @@ class SyncSketch_Window(QtWidgets.QMainWindow):
         return self.geometry()
 
     def cancel(self):
+        logger.info("Closing Synsketch GUI Window")
         self.close()

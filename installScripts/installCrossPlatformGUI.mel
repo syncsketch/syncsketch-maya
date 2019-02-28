@@ -19,6 +19,7 @@ import maya.cmds\n\
 from functools import partial\n\
 \n\
 DEV = True\n\
+INSTALL_SSGUI_ONLY = True\n\
 MAYA_API_VERSION = int(str(cmds.about(apiVersion=True))[:4])\n\
 if MAYA_API_VERSION >= 2017:\n\
     from PySide2.QtCore import *\n\
@@ -31,8 +32,12 @@ else:\n\
 \n\
 SYNCSKETCH_GUI_RELEASE_PATH = 'https://github.com/syncsketch/syncsketch-maya/archive/release.zip'\n\
 SYNCSKETCH_API_RELEASE_PATH = 'https://github.com/syncsketch/python-api/archive/v1.0.1.zip'\n\
+SYNCSKETCH_INSTALL_PATH = ''\n\
+\n\
 if DEV:\n\
     SYNCSKETCH_GUI_RELEASE_PATH = '/Users/chavez/deleteMePls/syncsketchGUI'\n\
+\n\
+\n\
 \n\
 InstallPath = {\n\
     'Darwin': '{0}/Library/Preferences/Autodesk/maya/scripts/'.format(expanduser('~')),\n\
@@ -307,6 +312,30 @@ class SyncSketchInstaller(QObject):\n\
             from syncsketchGUI import install_shelf\n\
             install_shelf()\n\
 \n\
+        #Create Default's for current OS\n\
+        self.createGoodDefaults()\n\
+\n\
+    def createGoodDefaults(self):\n\
+        '''\n\
+        Adds default setting's to have a good starting point for the tool\n\
+        '''\n\
+        import yaml\n\
+        print('sscache: {0}'.format(SYNCSKETCH_INSTALL_PATH))\n\
+        syncsketch_cache = os.path.join(SYNCSKETCH_INSTALL_PATH, 'config', 'syncsketch_cache.yaml')\n\
+        print('sscache: {0}'.format(syncsketch_cache))\n\
+        \n\
+        with open(syncsketch_cache, 'r') as f:\n\
+            config = yaml.load(f)\n\
+\n\
+        if config['current_preset']:\n\
+            if PLATFORM == 'Darwin':\n\
+                config['current_preset'] = 'HD720p (OSX)'\n\
+            elif PLATFORM == 'Windows':\n\
+                config['current_preset'] = 'HD720p (Windows)'\n\
+\n\
+        with open(syncsketch_cache, 'w') as f:\n\
+            yaml.dump(config, f)\n\
+\n\
         # Add TimeLineMenu's if they doesn't exist\n\
 \n\
     def __syncsketchIntall(self):\n\
@@ -400,10 +429,14 @@ class installThread(QThread):\n\
             PIP_PATH = os.path.join(expanduser('~'), 'Library', 'Python', '2.7', 'bin', 'pip2.7')\n\
 \n\
         FFMPEG_PATH = os.path.join(MAYA_SCRIPTS_PATH, 'ffmpeg', 'bin')\n\
+        SYNCSKETCH_INSTALL_PATH = '{0}syncsketchGUI'.format(MAYA_SCRIPTS_PATH)\n\
 \n\
-        print(MAYA_SCRIPTS_PATH)\n\
-        print(PYTHON_PATH)\n\
-        print(PIP_PATH)\n\
+        print('MAYA_SCRIPTS_PATH: {0}'.format(MAYA_SCRIPTS_PATH))\n\
+        print('PYTHON_PATH: {0}'.format(PYTHON_PATH))\n\
+        print('PIP_PATH: {0}'.format(PIP_PATH))\n\
+        print('SYNCSKETCH_INSTALL_PATH: {0}'.format(SYNCSKETCH_INSTALL_PATH))\n\
+\n\
+        \n\
 \n\
         try:\n\
             # Create a temporary directory to act as a working directory if we were\n\
@@ -417,9 +450,10 @@ class installThread(QThread):\n\
 \n\
             if PLATFORM == 'Darwin':\n\
                 cmd = 'curl https://bootstrap.pypa.io/get-pip.py -o {0}'.format(pipInstaller).split(' ')\n\
-                print('Calling shell command: {0}'.format(cmd))\n\
-                # todo remove call to shell for security reasons\n\
-                print(subprocess.check_output(cmd))\n\
+                if not INSTALL_SSGUI_ONLY:\n\
+                    print('Calling shell command: {0}'.format(cmd))\n\
+                    # todo remove call to shell for security reasons\n\
+                    print(subprocess.check_output(cmd))\n\
 \n\
             else:\n\
                 # this should be using secure https, but we shoul dbe fine for now\n\
@@ -443,17 +477,18 @@ class installThread(QThread):\n\
             cmd = '{0} install --ignore-installed --user {1} pyyaml requests[security]'.format(PIP_PATH,\n\
                                                                                                SYNCSKETCH_API_RELEASE_PATH).split(\n\
                 ' ')\n\
-            print('Calling shell command: {0}'.format(cmd))\n\
-            print(subprocess.check_output(cmd))\n\
+            if not INSTALL_SSGUI_ONLY:\n\
+                print('Calling shell command: {0}'.format(cmd))\n\
+                print(subprocess.check_output(cmd))\n\
 \n\
             # Install SyncsketchGUI\n\
             # Todo: We might wan't to check first if there is already a syncsketchGUI installed in a different path\n\
             # todo: By using target, pip show won't find this package anymore\n\
-            toDir = '{0}/syncsketchGUI'.format(MAYA_SCRIPTS_PATH)\n\
-            if os.path.isdir(toDir):\n\
-                shutil.rmtree(toDir, ignore_errors=True)\n\
+            \n\
+            if os.path.isdir(SYNCSKETCH_INSTALL_PATH):\n\
+                shutil.rmtree(SYNCSKETCH_INSTALL_PATH, ignore_errors=True)\n\
                 # todo: delete as well SyncsketchGUI-1.0.0.dist-info\n\
-                print('Deleting previous directory for a clean install {0} '.format(toDir))\n\
+                print('Deleting previous directory for a clean install {0} '.format(SYNCSKETCH_INSTALL_PATH))\n\
 \n\
             cmd = '{0} install --ignore-installed --target={1} {2}'.format(PIP_PATH, MAYA_SCRIPTS_PATH,\n\
                                                                            SYNCSKETCH_GUI_RELEASE_PATH).split(' ')\n\
@@ -463,11 +498,12 @@ class installThread(QThread):\n\
             # Finally Move things in place\n\
             # fromDir = os.path.join(tmpdir, 'syncsketchGUI')\n\
 \n\
-            # shutil.move(fromDir, toDir)\n\
+            # shutil.move(fromDir, SYNCSKETCH_INSTALL_PATH)\n\
             # print('Moving files to directory: {0}'.format(MAYA_SCRIPTS_PATH))\n\
 \n\
             # Download FFMPeg Binaries\n\
-            downloadFFmpegToDisc(platform=PLATFORM, moveToLocation=FFMPEG_PATH)\n\
+            if not INSTALL_SSGUI_ONLY:\n\
+                downloadFFmpegToDisc(platform=PLATFORM, moveToLocation=FFMPEG_PATH)\n\
 \n\
 \n\
         except Exception as e:\n\

@@ -14,6 +14,7 @@ import time
 import webbrowser
 import tempfile
 import yaml
+import re
 from functools import partial
 
 from vendor.Qt.QtWebKit import *
@@ -22,13 +23,13 @@ from vendor.Qt.QtWidgets import QApplication
 
 import syncsketchGUI
 from lib import video, user, database
-from syncsketchGUI.lib.gui.qt_widgets import *
-from syncsketchGUI.lib.gui import qt_utils
-from syncsketchGUI.lib.gui.qt_utils import *
+from lib.gui.qt_widgets import *
+from lib.gui import qt_utils
+from lib.gui.qt_utils import *
 
-from syncsketchGUI.lib.gui.icons import *
-from syncsketchGUI.lib.gui.icons import _get_qicon
-from syncsketchGUI.lib.connection import *
+from lib.gui.icons import *
+from lib.gui.icons import _get_qicon
+from lib.connection import *
 from vendor import mayapalette
 from vendor.Qt import QtCompat
 from vendor.Qt import QtCore
@@ -63,7 +64,7 @@ if not MAYA and not NUKE:
     STANDALONE = True
 
 if MAYA:
-    from syncsketchGUI.lib.maya import scene as maya_scene
+    from lib.maya import scene as maya_scene
 
 # ======================================================================
 # Global Variables
@@ -304,14 +305,26 @@ class DownloadWindow(SyncSketch_Window):
         self.align_to_center(self.parent)
 
         current_user = user.SyncSketchUser()
-        self.item_data = current_user.get_item_info(int(database.read_cache('target_media_id')))['objects'][0]
+        
+        #todo better handling
+        try:
+            target_media_id = int(database.read_cache('target_media_id'))
+        except Exception as e:
+            target_media_id = 0
+            
+        return
+
+        self.item_data = current_user.get_item_info(target_media_id['objects'][0])
 
         review_id = database.read_cache('target_review_id')
         media_id  = database.read_cache('target_media_id')
         target_url  = database.read_cache('upload_to_value')
         logger.warning(target_url)
+        thumb_url = current_user.get_item_info(media_id)['objects'][0]['thumb']
+        logger.info("thumb_url: {}".format(thumb_url))
+        
         self.ui.review_target_url.setText(target_url)
-        self.ui.thumbnail_pushButton.set_icon_from_url(current_user.get_item_info(media_id)['objects'][0]['thumb'])
+        self.ui.thumbnail_pushButton.set_icon_from_url(thumb_url)
         self.ui.review_target_name.setText(self.item_data['name'])
 
 
@@ -804,6 +817,7 @@ class ViewportPresetWindow(SyncSketch_Window):
 
 
     def build_screenshot(self, preset_name = None):
+        print("clicked")
         if not preset_name:
             preset_name = self.ui.ui_viewportpreset_comboBox.currentText()
 
@@ -901,21 +915,14 @@ class InfoDialog(QtWidgets.QDialog):
     def build_connections(self):
         self.info_pushButton.clicked.connect(self.open_url)
 
-# tree function
-def get_current_item_from_ids(tree, ids=None):
-    # tree.setCurrentItem(tree.topLevelItem(0), 0)
-    if ids is None:
-        ids = []
-    if not ids:
-        return
 
-    if len(ids) > 1:
-        id = int(ids[1])
-    else:
-        id = int(ids[0])
+def set_tree_selection(tree, id):
+    """
+    Given a uniqute item'id set's the selection on the treeview
+    """
+    if not id:
+        return
     iterator = QtWidgets.QTreeWidgetItemIterator(tree, QtWidgets.QTreeWidgetItemIterator.All)
-    # by default select first item(playground)
-    # todo: make sure we're not parsing for the correct review id
     while iterator.value():
         item = iterator.value()
         item_data = item.data(1, QtCore.Qt.EditRole)
@@ -925,6 +932,55 @@ def get_current_item_from_ids(tree, ids=None):
         iterator +=1
     return item_data
 
+
+# tree function
+def get_current_item_from_ids(tree, payload=None):
+    # tree.setCurrentItem(tree.topLevelItem(0), 0)
+    # logger.info("ids: {0}".format(ids))
+    # if ids is None:
+    #     ids = []
+    # if not ids:
+    #     return
+
+    # if len(ids) > 1:
+    #     id = int(ids[1])
+    # else:
+    #     id = int(ids[0])
+    logging.info("payload: {}".format(payload))
+    searchValue = ''
+    searchType = ''
+
+    if not payload:
+        return
+
+    #Got both uuid and id, we are dealing with an item
+    if payload['uuid'] and payload['id']:
+        searchType = 'id'
+        searchValue = int(payload['id'])
+
+    #Got only uuid, it's a review
+    elif payload['uuid']:
+        searchType = 'uuid'
+        searchValue = payload['uuid']
+
+    #Nothing useful found return
+    else:
+        return
+
+
+    iterator = QtWidgets.QTreeWidgetItemIterator(tree, QtWidgets.QTreeWidgetItemIterator.All)
+    # by default select first item(playground)
+    # todo: make sure we're not parsing for the correct review id
+    while iterator.value():
+        item = iterator.value()
+        item_data = item.data(1, QtCore.Qt.EditRole)
+        if item_data.get(searchType) == searchValue:
+            tree.setCurrentItem(item, 1)
+            tree.scrollToItem(item)
+            return item_data
+        iterator +=1
+    
+
 def RepresentsInt(s):
     try:
         int(s)
@@ -932,7 +988,66 @@ def RepresentsInt(s):
     except ValueError:
         return False
 
+def parse_url_data(link=database.read_cache('upload_to_value')):
+    '''
+    simple url parser that extract uuid, review_id and revision_id
+    '''
+    #url = 'https://www.syncsketch.com/sketch/bff609f9cbac/#711273/637821'
+    #       https://syncsketch.com/sketch/bff609f9cbac#711680
+
+    #Remove reduntant path and check if it's expected
+    logger.info("link parser: {}".format(link))
+    if not link: 
+        logger.info("Link isn't a link: {}".format(link))
+        return
+
+    baseUrl = 'https://syncsketch.com/sketch/'
+
+    #Remove leading forward slash
+    if link[-1] == "/":
+        link = link[:-1]
+
+    #Remove www
+    link = link.replace("www.", "")
+
+    
+
+    if not link[0:len(baseUrl)] == baseUrl:
+        print("URL need's to start with: {}".format(baseUrl))
+        return
+
+
+
+    data = {"uuid":0, "id":0, "revision_id":0}
+
+    #Find UUID
+    payload = link[len(baseUrl):].split("/")
+
+    if len(link) > 0:
+        uuidPart = (re.findall(r"([a-fA-F\d]{12})", payload[0]))
+        if uuidPart:
+            data['uuid'] = uuidPart[0]
+        else:
+            print("link need's to be of the form https://www.syncsketch.com/sketch/bff609f9cbac/ got {}".format(link))
+    #Find ID
+    if len(payload) > 1:
+        if payload[1].startswith("#"):
+            data['id'] = payload[1][1:]
+        else:
+            print("link need's to be of the form https://www.syncsketch.com/sketch/bff609f9cbac/#711273 got {}".format(link))
+
+    if len(payload) > 3:
+        pass
+        #handle revision
+    return data
+
+
+
 def get_ids_from_link(link = database.read_cache('upload_to_value')):
+    #link: https://www.syncsketch.com/sketch/0a5546b336de/
+    #uploaded_to_value: https://syncsketch.com/sketch/0854aaba81fb#705832
+    #https://syncsketch.com/sketch/0854aaba81fb#705832
+    logger.info("link: {0}".format(link))
     if not link:
         return
     return link.split('/')[-1].split('#')
@@ -1055,12 +1170,16 @@ def populate_review_panel(self, playground_only = False, item_to_add = None, for
                                                                 item_type = 'media',
                                                                 item_icon = specified_media_icon,
                                                                 item_data = media)
-                    logger.warning(media)
 
                     media_treeWidgetItem.sizeHint(80)
 
-    ids = get_ids_from_link(database.read_cache('upload_to_value'))
-    get_current_item_from_ids(self.ui.browser_treeWidget, ids)
+    #ids = get_ids_from_link(database.read_cache('upload_to_value'))
+
+    logger.info("uploaded_to_value: {}".format(database.read_cache('upload_to_value')))
+    url_payload = parse_url_data(database.read_cache('upload_to_value'))
+    logger.info("url_payload: {}".format(url_payload) )
+    get_current_item_from_ids(self.ui.browser_treeWidget, url_payload)
+    set_tree_selection(self.ui.browser_treeWidget, None)
     USER_ACCOUNT_DATA = account_data
 
     self.populate_upload_settings()
@@ -1602,7 +1721,7 @@ class MenuWindow(SyncSketch_Window):
 
     def validate_review_url(self, target = None):
         # self.populate_upload_settings()
-        targetdata = update_target_from_tree(self.ui.browser_treeWidget)
+        targetdata = update_target_from_tree(self, self.ui.browser_treeWidget)
         #todo: don't do that, that's very slow put this in the caching at the beginning
         #if target:
         #    logger.warning(self.current_user.get_review_data_from_id(targetdata['review_id']))
@@ -1678,12 +1797,16 @@ class MenuWindow(SyncSketch_Window):
         OpenPlayer(self,url)
 
     def select_item_from_target_input(self):
+
         link = sanitize(self.ui.target_lineEdit.text())
         if not link:
             link = database.read_cache('upload_to_value')
-        ids = get_ids_from_link(link)
-        if not get_current_item_from_ids(self.ui.browser_treeWidget, ids):
-            logger.info("Review does not exist: %s"%ids)
+            logger.warning("No link, reading from cache: {} ".format(link))
+        #ids = get_ids_from_link(link)
+        url_payload = parse_url_data(link)
+        logger.debug("select_item_from_target_input: {} ".format(url_payload))
+        if not get_current_item_from_ids(self.ui.browser_treeWidget, url_payload):
+            logger.info("Review does not exist: {}".format(url_payload))
 
     # ==================================================================
     # Video Tab Functions
@@ -1891,6 +2014,7 @@ class MenuWindow(SyncSketch_Window):
 
 
     def update_target_from_upload(self, uploaded_media_url):
+        logger.debug("uploaded_media_url: {}".format(uploaded_media_url))
         if 'none' in uploaded_media_url.lower():
             uploaded_media_url = str()
 
@@ -1971,7 +2095,8 @@ def confirm_upload_to_playground():
 
 
 # tree function
-def update_target_from_tree(treeWidget):
+def update_target_from_tree(self, treeWidget):
+    logger.debug("update_target_from_tree")
     selected_item = treeWidget.currentItem()
     if not selected_item:
         return
@@ -1994,9 +2119,12 @@ def update_target_from_tree(treeWidget):
 
     if item_type == 'project':
         review_url = '{}{}'.format(path.project_url, item_data.get('id'))
+        #todo: is there a shorter way?
+        self.thumbnail_itemPreview.clear()
     elif item_type == 'review': # and not item_data.get('reviewURL'):
         current_data['review_id'] = item_data.get('id')
         current_data['target_url'] = '{0}{1}'.format(review_base_url, item_data.get('uuid'), item_data.get('id'))
+        self.thumbnail_itemPreview.clear()
 
     elif item_type == 'media':
         parent_item = selected_item.parent()
@@ -2008,6 +2136,7 @@ def update_target_from_tree(treeWidget):
         #https://www.syncsketch.com/sketch/5a8d634c8447#692936/619482
         #current_data['target_url'] = '{}#{}'.format(review_base_url + str(current_data['review_id']), current_data['media_id'])
         current_data['target_url'] = '{0}{1}#{2}'.format(review_base_url, item_data.get('uuid'), item_data.get('id'))
+        logger.info(current_data['target_url'])
 
     if selected_item.text(0) == 'Playground':
         current_data['upload_to_value'] = 'Playground'
@@ -2039,7 +2168,7 @@ def update_target_from_tree(treeWidget):
     # Description
     description = item_data.get('description')
     database.dump_cache({'target_url_description': description})
-    database.dump_cache({'target_review_id': current_data['review_id']})
+    database.dump_cache({'target_review_id': item_data.get('uuid')})
     database.dump_cache({'target_media_id': current_data['media_id']})
 
     # Upload to Value - this is really the 'breadcrumb')
@@ -2075,6 +2204,8 @@ def show_menu_window():
     elif MAYA:
         _maya_delete_ui(MenuWindow.window_name)
         app = _call_ui_for_maya(MenuWindow)
+        logger.info("app: {}".format(app))
+        return app
 
 
 def show_download_window():

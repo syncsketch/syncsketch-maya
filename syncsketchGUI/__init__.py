@@ -28,11 +28,10 @@ if not MAYA and not NUKE:
     STANDALONE = True
 
 import logging
-import logging
 logger = logging.getLogger('syncsketchGUI')
 logger.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
-ch.setLevel(logging.WARNING)
+ch.setLevel(logging.DEBUG)
 
 # create formatter
 formatter = logging.Formatter('[%(asctime)s - %(filename)s:%(lineno)s - %(levelname)s - %(message)s]', "%Y-%m-%d %H:%M:%S")
@@ -122,7 +121,7 @@ def show_syncsketch_browser_window():
     gui.show_syncsketch_browser_window()
 
 def show_menu_window():
-    gui.show_menu_window()
+    return gui.show_menu_window()
 
 def show_download_window():
     gui.show_download_window()
@@ -130,6 +129,7 @@ def show_download_window():
 def show_viewport_preset_window():
     gui.show_viewport_preset_window()
 
+#todo don't raise error
 def get_current_file():
     # validate file name
     filename = database.read_cache('last_recorded_selection')
@@ -316,6 +316,7 @@ def _upload(current_user = None, ):
 
     # Try to upload to the last uploaded address first
     selected_item = database.read_cache('treewidget_selection')
+    logger.info("selected_item: {0}".format(selected_item))
 
     # if not selected_item:
     #     database.read_cache('target_review_id')
@@ -364,7 +365,7 @@ def _upload(current_user = None, ):
         logger.info('Uploading {} to {}'.format(upload_file, upload_to_value))
         uploaded_item = current_user.upload_media_to_review(review_id, upload_file, noConvertFlag = True, itemParentId = False, data = postData)
         from pprint import pformat
-        logger.info(pformat(uploaded_item))
+        logger.info("uploaded_item: {0}".format(pformat(uploaded_item)))
 
     elif item_type == 'media':
         logger.info('Updating item {} with file {}'.format(upload_to_value, upload_file))
@@ -390,7 +391,9 @@ def _upload(current_user = None, ):
     review_data = current_user.get_review_data_from_id(review_id)
     review_url = review_data.get('reviewURL')
     #todo: what is revision?
-    uploaded_media_url = '{}'.format(review_url)
+    #uploaded_media_url = '{}'.format(review_url)
+    uploaded_media_url = '{}#{}'.format(review_url, uploaded_item['id'])
+    logger.info("review_data: {}".format(review_data))
     logger.info('Upload successful. Uploaded item {} to {}'.format(upload_file, uploaded_media_url))
     # except:
     #     uploaded_media_url = uploaded_item.get('reviewURL')

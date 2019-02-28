@@ -29,7 +29,6 @@ def _parse_yaml(yaml_file = CACHE_YAML):
         return
 
     # cache_file = path.get_config_yaml(yaml_file)
-    logger.info(yaml_file)
     if not os.path.isfile(yaml_file):
         raise RuntimeError('Please provide valid yaml file.')
 
