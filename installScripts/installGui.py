@@ -87,7 +87,7 @@ class Literals(object):
         pass
 
     SYNCSKETCH_INSTALL_PATH = ''
-    Literals.PLATFORM = ''
+    PLATFORM = ''
 
 
         
