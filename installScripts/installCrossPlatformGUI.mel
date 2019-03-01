@@ -322,6 +322,10 @@ class SyncSketchInstaller(QObject):\n\
             from syncsketchGUI import install_shelf\n\
             install_shelf()\n\
 \n\
+        #Install Timeline\n\
+        import syncsketchGUI\n\
+        syncsketchGUI.add_timeline_context_menu()\n\
+\n\
         #Create Default's for current OS\n\
         self.createGoodDefaults()\n\
 \n\
