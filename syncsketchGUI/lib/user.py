@@ -13,6 +13,8 @@ import requests
 
 from syncsketchGUI.lib import database
 from syncsketchGUI.lib import path
+from os.path import expanduser
+
 
 import logging
 logger = logging.getLogger(__name__)
@@ -299,7 +301,8 @@ class SyncSketchUser():
             logger.warning('Please login first.')
             return
 
-        return self.host_data.getGreasePencilOverlays(reviewId, itemId)
+        baseDir = "{0}".format(expanduser('~'))
+        return self.host_data.getGreasePencilOverlays(reviewId, itemId, baseDir)
 
 
     def download_converted_video(self, itemId):
@@ -315,7 +318,9 @@ class SyncSketchUser():
         #maya supports mov only
         fileName = fileName.replace('mp4', 'mov')
 
-        local_filename = '/tmp/{}'.format(fileName)
+
+        baseDir = "{0}".format(expanduser('~'))
+        local_filename = os.path.join(baseDir, fileName)
         r = requests.get(videoURL, stream=True)
         with open(local_filename, 'wb') as f:
             for chunk in r.iter_content(chunk_size=1024):

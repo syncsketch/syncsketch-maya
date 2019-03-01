@@ -17,8 +17,9 @@ import maya.utils
 import maya.cmds
 from functools import partial
 
-DEV = True
+DEV = False
 INSTALL_SSGUI_ONLY = False
+
 MAYA_API_VERSION = int(str(cmds.about(apiVersion=True))[:4])
 if MAYA_API_VERSION >= 2017:
     from PySide2.QtCore import *
@@ -30,7 +31,7 @@ else:
     from PySide.QtGui import *
 
 SYNCSKETCH_GUI_RELEASE_PATH = 'https://github.com/syncsketch/syncsketch-maya/archive/release.zip'
-SYNCSKETCH_API_RELEASE_PATH = 'https://github.com/syncsketch/python-api/archive/v1.0.1.zip'
+SYNCSKETCH_API_RELEASE_PATH = 'https://github.com/syncsketch/python-api/archive/v1.0.3.zip'
 
 
 if DEV:
@@ -39,8 +40,8 @@ if DEV:
 
 InstallPath = {
     'Darwin': '{0}/Library/Preferences/Autodesk/maya/scripts/'.format(expanduser('~')),
-    'linux64': '$HOME/maya/scripts',  # Todo: Not tested
-    'Windows': '{0}/Documents/maya/scripts'.format(expanduser('~'))
+    'linux64': '$HOME/maya/scripts/',  # Todo: Not tested
+    'Windows': '{0}/maya/scripts/'.format(expanduser('~'))
 }
 
 
