@@ -1009,13 +1009,15 @@ def parse_url_data(link=database.read_cache('upload_to_value')):
     #Remove www
     link = link.replace("www.", "")
 
+    #Add a slash so we don't need to chase two different cases
+    if not link.split("#")[0][-1] == "/":
+        link = "/#".join(link.split("#"))
+        logger.info("Modified link: {}".format(link))
     
 
     if not link[0:len(baseUrl)] == baseUrl:
         print("URL need's to start with: {}".format(baseUrl))
         return
-
-
 
     data = {"uuid":0, "id":0, "revision_id":0}
 
@@ -1801,6 +1803,7 @@ class MenuWindow(SyncSketch_Window):
     def select_item_from_target_input(self):
 
         link = sanitize(self.ui.target_lineEdit.text())
+        logging.info("Got Link from lineEdit: {}".format(link))
         if not link:
             link = database.read_cache('upload_to_value')
             logger.warning("No link, reading from cache: {} ".format(link))
