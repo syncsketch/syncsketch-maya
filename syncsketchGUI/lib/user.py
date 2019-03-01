@@ -302,6 +302,26 @@ class SyncSketchUser():
         return self.host_data.getGreasePencilOverlays(reviewId, itemId)
 
 
+    def download_converted_video(self, itemId):
+        self.auto_login()
+        if not self.host_data:
+            logger.warning('Please login first.')
+            return
+
+        media = self.host_data.getMedia({'id': itemId})
+        videoURL = media['objects'][0]['url']
+        fileName = videoURL.split(str(itemId) + '/')[1].split("?token")[0]
+
+        #maya supports mov only
+        fileName = fileName.replace('mp4', 'mov')
+
+        local_filename = '/tmp/{}'.format(fileName)
+        r = requests.get(videoURL, stream=True)
+        with open(local_filename, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=1024):
+                if chunk:
+                    f.write(chunk)
+        return local_filename
 
 
 # ======================================================================

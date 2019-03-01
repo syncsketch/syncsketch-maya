@@ -307,12 +307,19 @@ class DownloadWindow(SyncSketch_Window):
         current_user = user.SyncSketchUser()
         
 
+        if not current_user.is_logged_in():
+            logger.info("Please Login to syncsketch to Download content")
+            return
+        
+
         try:
             target_media_id = int(database.read_cache('target_media_id'))
             logger.info("target_media_id: {}".format(target_media_id))
         except Exception as e:
             logger.info(e)
-            target_media_id = 0
+            cmds.warning("No target media selected, please select an item from the UI")
+            return
+
             
         self.item_data = current_user.get_item_info(int(database.read_cache('target_media_id')))['objects'][0]
 
@@ -406,7 +413,10 @@ class DownloadWindow(SyncSketch_Window):
             logger.info("Error: Could not download grease pencil file...")
 
     def download_video_annotated(self):
-        logger.info( "Not Implemented yet")
+        downloaded_item = syncsketchGUI.downloadVideo()
+        if downloaded_item:
+            logger.info(downloaded_item)
+            maya_scene.apply_imageplane(downloaded_item)
 
 class FormatPresetWindow(SyncSketch_Window):
     """

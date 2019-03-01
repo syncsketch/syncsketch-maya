@@ -229,6 +229,15 @@ def apply_greasepencil(filename, clear_existing_frames=False):
     pm.greasePencilCtx(ctxName, edit = True, importArchive =  filename )
 
 
+def apply_imageplane(filename):
+    import maya.cmds as cmds
+    ssCamera = cmds.camera()
+
+    imagePlane = cmds.imagePlane(camera=ssCamera[1])
+    cmds.setAttr("{}.type".format(imagePlane[1], 2), 2)
+    cmds.setAttr("{}.imageName".format(imagePlane[1], 2), filename, type='string')
+
+
 
 def add_extension(file):
     # Find out the file extension manually because maya wouldn't

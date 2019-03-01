@@ -193,6 +193,15 @@ def download(current_user = None):
     logger.info("target_media_id: %s"%media_id)
     return current_user.download_greasepencil(review_id, media_id )
 
+#todo: refator both to one function
+def downloadVideo(current_user = None):
+    if not current_user:
+        current_user = user.SyncSketchUser()
+    media_id  = database.read_cache('target_media_id')
+    logger.info("current_user: %s"%current_user)
+    logger.info("target_media_id: %s"%media_id)
+    return current_user.download_converted_video(media_id )
+
 
 def record(upload_after_creation = None, play_after_creation = None,  show_success_msg = True):
     # This a wrapper function and if called individually should mirror all the same effect as hitting 'record' in the UI
