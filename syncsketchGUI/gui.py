@@ -1213,6 +1213,8 @@ class MenuWindow(SyncSketch_Window):
         self.decorate_ui()
         logging.info("build_connections")
         self.build_connections()
+        logging.info("populate review Panel")
+        populate_review_panel(self, force=True)
 
         logging.info("restore_ui_state")
         # Load UI state
@@ -1677,7 +1679,7 @@ class MenuWindow(SyncSketch_Window):
         self.ui.ui_range_comboBox.set_combobox_index( selection='Start / End')
 
         self.set_rangeFromComboBox()
-        populate_review_panel(self, force=True)
+        
 
 
     def disconnect_account(self):

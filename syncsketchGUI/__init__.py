@@ -327,8 +327,6 @@ def _upload(current_user = None, ):
     selected_item = database.read_cache('treewidget_selection')
     logger.info("selected_item: {0}".format(selected_item))
 
-    # if not selected_item:
-    #     database.read_cache('target_review_id')
 
     # ToDo rename media_id to item_id
     item_type = database.read_cache('target_url_type')
@@ -340,9 +338,7 @@ def _upload(current_user = None, ):
     current_item = selected_item
     upload_to_value = str()
 
-    # if item_type == 'playground':
-    #     upload_to_value = 'Playground(public)'
-    # else:
+
     upload_to_value = item_name
     logger.info('Selected Item: %s'%item_name)
 
@@ -358,17 +354,6 @@ def _upload(current_user = None, ):
         "last_frame": last_recorded_data['end_frame'],
     }
 
-    # if item_type == 'playground':
-    #     playground_email = database.get_playground_email()
-    #     if not path.validate_email_address(playground_email):
-    #         user_input = qt_widgets.InputDialog()
-    #         if not user_input.response:
-    #             return
-
-    #         playground_email = user_input.response_text
-    #         database.save_playground_email(playground_email)
-
-    #     uploaded_item = user.upload_to_playground(upload_file, playground_email)
 
     if item_type == 'review':
         logger.info('Uploading {} to {} with review_id {}'.format(upload_file, upload_to_value, review_id))
@@ -396,7 +381,7 @@ def _upload(current_user = None, ):
         logger.info('ERROR: This Upload failed: %s'%(errorLog))
         return
 
-    # try:
+
     review_data = current_user.get_review_data_from_id(review_id)
     review_url = review_data.get('reviewURL')
     #todo: what is revision?
@@ -404,8 +389,6 @@ def _upload(current_user = None, ):
     uploaded_media_url = '{}#{}'.format(review_url, uploaded_item['id'])
     logger.info("review_data: {}".format(review_data))
     logger.info('Upload successful. Uploaded item {} to {}'.format(upload_file, uploaded_media_url))
-    # except:
-    #     uploaded_media_url = uploaded_item.get('reviewURL')
 
     if 'none' in uploaded_media_url.lower():
         uploaded_media_url = str()
@@ -471,10 +454,9 @@ def cycle_viewport_presets():
     cache = path.get_config_yaml(VIEWPORT_PRESET_YAML)
     presets = database._parse_yaml(cache).keys()
     current_viewport_preset = database.read_cache('current_viewport_preset')
-    # logger.info("current_viewport_preset %s"%current_viewport_preset)
     logger.info(presets)
     l = len(presets)
-    # logger.info(current_viewport_preset)
+
 
     i = 0
     if current_viewport_preset in presets:
