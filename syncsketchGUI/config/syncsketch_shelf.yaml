@@ -1,0 +1,82 @@
+- shelfButton:
+    annotation  : Main Menu
+    command     : import syncsketchGUI; reload (syncsketchGUI); syncsketchGUI.reload_toolkit (); syncsketchGUI.show_menu_window ()
+    image       : syncsketch_ui_100.png
+    image1      : syncsketch_ui_100.png
+    image2      : syncsketch_ui_150.png
+    image3      : syncsketch_ui_200.png
+    label       : Main Menu
+    sourceType  : python
+
+- shelfButton:
+    annotation  : Target
+    command     : import syncsketchGUI; reload (syncsketchGUI); syncsketchGUI.reload_toolkit (); syncsketchGUI.show_syncsketch_browser_window()
+    image       : icon_target_100.png
+    image1      : icon_target_100.png
+    image2      : icon_target_150.png
+    image3      : icon_target_200.png
+    label       : Target
+    sourceType  : python
+
+- shelfButton:
+    annotation  : Record
+    command     : import syncsketchGUI; reload (syncsketchGUI); syncsketchGUI.reload_toolkit (); syncsketchGUI.record ()
+    image       : icon_record_100.png
+    image1      : icon_record_100.png
+    image2      : icon_record_150.png
+    image3      : icon_record_200.png
+    label       : Record
+    sourceType  : python
+
+- shelfButton:
+    annotation  : Play
+    command     : import syncsketchGUI; reload (syncsketchGUI); syncsketchGUI.reload_toolkit (); syncsketchGUI.play ()
+    image       : icon_play_100.png
+    image1      : icon_play_100.png
+    image2      : icon_play_150.png
+    image3      : icon_play_200.png
+    label       : Play
+    sourceType  : python
+
+- shelfButton:
+    annotation  : Upload
+    command     : import syncsketchGUI; reload (syncsketchGUI); syncsketchGUI.reload_toolkit (); syncsketchGUI.upload ()
+    image       : icon_upload_100.png
+    image1      : icon_upload_100.png
+    image2      : icon_upload_150.png
+    image3      : icon_upload_200.png
+    label       : Upload
+    sourceType  : python
+
+
+- shelfButton:
+    annotation  : Download
+    command     : import syncsketchGUI; reload (syncsketchGUI); syncsketchGUI.reload_toolkit (); syncsketchGUI.show_download_window ()
+    image       : icon_download_100.png
+    image1      : icon_download_100.png
+    image2      : icon_download_150.png
+    image3      : icon_download_200.png
+    label       : Download
+    sourceType  : python
+
+- shelfButton:
+    annotation  : Cycle Presets
+    command     : import syncsketchGUI; syncsketchGUI.cycle_viewport_presets()
+    image       : icon_cycle_100.png
+    image1      : icon_cycle_100.png
+    image2      : icon_cycle_150.png
+    image3      : icon_cycle_200.png
+    label       : Cycle Presets
+    sourceType  : python
+
+
+- shelfButton:
+    annotation  : Manage Presets
+    command     : import syncsketchGUI; syncsketchGUI.show_viewport_preset_window()
+    image       : icon_manage_presets_100.png
+    image1      : icon_manage_presets_100.png
+    image2      : icon_manage_presets_150.png
+    image3      : icon_manage_presets_100.png
+    label       : Preset 1
+    sourceType  : python
+

@@ -1,0 +1,27 @@
+F: 'true'
+breadcrumb: ''
+current_preset: null
+current_range_type: Start / End
+current_viewport_preset: Animation
+frame_end: '200'
+frame_start: '1'
+last_recorded: {camera: persp, compression: H.264, end_frame: '200', filename: '',
+  format: avfoundation, height: 720, off_screen: true, overwrite: false, show_ornaments: false,
+  start_frame: '1', viewer: false, width: 1280}
+last_recorded_selection: ''
+playground_email: ''
+ps_clipname_lineEdit: ''
+ps_directory_lineEdit: ''
+ps_open_afterUpload_checkBox: 'true'
+ps_play_after_creation_checkBox: 'true'
+ps_upload_after_creation_checkBox: 'true'
+selected_camera: persp
+target_media_id: ''
+target_review_id: ''
+target_url_description: null
+target_url_item_name: Playground
+target_url_type: playground
+target_url_username: ''
+upload_to_value: null
+us_filename_lineEdit: playblast
+us_last_upload_url_pushButton: ''

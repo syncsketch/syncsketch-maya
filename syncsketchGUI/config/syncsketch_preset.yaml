@@ -1,0 +1,26 @@
+Default (for speedy upload):
+  encoding: H.264
+  format: avfoundation
+  height: 720
+  width: 1280
+HD720p (OSX):
+  encoding: H.264
+  format: avfoundation
+  height: 720
+  width: 1280
+HD720p (Windows):
+  encoding: H.264
+  format: avi
+  height: 768
+  width: 1280
+Small:
+  encoding: H.264
+  format: avfoundation
+  height: 256
+  width: 640
+UHD:
+  encoding: H.264
+  format: avfoundation
+  height: 1920
+  width: 1280
+current_preset: HD720p (Windows)
