@@ -1,6 +1,6 @@
 F: 'true'
 breadcrumb: ''
-current_preset: 
+current_preset: null
 current_range_type: Start / End
 current_viewport_preset: Animation
 frame_end: '200'

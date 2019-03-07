@@ -499,7 +499,7 @@ class installThread(QThread):
             # Install SyncsketchGUI
             # Todo: We might wan't to check first if there is already a syncsketchGUI installed in a different path
             # todo: By using target, pip show won't find this package anymore
-            
+
             if os.path.isdir(Literals.SYNCSKETCH_INSTALL_PATH):
                 shutil.rmtree(Literals.SYNCSKETCH_INSTALL_PATH, ignore_errors=True)
                 # todo: delete as well SyncsketchGUI-1.0.0.dist-info
