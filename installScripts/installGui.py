@@ -17,8 +17,8 @@ import maya.utils
 import maya.cmds
 from functools import partial
 
-DEV = False
-INSTALL_SSGUI_ONLY = False
+DEV = True
+INSTALL_SSGUI_ONLY = True
 
 MAYA_API_VERSION = int(str(cmds.about(apiVersion=True))[:4])
 if MAYA_API_VERSION >= 2017:
@@ -38,11 +38,18 @@ if DEV:
     SYNCSKETCH_GUI_RELEASE_PATH = '/Users/chavez/deleteMePls/syncsketchGUI'
 
 
-InstallPath = {
+ScriptInstallPath = {
     'Darwin': '{0}/Library/Preferences/Autodesk/maya/scripts/'.format(expanduser('~')),
     'linux64': '$HOME/maya/scripts/',  # Todo: Not tested
     'Windows': '{0}/maya/scripts/'.format(expanduser('~'))
 }
+
+PluginInstallPath = {
+    'Darwin': '{0}/Library/Preferences/Autodesk/maya/plug-ins/'.format(expanduser('~')),
+    'linux64': '$HOME/maya/scripts/',  # Todo: Not tested
+    'Windows': '{0}/maya/scripts/'.format(expanduser('~')) # Todo: Not tested
+}
+
 
 
 class Icon():
@@ -325,6 +332,10 @@ class SyncSketchInstaller(QObject):
         import syncsketchGUI
         syncsketchGUI.add_timeline_context_menu()
 
+        #Load Plugin And Autoload it
+        cmds.loadPlugin("SyncSketchPlugin")
+        cmds.pluginInfo("SyncSketchPlugin",  edit=True, autoload=True)
+
         #Create Default's for current OS
         self.createGoodDefaults()
 
@@ -434,12 +445,12 @@ class installThread(QThread):
 
         if Literals.PLATFORM == 'Windows':
             PYTHON_PATH = os.path.join(os.getenv('MAYA_LOCATION'), 'bin', 'mayapy.exe')
-            MAYA_SCRIPTS_PATH = InstallPath['Windows']
+            MAYA_SCRIPTS_PATH = ScriptInstallPath['Windows']
             PIP_PATH = os.path.join(os.getenv('APPDATA'), 'Python', 'Scripts', 'pip2.7.exe')
 
         elif Literals.PLATFORM == 'Darwin':
             PYTHON_PATH = '/usr/bin/python'
-            MAYA_SCRIPTS_PATH = InstallPath['Darwin']
+            MAYA_SCRIPTS_PATH = ScriptInstallPath['Darwin']
             PIP_PATH = os.path.join(expanduser('~'), 'Library', 'Python', '2.7', 'bin', 'pip2.7')
 
         FFMPEG_PATH = os.path.join(MAYA_SCRIPTS_PATH, 'ffmpeg', 'bin')
@@ -520,6 +531,14 @@ class installThread(QThread):
             if not INSTALL_SSGUI_ONLY:
                 downloadFFmpegToDisc(platform=Literals.PLATFORM, moveToLocation=FFMPEG_PATH)
 
+
+
+            if Literals.PLATFORM == 'Darwin':
+                if not os.path.isdir(PluginInstallPath['Darwin']):
+                    os.makedirs(PluginInstallPath['Darwin'])
+                shutil.copy(os.path.join(Literals.SYNCSKETCH_INSTALL_PATH, "SyncSketchPlugin.py"), 
+                    os.path.join(PluginInstallPath['Darwin'], "SyncSketchPlugin.py")
+                    )
 
         except Exception as e:
             print(e)

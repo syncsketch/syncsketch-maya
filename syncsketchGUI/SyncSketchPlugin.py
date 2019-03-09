@@ -222,6 +222,7 @@ def initializePlugin(mobject):
     import syncsketchGUI
     syncsketchGUI.build_menu()
     syncsketchGUI.refresh_menu_state()
+    syncsketchGUI.add_timeline_context_menu()
     
     # Register command pairs
     mplugin = ommpx.MFnPlugin( mobject,
