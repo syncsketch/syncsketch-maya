@@ -235,7 +235,7 @@ def _record():
     if not MAYA:
         title = 'Maya Only Function'
         message = 'Recording is not yet functional outside of Maya.'
-        WarningDialog(self.parent_ui, title, message)
+        qt_widgets.WarningDialog(self.parent_ui, title, message)
         return
 
     # filename & path
@@ -246,7 +246,7 @@ def _record():
     if not filepath or not filename:
         title = 'Playblast Location'
         message = 'Please specify playblast file name and location.'
-        WarningDialog(self.parent_ui, title, message)
+        qt_widgets.WarningDialog(self.parent_ui, title, message)
         filepath = os.path.expanduser('~/Desktop/playblasts/')
         filename = 'playblast'
     if clipname:

@@ -113,7 +113,6 @@ class HoverButton(QtWidgets.QPushButton):
     def leaveEvent(self,event):
         self.setStyleSheet("background-color: rgba(0,0,0,0); border: none; ; Text-align:bottom;")
 
-# class WebLoginWindow(QtWidgets.QMainWindow):
 
 class RegularHeaderButton(QtWidgets.QPushButton):
     def __init__(self, parent=None, color ='white'):
@@ -134,6 +133,7 @@ class RegularHeaderButton(QtWidgets.QPushButton):
         self.setStyleSheet("margin:1; background-color: rgba(255,255,255,0.2); border: none;")
     def leaveEvent(self, event):
         self.setStyleSheet("margin:1; background-color: rgba(255,255,255,0.1); border: none;")
+
 
 class RegularStatusLabel(QtWidgets.QLabel):
     def __init__(self, parent=None, color ='white', bgColor='rgba(0,0,0,0.3)'):

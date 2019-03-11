@@ -1,6 +1,6 @@
 F: 'true'
 breadcrumb: ''
-current_preset: null
+current_preset: current_preset
 current_range_type: Start / End
 current_viewport_preset: Animation
 frame_end: '200'
@@ -19,8 +19,8 @@ selected_camera: persp
 target_media_id: ''
 target_review_id: ''
 target_url_description: null
-target_url_item_name: Playground
-target_url_type: playground
+target_url_item_name: null
+target_url_type: null
 target_url_username: ''
 upload_to_value: null
 us_filename_lineEdit: playblast

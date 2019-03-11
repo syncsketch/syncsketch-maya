@@ -312,7 +312,7 @@ class IconButton(QPushButton):
 class SyncSketchInstaller(QObject):
     def showit(self):
         self.installer = installerUI()
-        self.installer.installButton.clicked.connect(self.__syncsketchIntall)
+        self.installer.installButton.clicked.connect(self.__syncsketchInstall)
         self.installer.closeButton.clicked.connect(self.__closeButton)
         self.installer.launchButton.clicked.connect(self.__launchButton)
         self.installer.show()
@@ -360,7 +360,7 @@ class SyncSketchInstaller(QObject):
 
         # Add TimeLineMenu's if they doesn't exist
 
-    def __syncsketchIntall(self):
+    def __syncsketchInstall(self):
         self.installer.installButton.hide()
         self.installer.closeButton.hide()
         self.installer.installShelf.hide()

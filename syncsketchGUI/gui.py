@@ -39,6 +39,8 @@ from vendor.Qt import QtWidgets
 import logging
 logger = logging.getLogger(__name__)
 
+from lib.gui.syncsketchWidgets.webLoginWindow import WebLoginWindow
+
 # ======================================================================
 # Environment Detection
 
@@ -92,7 +94,7 @@ def _maya_delete_ui(ui_name):
     """
     Delete existing UI in Maya
     """
-    if cmds.control(ui_name, exists = True):
+    if cmds.control(ui_name, exists=True):
         cmds.deleteUI(ui_name)
 
 def _maya_main_window():
@@ -202,95 +204,9 @@ class OpenPlayer(QWebView):
         if MAYA:
             self.setProperty('saveWindowPref', True)
 
-class WebLoginWindow(QWebView):
-    """
-    Login Window Class
-    """
-    window_name = 'syncsketchGUI_login_window'
-    window_label = 'Login to SyncSketch'
-
-    def __init__(self, parent):
-        super(WebLoginWindow, self).__init__(parent)
-
-        self.parent = parent
-        self.current_user = user.SyncSketchUser()
-
-        self.setMaximumSize(650, 600)
-
-        # self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-        self.setWindowTitle(self.window_label)
-        self.setObjectName(self.window_name)
-        self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.WindowStaysOnTopHint )
-
-        self.load(QtCore.QUrl("https://syncsketch.com/login/?next=/users/getToken/&simple=1"))
-
-        self.show()
-        self.activateWindow()
-        self._myBindingFunction()
-
-        qt_utils.align_to_center(self, self.parent)
-
-        if MAYA:
-            self.setProperty('saveWindowPref', True)
 
 
 
-    def changed(self):
-        thisUrl = self.url().toString()
-        if thisUrl == "https://syncsketch.com/users/getToken/":
-            command = """window.getTokenData()"""
-            for i in range(20):
-                jsonData = self.page().mainFrame().evaluateJavaScript(command)
-                if isinstance(jsonData, unicode):
-                    tokenData = json.loads(jsonData)
-                    self.current_user.set_name(tokenData["email"])
-                    # todo we should remove api_key
-                    self.current_user.set_token(tokenData["token"])
-                    self.current_user.set_api_key(tokenData["token"])
-                    self.current_user.auto_login()
-                    break
-
-                else:
-                    logger.info("sleeping")
-                    time.sleep(0.1)
-            self.close()
-            update_login_ui(self.parent)
-            populate_review_panel(self.parent)
-
-
-
-    def _myBindingFunction(self):
-        # self.loadStarted.connect(self._plot)
-        # self.page().mainFrame().loadStarted.connect(self.onStart)
-        self.page().mainFrame().loadFinished.connect(self.changed)
-        self.page().mainFrame().urlChanged.connect(self.changed)
-        # self.loadingChanged.connect(self.changed)
-        # self.page().mainFrame().loadFinished.connect(self._plot)
-
-    def _plot(self):
-        command =('return getTokenData()')
-        me = self.page().mainFrame().evaluateJavaScript(command)
-
-
-
-def update_login_ui(self):
-    #user Login
-    self.current_user = user.SyncSketchUser()
-    if self.current_user.is_logged_in() and is_connected():
-        username = self.current_user.get_name()
-        self.ui.ui_login_label.setText("Logged into SyncSketch as \n%s" % username)
-        self.ui.ui_login_label.setStyleSheet("color: white; font-size: 11px;")
-        self.ui.login_pushButton.hide()
-        self.ui.signup_pushButton.hide()
-        self.ui.logout_pushButton.show()
-    else:
-        # self.ui.ui_login_label.setText("You're not logged in")
-        # self.ui.logged_in_groupBox.hide()
-        self.ui.ui_login_label.setText("You are not logged into SyncSketch")
-        self.ui.ui_login_label.setStyleSheet("color: white; font-size: 11px;")
-        self.ui.login_pushButton.show()
-        self.ui.signup_pushButton.show()
-        self.ui.logout_pushButton.hide()
 
 class DownloadWindow(SyncSketch_Window):
     """
@@ -574,6 +490,25 @@ class FormatPresetWindow(SyncSketch_Window):
             encodings = maya_scene.get_available_compressions(format)
             self.ui.encoding_comboBox.clear()
             self.ui.encoding_comboBox.addItems(encodings)
+
+    def update_login_ui(self):
+        #user Login
+        self.current_user = user.SyncSketchUser()
+        if self.current_user.is_logged_in() and is_connected():
+            username = self.current_user.get_name()
+            self.ui.ui_login_label.setText("Logged into SyncSketch as \n%s" % username)
+            self.ui.ui_login_label.setStyleSheet("color: white; font-size: 11px;")
+            self.ui.login_pushButton.hide()
+            self.ui.signup_pushButton.hide()
+            self.ui.logout_pushButton.show()
+        else:
+            # self.ui.ui_login_label.setText("You're not logged in")
+            # self.ui.logged_in_groupBox.hide()
+            self.ui.ui_login_label.setText("You are not logged into SyncSketch")
+            self.ui.ui_login_label.setStyleSheet("color: white; font-size: 11px;")
+            self.ui.login_pushButton.show()
+            self.ui.signup_pushButton.show()
+            self.ui.logout_pushButton.hide()
 
     def load_preset(self, preset_name=None):
         """
