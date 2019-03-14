@@ -6,6 +6,7 @@ from syncsketchGUI.vendor.Qt import QtGui
 from syncsketchGUI.vendor.Qt import QtWidgets
 
 from syncsketchGUI.lib import database
+import syncsketchGUI.lib.user as user
 import logging
 logger = logging.getLogger(__name__)
 
@@ -324,3 +325,22 @@ class SyncSketch_Window(QtWidgets.QMainWindow):
     def cancel(self):
         logger.info("Closing Synsketch GUI Window")
         self.close()
+
+    def update_login_ui(self):
+        #user Login
+        self.current_user = user.SyncSketchUser()
+        if self.current_user.is_logged_in() and is_connected():
+            username = self.current_user.get_name()
+            self.ui.ui_login_label.setText("Logged into SyncSketch as \n%s" % username)
+            self.ui.ui_login_label.setStyleSheet("color: white; font-size: 11px;")
+            self.ui.login_pushButton.hide()
+            self.ui.signup_pushButton.hide()
+            self.ui.logout_pushButton.show()
+        else:
+            # self.ui.ui_login_label.setText("You're not logged in")
+            # self.ui.logged_in_groupBox.hide()
+            self.ui.ui_login_label.setText("You are not logged into SyncSketch")
+            self.ui.ui_login_label.setStyleSheet("color: white; font-size: 11px;")
+            self.ui.login_pushButton.show()
+            self.ui.signup_pushButton.show()
+            self.ui.logout_pushButton.hide()

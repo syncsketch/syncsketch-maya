@@ -2,7 +2,7 @@ from syncsketchGUI.vendor.Qt.QtWebKit import *
 from syncsketchGUI.vendor.Qt.QtWebKitWidgets import *
 import syncsketchGUI.lib.user as user
 from syncsketchGUI.vendor.Qt import QtCore
-from lib.gui import qt_utils
+from syncsketchGUI.lib.gui import qt_utils
 import time
 import json
 import logging
@@ -60,8 +60,8 @@ class WebLoginWindow(QWebView):
                     logger.info("sleeping")
                     time.sleep(0.1)
             self.close()
-            update_login_ui(self.parent)
-            populate_review_panel(self.parent)
+            self.update_login_ui()
+            self.populate_review_panel()
 
 
 

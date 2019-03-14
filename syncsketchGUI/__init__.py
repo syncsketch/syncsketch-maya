@@ -27,6 +27,7 @@ STANDALONE = False
 if not MAYA and not NUKE:
     STANDALONE = True
 
+from syncsketchGUI.lib.gui.syncsketchWidgets import InfoDialog
 import logging
 logger = logging.getLogger('syncsketchGUI')
 logger.setLevel(logging.DEBUG)
@@ -151,7 +152,7 @@ def show_success_message(uploaded_item):
     title = 'Upload Successful'
     info_message = 'Your file has successfully been uploaded. Please follow this link:'
 
-    UploadedMediaDialog = gui.InfoDialog(None,
+    UploadedMediaDialog = infoDialog.InfoDialog(None,
                                           title,
                                           info_message,
                                           uploaded_item['reviewURL'])
@@ -423,7 +424,7 @@ def playblast_and_upload():
     title = 'Upload Successful'
     info_message = 'Your file has successfully been uploaded. Please follow this link:'
     
-    UploadedMediaDialog = gui.InfoDialog(title = title, info_text = info_message, media_url = uploaded_media_url.json()['reviewURL'])
+    UploadedMediaDialog = infoDialog.InfoDialog(title = title, info_text = info_message, media_url = uploaded_media_url.json()['reviewURL'])
     UploadedMediaDialog.exec_()
     
 def install_shelf():
