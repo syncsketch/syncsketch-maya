@@ -118,12 +118,18 @@ def get_current_file():
     filename = database.read_cache('last_recorded_selection')
 
     if not filename:
-        raise RuntimeError('There is no previously recorded video file.')
+        title = 'No File for Upload'
+        message = 'There is no previously recorded video file, please record one first through The Widget'
+        qt_widgets.WarningDialog(None, title, message)
+        return
+
 
     filename = path.sanitize(filename)
 
     if not os.path.isfile(filename):
-        raise RuntimeError('Please provide a valid file.')
+        title = 'Not a valid file'
+        message = 'Please provide a falid file'
+        qt_widgets.WarningDialog(None, title, message)
         return
     else:
         return filename
@@ -144,6 +150,7 @@ def show_success_message(uploaded_item):
 def play(filename = None):
     if not filename:
         filename = get_current_file()
+        return
     filename = path.make_safe(filename)
     video.play_in_default_player(filename)
     logger.info('Playing current video: {}'.format(filename.replace('"', '')))
@@ -296,9 +303,10 @@ def _upload(current_user = None, ):
     username = current_user.get_name()
     upload_file = get_current_file()
 
-
+    #todo remove this
     if not upload_file or not os.path.isfile(upload_file):
         self.update_tooltip('WebM file cannot be sourced. Uploading the original file.', color='LightYellow')
+        return
 
     # Try to upload to the last uploaded address first
     selected_item = database.read_cache('treewidget_selection')

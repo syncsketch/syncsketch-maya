@@ -240,6 +240,8 @@ class MenuWindow(SyncSketch_Window):
         self.ui.browser_treeWidget.setPalette(highlight_palette)
         self.ui.browser_treeWidget.setHeaderLabel('refresh')
 
+
+        self.ui.browser_treeWidget.header().setSectionsClickable(True)
         self.ui.browser_treeWidget.header().setDefaultAlignment(QtCore.Qt.AlignCenter)
         self.ui.browser_treeWidget.header().sectionClicked.connect(self.refresh)
         self.ui.ui_treeWidget_layout.addWidget(self.ui.browser_treeWidget)
@@ -472,6 +474,7 @@ class MenuWindow(SyncSketch_Window):
         self.populate_review_panel(self,  force=True)
 
     def refresh(self):
+        logging.info("Header clicked")
         self.populate_review_panel(self, force=True)
         self.repaint()
 
