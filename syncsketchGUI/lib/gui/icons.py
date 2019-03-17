@@ -4,12 +4,6 @@ import urllib
 import tempfile
 
 
-def _get_tempfile_from_url(url):
-    testfile = urllib.URLopener()
-    tmpname = tempfile.NamedTemporaryFile()
-    thumb = testfile.retrieve(url, tmpname.name)
-    print tmpname.name
-
 def _get_qicon(icon_name='syncsketch_ui_100.png'):
     '''
     Get logo path and return a QtGui.QIcon object
@@ -37,9 +31,6 @@ def _get_qicon_from_url(url):
     # lets remove the temp image file after we have the qicon file in memory
 
     return qicon
-
-
-
 
 
 # icons

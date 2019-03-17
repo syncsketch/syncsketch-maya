@@ -1,3 +1,23 @@
+import sys
+import logging
+import yaml
+import codecs
+
+from syncsketchGUI.lib.gui.qt_widgets import SyncSketch_Window
+from syncsketchGUI.vendor.Qt import QtWidgets, QtCore
+from syncsketchGUI.lib.gui.qt_widgets import RegularComboBox, RegularButton, RegularToolButton, RegularGridLayout, RegularQSpinBox
+from syncsketchGUI.lib.gui.icons import *
+from syncsketchGUI.lib.gui.qt_utils import *
+from syncsketchGUI.lib.gui import qt_utils
+from functools import partial
+from syncsketchGUI.lib.connection import is_connected, open_url
+from syncsketchGUI.lib import database, user
+from syncsketchGUI.lib.maya import scene as maya_scene
+from syncsketchGUI.lib.gui.syncsketchWidgets.mainWidget import DEFAULT_PRESET, VIEWPORT_YAML, PRESET_YAML
+
+
+logger = logging.getLogger(__name__)
+
 
 class FormatPresetWindow(SyncSketch_Window):
     """
@@ -6,9 +26,8 @@ class FormatPresetWindow(SyncSketch_Window):
     window_name = 'syncsketchGUI_preset_window'
     window_label = 'Recording Preset Manager'
 
-    def __init__(self, parent=None, icon=None, color ='white'):
+    def __init__(self, parent=None, icon=None, color='white'):
         super(FormatPresetWindow, self).__init__(parent=parent)
-
         self.decorate_ui()
         self.build_connections()
         self.populate_ui()
@@ -34,18 +53,17 @@ class FormatPresetWindow(SyncSketch_Window):
         self.ui.ui_formatpreset_layout.addWidget(self.ui.ps_delete_preset_pushButton)
 
 
-            # 720p HD
-
+        # 720p HD
         self.ui.ui_format_layout = RegularGridLayout(self, label = 'Format' )
         self.ui.format_comboBox = RegularComboBox()
         self.ui.ui_format_layout.addWidget(self.ui.format_comboBox, 0, 1)
-            # avi, qt
 
+        # avi, qt
         self.ui.ui_encoding_layout = RegularGridLayout(self, label = 'Encoding' )
         self.ui.encoding_comboBox = RegularComboBox()
         self.ui.ui_encoding_layout.addWidget(self.ui.encoding_comboBox, 0, 1)
-            # H.264
 
+        # H.264
         # upload_layout - range
         self.ui.ui_resolution_layout = RegularGridLayout(self, label = 'Resolution')
         self.ui.ui_resolution_comboBox = RegularComboBox(self)
@@ -106,6 +124,7 @@ class FormatPresetWindow(SyncSketch_Window):
         self.ui.height_spinBox.setValue(int(height*factor))
         self.ui.width_spinBox.setValue(int(width*factor))
 
+
     def build_connections(self):
         self.ui.save_pushButton.clicked.connect(self.save)
         self.ui.cancel_pushButton.clicked.connect(self.cancel)
@@ -113,12 +132,12 @@ class FormatPresetWindow(SyncSketch_Window):
         self.ui.ui_formatPreset_comboBox.currentIndexChanged.connect(self.load_preset_from_selection)
         self.ui.format_comboBox.currentIndexChanged.connect(self.update_encoding_list)
 
+
     def populate_ui(self):
         """
         Populate the UI based on the available values
         depending on what the user has installed and what the DCC tool has to offer
         """
-        # Get the values from the host DCC
         formats = maya_scene.get_available_formats()
         encodings = maya_scene.get_available_compressions()
 
@@ -135,26 +154,28 @@ class FormatPresetWindow(SyncSketch_Window):
         self.ui.height_spinBox.clear()
 
         self.ui.ui_formatPreset_comboBox.addItems([DEFAULT_PRESET])
-        # self.ui.viewport_name_comboBox.addItems(['Hussah!'])
+
         self.ui.format_comboBox.addItems(formats)
         self.ui.encoding_comboBox.addItems(encodings)
         self.ui.width_spinBox.setValue(1920)
         self.ui.height_spinBox.setValue(1080)
 
+
     def update_encoding_list(self):
         """
         Refresh the available compressions.
         """
-        format = self.ui.format_comboBox.currentText()
-        encodings = maya_scene.get_available_compressions(format)
+        compressionFormat = self.ui.format_comboBox.currentText()
+        encodings = maya_scene.get_available_compressions(compressionFormat)
         self.ui.encoding_comboBox.clear()
         self.ui.encoding_comboBox.addItems(encodings)
 
+
     def update_login_ui(self):
         #user Login
-        self.current_user = user.SyncSketchUser()
-        if self.current_user.is_logged_in() and is_connected():
-            username = self.current_user.get_name()
+        self.currentUser = user.SyncSketchUser()
+        if self.currentUser.is_logged_in() and is_connected():
+            username = self.currentUser.get_name()
             self.ui.ui_login_label.setText("Logged into SyncSketch as \n%s" % username)
             self.ui.ui_login_label.setStyleSheet("color: white; font-size: 11px;")
             self.ui.login_pushButton.hide()
@@ -169,24 +190,25 @@ class FormatPresetWindow(SyncSketch_Window):
             self.ui.signup_pushButton.show()
             self.ui.logout_pushButton.hide()
 
-    def load_preset(self, preset_name=None):
+
+    def load_preset(self, presetName=None):
         """
         Load the user's current preset from yaml
         """
-        preset_file = path.get_config_yaml(PRESET_YAML)
-        preset_data = database._parse_yaml(preset_file)
-        if not preset_data:
+        presetFile = path.get_config_yaml(PRESET_YAML)
+        presetData = database._parse_yaml(presetFile)
+        if not presetData:
             return
 
-        if not preset_name:
-            qt_utils.self.ui.ui_formatPreset_comboBox.set_combobox_index( selection=DEFAULT_PRESET)
-            qt_utils.self.ui.format_comboBox.set_combobox_index( selection='avi')
+        if not presetName:
+            self.ui.ui_formatPreset_comboBox.set_combobox_index( selection=DEFAULT_PRESET)
+            self.ui.format_comboBox.set_combobox_index( selection='avi')
             self.ui.encoding_comboBox.set_combobox_index( selection='none')
             self.ui.width_spinBox.setValue(1280)
             self.ui.height_spinBox.setValue(720)
 
 
-        elif preset_name == DEFAULT_PRESET:
+        elif presetName == DEFAULT_PRESET:
             self.ui.ui_formatPreset_comboBox.set_combobox_index( selection=DEFAULT_PRESET)
 
             if sys.platform == 'darwin':
@@ -202,7 +224,7 @@ class FormatPresetWindow(SyncSketch_Window):
                 encoding = 'none'
 
         else:
-            preset = preset_data.get(preset_name)
+            preset = presetData.get(presetName)
             if not preset:
                 return
             logger.info(preset)
@@ -211,9 +233,9 @@ class FormatPresetWindow(SyncSketch_Window):
             width = preset.get('width')
             height = preset.get('height')
 
-            self.ui.ui_formatPreset_comboBox.set_combobox_index( selection=preset_name)
-            self.ui.format_comboBox.set_combobox_index( selection=format)
-            self.ui.encoding_comboBox.set_combobox_index( selection=encoding)
+            self.ui.ui_formatPreset_comboBox.set_combobox_index(selection=presetName)
+            self.ui.format_comboBox.set_combobox_index(selection=format)
+            self.ui.encoding_comboBox.set_combobox_index(selection=encoding)
             self.ui.width_spinBox.setValue(width)
             self.ui.height_spinBox.setValue(height)
 
@@ -226,34 +248,33 @@ class FormatPresetWindow(SyncSketch_Window):
 
 
     def save(self):
-        preset_file = path.get_config_yaml(PRESET_YAML)
-        preset_data = database._parse_yaml(preset_file)
+        presetFile = path.get_config_yaml(PRESET_YAML)
+        presetData = database._parse_yaml(presetFile)
 
-        preset_name = self.ui.ui_formatPreset_comboBox.currentText()
+        presetName = self.ui.ui_formatPreset_comboBox.currentText()
         format = self.ui.format_comboBox.currentText()
         encoding = self.ui.encoding_comboBox.currentText()
         width = self.ui.width_spinBox.value()
         height = self.ui.height_spinBox.value()
 
-        new_data = dict()
-        if preset_name == DEFAULT_PRESET:
-            new_data = {'current_preset': preset_name}
+        newData = dict()
+        if presetName == DEFAULT_PRESET:
+            newData = {'current_preset': presetName}
 
         else:
-            new_data = {'current_preset': preset_name,
-                        preset_name:
+            newData = {'current_preset': presetName,
+                        presetName:
                             {'encoding': encoding,
                              'format': format,
                              'height': height,
                              'width': width}}
-        if preset_data:
-            preset_data.update(new_data)
+        if presetData:
+            presetData.update(newData)
         else:
-            preset_data = new_data
+            presetData = newData
 
-        with codecs.open(preset_file, 'w', encoding='utf-8') as f_out:
-            yaml.safe_dump(preset_data, f_out, default_flow_style=False)
+        with codecs.open(presetFile, 'w', encoding='utf-8') as f_out:
+            yaml.safe_dump(presetData, f_out, default_flow_style=False)
 
-        self.parent.ui.ui_formatPreset_comboBox.populate_combo_list( PRESET_YAML, preset_name)
-
+        self.parent.ui.ui_formatPreset_comboBox.populate_combo_list( PRESET_YAML, presetName)
         self.close()

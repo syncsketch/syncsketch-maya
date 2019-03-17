@@ -34,24 +34,24 @@ def join(*components):
     raw_path = str()
     for component in components:
         raw_path = os.path.join(raw_path, component)
-    
+
     clean_path = sanitize(raw_path)
     return clean_path
-    
+
 def sanitize(raw_path):
     '''
     Replace the back slashes with forward slashes
     '''
     clean_path = raw_path.replace('\\', '/')
     return clean_path
-    
+
 def make_windows_style(raw_path):
     '''
     Replace the forward slashes with back slashes
     '''
     windows_style = raw_path.replace('/', '\\')
     return windows_style
-    
+
 def make_safe(raw_path):
     norm_path = os.path.normpath(raw_path)
     path_components = norm_path.split(os.sep)
@@ -60,11 +60,11 @@ def make_safe(raw_path):
             not path_component.endswith('"') and \
             not path_component.startswith('"'):
             path_components[i] = '"{}"'.format(path_component)
-    
+
     quoted_path = '/'.join(path_components)
     safe_path = os.path.normpath(quoted_path)
     return safe_path
-    
+
 def validate_email_address(email_address):
     '''
     Check to make sure if the given email address if valid
@@ -94,7 +94,7 @@ def get_config_folder():
     config_folder = os.path.join(root_folder, 'syncsketchGUI', 'config')
     config_folder = sanitize(config_folder)
     return config_folder
-    
+
 def get_config_yaml(yaml_file):
     '''
     Take the yaml file name and construct the full path
@@ -103,7 +103,7 @@ def get_config_yaml(yaml_file):
     config_yaml = os.path.join(config_folder, yaml_file)
     config_yaml = sanitize(config_yaml)
     return config_yaml
-    
+
 def get_image_folder():
     '''
     Get the full path of the image folder
@@ -112,7 +112,7 @@ def get_image_folder():
     image_folder = os.path.join(root_folder, 'syncsketchGUI', 'ressources', 'image')
     image_folder = sanitize(image_folder)
     return image_folder
-    
+
 def get_icon(icon_name):
     '''
     Get logo path and return the fullname
@@ -121,7 +121,7 @@ def get_icon(icon_name):
     icon_fullname = os.path.join(image_folder, icon_name)
     icon_fullname = sanitize(icon_fullname)
     return icon_fullname
-    
+
 def get_ffmpeg_folder():
     '''
     Get the full path of the ffmpeg tool folder
@@ -130,7 +130,7 @@ def get_ffmpeg_folder():
     ffmpeg_folder = os.path.join(root_folder, 'ffmpeg')
     ffmpeg_folder = sanitize(ffmpeg_folder)
     return ffmpeg_folder
-    
+
 def get_ffmpeg_bin():
     '''
     Get the bin folder of the ffmpeg tool folder
@@ -139,7 +139,7 @@ def get_ffmpeg_bin():
     ffmpeg_bin = os.path.join(ffmpeg_folder, 'bin')
     ffmpeg_bin = make_windows_style(ffmpeg_bin)
     return ffmpeg_bin
-    
+
 def get_default_playblast_folder():
     '''
     Get the default playblast directory, a folder named playblasts on user's desktop

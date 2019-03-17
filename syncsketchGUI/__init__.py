@@ -9,26 +9,9 @@
 import os
 import time
 import webbrowser
-
-try:
-    from maya import cmds
-    MAYA = True
-except ImportError:
-    MAYA = False
-
-try:
-    import nuke
-    import nukescripts
-    NUKE = True
-except ImportError:
-    NUKE = False
-
-STANDALONE = False
-if not MAYA and not NUKE:
-    STANDALONE = True
-
-from syncsketchGUI.lib.gui.syncsketchWidgets import InfoDialog
 import logging
+from syncsketchGUI.lib.gui.syncsketchWidgets import infoDialog
+
 logger = logging.getLogger('syncsketchGUI')
 logger.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
@@ -46,6 +29,7 @@ logger.propagate=0
 # Global Variables
 WAIT_TIME = 0.1 # seconds
 
+
 # ======================================================================
 # API Import
 
@@ -59,10 +43,8 @@ import gui
 
 # ======================================================================
 # Maya Imports
-
-if MAYA:
-    from syncsketchGUI.lib.maya import shelf as maya_shelf, menu as maya_menu
-    from syncsketchGUI.lib.maya import scene as maya_scene, timeline as maya_timeline
+from syncsketchGUI.lib.maya import shelf as maya_shelf, menu as maya_menu
+from syncsketchGUI.lib.maya import scene as maya_scene, timeline as maya_timeline
 
 # ======================================================================
 # Global Variables
@@ -95,26 +77,26 @@ def reload_toolkit():
     reload(user)
     reload(qt_widgets)
     reload(qt_utils)
-    
-    if MAYA:
-        from syncsketchGUI.lib.maya import menu as maya_menu
-        from syncsketchGUI.lib.maya import scene as maya_scene
-        from syncsketchGUI.lib.maya import shelf as maya_shelf
-        from syncsketchGUI.lib.maya import timeline as maya_timeline
-        from syncsketchGUI.vendor import capture as maya_capture
 
-        reload(maya_menu)
-        reload(maya_scene)
-        reload(maya_shelf)
-        reload(maya_capture)
-        reload(maya_timeline)
-    
+
+    from syncsketchGUI.lib.maya import menu as maya_menu
+    from syncsketchGUI.lib.maya import scene as maya_scene
+    from syncsketchGUI.lib.maya import shelf as maya_shelf
+    from syncsketchGUI.lib.maya import timeline as maya_timeline
+    from syncsketchGUI.vendor import capture as maya_capture
+
+    reload(maya_menu)
+    reload(maya_scene)
+    reload(maya_shelf)
+    reload(maya_capture)
+    reload(maya_timeline)
+
 def build_menu():
     maya_menu.build_menu()
-    
+
 def delete_menu():
     maya_menu.delete_menu()
-    
+
 def refresh_menu_state():
     maya_menu.refresh_menu_state()
 
@@ -233,12 +215,6 @@ def record(upload_after_creation = None, play_after_creation = None,  show_succe
 
 
 def _record():
-    if not MAYA:
-        title = 'Maya Only Function'
-        message = 'Recording is not yet functional outside of Maya.'
-        qt_widgets.WarningDialog(self.parent_ui, title, message)
-        return
-
     # filename & path
     filepath = database.read_cache('ps_directory_lineEdit')
     filename = database.read_cache('us_filename_lineEdit')
@@ -404,32 +380,32 @@ def _upload(current_user = None, ):
 def playblast_and_upload():
     if not gui.confirm_upload_to_playground():
         return
-    
+
     filepath = maya_scene.playblast()
     if not filepath:
         return
-    
+
     webm_file = video.convert_to_webm(filepath)
     if not webm_file:
         return
-    
+
     user_input = gui.InputDialog()
     if not user_input.response:
         return
-    
+
     uploaded_media_url = user.upload_to_playground(webm_file, user_input.response_text)
     if not uploaded_media_url:
         return
-    
+
     title = 'Upload Successful'
     info_message = 'Your file has successfully been uploaded. Please follow this link:'
-    
+
     UploadedMediaDialog = infoDialog.InfoDialog(title = title, info_text = info_message, media_url = uploaded_media_url.json()['reviewURL'])
     UploadedMediaDialog.exec_()
-    
+
 def install_shelf():
     maya_shelf.install()
-    
+
 def uninstall_shelf():
     maya_shelf.uninstall()
 
@@ -478,8 +454,6 @@ def cycle_viewport_presets():
     maya_scene.apply_viewport_preset(cache, presets[i])
 
 def createOrUpdatePlayblastCam():
-    # apply_viewport_preset('')
-    # apply_viewport_preset
     filePath = database.read_cache('last_recorded')
     maya_scene.createOrUpdatePlayblastCam(frameOffset=0, moviePath=filePath)
-    # removePlayblastCam()
+

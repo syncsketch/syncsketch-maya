@@ -39,13 +39,13 @@ def get_available_compressions(format = None):
             format = 'avi'
         else:
             format = 'movie'
-    
+
     mel_command = 'playblast -format "{}" -query -compression'.format(format)
     return mel.eval(mel_command)
-    
+
 def get_available_formats():
     return cmds.playblast(query = True, format = True)
-    
+
 def get_available_cameras():
     return cmds.listCameras()
 
@@ -62,7 +62,7 @@ def confirm_overwrite_dialogue(message):
 
 
 def get_current_camera(panel=None):
-    """ 
+    """
     From BigRoy's Capture GUI
     Returns the currently active camera.
 

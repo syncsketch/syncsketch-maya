@@ -11,7 +11,6 @@ import platform
 import socket
 import sys
 import time
-import webbrowser
 import tempfile
 import yaml
 import re
@@ -22,13 +21,12 @@ from vendor.Qt.QtWebKitWidgets import *
 from vendor.Qt.QtWidgets import QApplication
 
 import syncsketchGUI
-from lib import video, user, database
+
 from lib.gui.qt_widgets import *
 from lib.gui import qt_utils
 from lib.gui.qt_utils import *
 
-from lib.gui.icons import *
-from lib.gui.icons import _get_qicon
+
 from lib.connection import *
 from vendor import mayapalette
 from vendor.Qt import QtCompat
@@ -39,7 +37,7 @@ from vendor.Qt import QtWidgets
 import logging
 logger = logging.getLogger(__name__)
 
-from lib.gui.syncsketchWidgets.webLoginWindow import WebLoginWindow
+from lib.gui.syncsketchWidgets.webLoginWidget import WebLoginWindow
 
 # ======================================================================
 # Environment Detection
@@ -58,26 +56,15 @@ except ImportError:
 
 STANDALONE = False
 
-from lib.maya import scene as maya_scene
 
 # ======================================================================
 # Global Variables
 
 PALETTE_YAML = 'syncsketch_palette.yaml'
-PRESET_YAML = 'syncsketch_preset.yaml'
-VIEWPORT_YAML = 'syncsketch_viewport.yaml'
-
-
-DEFAULT_PRESET = 'Default(for speedy upload)'
-DEFAULT_VIEWPORT_PRESET = database.read_cache('current_viewport_preset')
-
-uploadPlaceHolderStr = "Pick a review/item or paste a SyncSketch URL here"
-message_is_not_loggedin = "Please sign into your account by clicking 'Log-In' or create a free Account by clicking 'Sign up'."
-message_is_not_connected = "WARNING: Could not connect to SyncSketch. It looks like you may not have an internet connection?"
 
 WAIT_TIME = 0.00 # seconds
 
-USER_ACCOUNT_DATA = None
+
 
 # ======================================================================
 # DCC application helper functions
@@ -136,12 +123,7 @@ def _call_web_ui_for_maya(ui_object):
     app_ui.show()
     return app_ui
 
-def _build_widget_item(parent, item_name, item_type, item_icon, item_data):
-    treewidget_item = QtWidgets.QTreeWidgetItem(parent, [item_name])
-    treewidget_item.setData(1, QtCore.Qt.EditRole, item_data)
-    treewidget_item.setData(2, QtCore.Qt.EditRole, item_type)
-    treewidget_item.setIcon(0, item_icon)
-    return treewidget_item
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
@@ -193,7 +175,7 @@ def set_tree_selection(tree, id):
         if itemData.get('id') == id:
             tree.setCurrentItem(item, 1)
             tree.scrollToItem(item)
-        iterator +=1
+        iterator += 1
     return itemData
 
 
@@ -419,7 +401,7 @@ def show_menu_window():
 
 
 def show_download_window():
-    from syncsketchGUI.lib.gui.syncsketchWidgets.webLoginWindow import DownloadWindow
+    from syncsketchGUI.lib.gui.syncsketchWidgets.downloadWidget import DownloadWindow
     _maya_delete_ui(DownloadWindow.window_name)
     _call_ui_for_maya(DownloadWindow)
 

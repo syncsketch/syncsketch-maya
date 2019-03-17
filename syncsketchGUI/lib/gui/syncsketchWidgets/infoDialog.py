@@ -1,17 +1,21 @@
-# -*- coding: utf-8 -*-
-# @Author: yafes
-# @Date:   2019-03-12 11:07:16
-# @Last Modified by:   yafes
-# @Last Modified time: 2019-03-12 11:07:18
+import webbrowser
+from syncsketchGUI.vendor.Qt import QtCore
+from syncsketchGUI.vendor.Qt import QtGui
+from syncsketchGUI.vendor.Qt import QtWidgets
+from syncsketchGUI.lib.gui.icons import *
+
+import logging
+logger = logging.getLogger(__name__)
+
 class InfoDialog(QtWidgets.QDialog):
     """
     Customized Popup Dialog
     """
-    def __init__(  self,
-                    parent = None,
-                    title = 'Upload Successful',
-                    info_text = '',
-                    media_url = ''):
+    def __init__(self,
+                parent = None,
+                title = 'Upload Successful',
+                info_text = '',
+                media_url = ''):
 
         super(InfoDialog, self).__init__(parent)
 

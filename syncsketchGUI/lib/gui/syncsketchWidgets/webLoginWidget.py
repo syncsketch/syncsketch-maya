@@ -1,11 +1,12 @@
-from syncsketchGUI.vendor.Qt.QtWebKit import *
-from syncsketchGUI.vendor.Qt.QtWebKitWidgets import *
-import syncsketchGUI.lib.user as user
-from syncsketchGUI.vendor.Qt import QtCore
-from syncsketchGUI.lib.gui import qt_utils
 import time
 import json
 import logging
+
+from syncsketchGUI.vendor.Qt.QtWebKitWidgets import QWebView
+import syncsketchGUI.lib.user as user
+from syncsketchGUI.vendor.Qt import QtCore
+from syncsketchGUI.lib.gui import qt_utils
+
 logger = logging.getLogger(__name__)
 
 class WebLoginWindow(QWebView):
@@ -23,7 +24,6 @@ class WebLoginWindow(QWebView):
 
         self.setMaximumSize(650, 600)
 
-        # self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowTitle(self.window_label)
         self.setObjectName(self.window_name)
         self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.WindowStaysOnTopHint)
@@ -49,6 +49,7 @@ class WebLoginWindow(QWebView):
                 jsonData = self.page().mainFrame().evaluateJavaScript(command)
                 if isinstance(jsonData, unicode):
                     tokenData = json.loads(jsonData)
+                    logger.warning("tokenData: {0}".format(tokenData))
                     self.current_user.set_name(tokenData["email"])
                     # todo we should remove api_key
                     self.current_user.set_token(tokenData["token"])
@@ -60,16 +61,11 @@ class WebLoginWindow(QWebView):
                     logger.info("sleeping")
                     time.sleep(0.1)
             self.close()
-            self.update_login_ui()
-            self.populate_review_panel()
+            self.parent.update_login_ui()
+            self.parent.populate_review_panel()
 
 
 
     def _myBindingFunction(self):
         self.page().mainFrame().loadFinished.connect(self.changed)
         self.page().mainFrame().urlChanged.connect(self.changed)
-
-
-    def _plot(self):
-        command =('return getTokenData()')
-        me = self.page().mainFrame().evaluateJavaScript(command)

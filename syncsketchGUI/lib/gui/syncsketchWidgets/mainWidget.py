@@ -1,8 +1,26 @@
 import logging
 import os
+import webbrowser
+from syncsketchGUI.vendor.Qt import QtCore, QtGui, QtWidgets
 logger = logging.getLogger(__name__)
-from lib import video, user, database
-from syncsketchGUI.lib.gui.qt_widgets import SyncSketch_Window
+from syncsketchGUI.lib import video, user, database
+from syncsketchGUI.lib.gui.qt_widgets import *
+from syncsketchGUI.lib.gui.qt_utils import *
+from syncsketchGUI.lib.maya import scene as maya_scene
+from syncsketchGUI.lib.connection import is_connected, open_url
+from syncsketchGUI.gui import  _maya_delete_ui, show_download_window
+from syncsketchGUI.lib.gui.syncsketchWidgets.webLoginWidget import WebLoginWindow
+import syncsketchGUI
+from syncsketchGUI.gui import OpenPlayer
+#todo: create helper class
+from syncsketchGUI.gui import parse_url_data, get_current_item_from_ids, set_tree_selection, update_target_from_tree
+from syncsketchGUI.lib.gui.icons import _get_qicon
+from syncsketchGUI.lib.gui.literals import DEFAULT_VIEWPORT_PRESET, PRESET_YAML, VIEWPORT_YAML, DEFAULT_PRESET, uploadPlaceHolderStr, message_is_not_loggedin, message_is_not_connected
+
+
+
+
+USER_ACCOUNT_DATA = None
 
 class MenuWindow(SyncSketch_Window):
     """
@@ -18,7 +36,7 @@ class MenuWindow(SyncSketch_Window):
         self.setMaximumSize(700, 650)
         self.decorate_ui()
         self.build_connections()
-        populate_review_panel(self, force=True)
+        self.populate_review_panel(self, force=True)
 
         # Load UI state
         self.restore_ui_state()
@@ -71,31 +89,18 @@ class MenuWindow(SyncSketch_Window):
             # Playblast Settings
             'ps_directory_lineEdit':
                 self.sanitize(self.ui.ps_directory_lineEdit.text()),
-
             'ps_clipname_lineEdit':
                 self.sanitize(self.ui.ps_clipname_lineEdit.text()),
-
             'current_range_type':
                 self.ui.ui_range_comboBox.currentText(),
-
-            # 'ps_force_overwrite_checkBox':
-            #     'true' if self.ui.ps_force_overwrite_checkBox.isChecked() else 'false',
-
             'ps_play_after_creation_checkBox':
                 self.bool_to_str( self.ui.ps_play_after_creation_checkBox.isChecked() ),
-
             'ps_upload_after_creation_checkBox':
                 self.bool_to_str( self.ui.ps_upload_after_creation_checkBox.isChecked() ),
-
-
             'us_filename_lineEdit':
                 self.ui.us_filename_lineEdit.text(),
-
-
             'ps_open_afterUpload_checkBox':
                 self.bool_to_str( self.ui.ps_open_afterUpload_checkBox.isChecked() )}
-
-
         database.dump_cache(ui_setting)
 
 
@@ -103,12 +108,14 @@ class MenuWindow(SyncSketch_Window):
         strVal = 'true' if val else 'false'
         return strVal
 
+
     def sanitize(self, val):
         return val.rstrip().lstrip()
 
 
     def clear_ui_setting(self):
         database.dump_cache('clear')
+
 
     def build_connections(self):
         # Menu Bar
@@ -159,16 +166,11 @@ class MenuWindow(SyncSketch_Window):
 
 
     def decorate_ui(self):
-
-
-        # Playblast Settings
         file_icon = self.style().standardIcon(QtWidgets.QStyle.SP_FileIcon)
-
         directory_icon = self.style().standardIcon(QtWidgets.QStyle.SP_DirIcon)
 
         # Row 1
         # Setting up Main Layout
-
         indent = 9
         self.ui.master_layout.setSpacing(0)
         self.ui.ui_login_layout = QtWidgets.QHBoxLayout()
@@ -228,7 +230,6 @@ class MenuWindow(SyncSketch_Window):
 
         # - buttons for opening and copying to clipboard
         # - tree wdget
-
         self.ui.ui_treeWidget_layout = QtWidgets.QVBoxLayout()
 
         self.ui.browser_treeWidget = QtWidgets. QTreeWidget()
@@ -468,10 +469,10 @@ class MenuWindow(SyncSketch_Window):
     def disconnect_account(self):
         self.current_user.logout()
         self.isloggedIn(self)
-        populate_review_panel(self,  force=True)
+        self.populate_review_panel(self,  force=True)
 
     def refresh(self):
-        populate_review_panel(self, force=True)
+        self.populate_review_panel(self, force=True)
         self.repaint()
 
     def open_target_url(self):
@@ -581,11 +582,9 @@ class MenuWindow(SyncSketch_Window):
     def open_support(self):
         webbrowser.open(path.support_url)
 
+
     def open_contact(self):
         webbrowser.open(path.contact_url)
-
-    # def open_terms_of_service(self):
-    #     webbrowser.open(path.terms_url)
 
     def open_landing(self):
         webbrowser.open(path.home_url)
@@ -709,13 +708,6 @@ class MenuWindow(SyncSketch_Window):
         # store current preset since subsequent calls will use that data exclusively
         # savedata
         self.save_ui_state()
-
-        if not MAYA:
-            title = 'Maya Only Function'
-            message = 'Recording is not yet functional outside of Maya.'
-            WarningDialog(self.parent_ui, title, message)
-            return
-
         recordData = syncsketchGUI.record()
         playblast_file = recordData["playblast_file"]
         if not playblast_file:
@@ -853,7 +845,6 @@ class MenuWindow(SyncSketch_Window):
         self.validate_review_url()
         show_download_window()
         return
-        # review_id = item_data.get('id')
 
 
 
@@ -887,14 +878,14 @@ class MenuWindow(SyncSketch_Window):
         else:
             message = message_is_not_loggedin
             self.ui.ui_status_label.update(message, color=error_color)
-        update_login_ui(self)
+        self.update_login_ui()
 
 
     # Tree Function
     def populate_review_panel(self, playground_only = False, item_to_add = None, force = False):
         if not is_connected():
             self.ui.ui_status_label.update(message_is_not_connected, color=error_color)
-            self.isloggedIn(self,loggedIn=False)
+            self.isloggedIn(loggedIn=False)
             logger.info("\nNot connected to SyncSketch ...")
             return
 
@@ -909,10 +900,10 @@ class MenuWindow(SyncSketch_Window):
             logger.info("Updating Account Data ...")
 
 
-        self.isloggedIn(self, self.current_user.is_logged_in())
+        self.isloggedIn(self.current_user.is_logged_in())
+
 
         global USER_ACCOUNT_DATA
-
         if USER_ACCOUNT_DATA and not force:
             account_data =  USER_ACCOUNT_DATA
 
@@ -954,7 +945,7 @@ class MenuWindow(SyncSketch_Window):
 
         # Add account
         for account in account_data:
-            account_treeWidgetItem = _build_widget_item(   parent = self.ui.browser_treeWidget,
+            account_treeWidgetItem = self._build_widget_item(   parent = self.ui.browser_treeWidget,
                                                             item_name = account.get('name'),
                                                             item_type = 'account',
                                                             item_icon = account_icon,
@@ -962,7 +953,7 @@ class MenuWindow(SyncSketch_Window):
             # Add projects
             projects = account.get('projects')
             for project in projects:
-                project_treeWidgetItem = _build_widget_item(   parent = account_treeWidgetItem,
+                project_treeWidgetItem = self._build_widget_item(   parent = account_treeWidgetItem,
                                                                 item_name = project.get('name'),
                                                                 item_type = 'project',
                                                                 item_icon = project_icon,
@@ -970,7 +961,7 @@ class MenuWindow(SyncSketch_Window):
                 # Add reviews
                 reviews = project.get('reviews')
                 for review in reviews:
-                    review_treeWidgetItem = _build_widget_item(parent = project_treeWidgetItem,
+                    review_treeWidgetItem = self._build_widget_item(parent = project_treeWidgetItem,
                                                                 item_name = review.get('name'),
                                                                 item_type = 'review',
                                                                 item_icon = review_icon,
@@ -991,8 +982,7 @@ class MenuWindow(SyncSketch_Window):
                         else:
                             specified_media_icon = media_unknown_icon
 
-                        # specified_media_icon = icons._get_qicon_from_url(media.get('thumbnail_url'))
-                        media_treeWidgetItem = _build_widget_item( parent = review_treeWidgetItem,
+                        media_treeWidgetItem = self._build_widget_item( parent = review_treeWidgetItem,
                                                                     item_name = media.get('name'),
                                                                     item_type = 'media',
                                                                     item_icon = specified_media_icon,
@@ -1011,3 +1001,10 @@ class MenuWindow(SyncSketch_Window):
 
         self.populate_upload_settings()
         return account_data
+
+    def _build_widget_item(self, parent, item_name, item_type, item_icon, item_data):
+        treewidget_item = QtWidgets.QTreeWidgetItem(parent, [item_name])
+        treewidget_item.setData(1, QtCore.Qt.EditRole, item_data)
+        treewidget_item.setData(2, QtCore.Qt.EditRole, item_type)
+        treewidget_item.setIcon(0, item_icon)
+        return treewidget_item

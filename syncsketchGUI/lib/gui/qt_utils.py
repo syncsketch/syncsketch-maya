@@ -1,5 +1,4 @@
-
-
+from syncsketchGUI.vendor.Qt import QtWidgets, QtCore, QtGui
 
 class suppressedUI():
     def __init__(self, ui):

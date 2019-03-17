@@ -27,7 +27,7 @@ yaml_file = 'syncsketch_user.yaml'
 # ======================================================================
 # Module Utilities
 
-    
+
 def _merge_dictionaries(*dictionaries):
     '''
     Given any number of dicts, shallow copy and merge into a new dict,
@@ -44,23 +44,23 @@ def _set_to_yaml_user(key, value):
     Set the given dictionary to the user's local yaml file
     '''
     yaml_path = path.get_config_yaml(yaml_file)
-    
+
     if not os.path.isfile(yaml_path):
         yaml_path = open(yaml_path, 'w')
-    
+
     existing_data = dict()
     user_data = {str(key) : str(value)}
-    
+
     if os.path.isfile(yaml_path):
         existing_data = database._parse_yaml(yaml_path)
-    
+
     if existing_data:
         user_data = _merge_dictionaries(existing_data, user_data)
-    
+
     with open(yaml_path, 'w') as outfile:
         new_data = yaml.dump(user_data, default_flow_style = False)
         outfile.write(new_data)
-    
+
 def _get_from_yaml_user(key):
     '''
     Get the given key's value from the user's local yaml file
@@ -68,7 +68,7 @@ def _get_from_yaml_user(key):
     yaml_path = path.get_config_yaml(yaml_file)
     if not os.path.isfile(yaml_path):
         return
-    
+
     user_data = database._parse_yaml(yaml_path)
     return user_data.get(key)
 

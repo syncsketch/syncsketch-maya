@@ -1,3 +1,12 @@
+from syncsketchGUI.lib.gui.qt_widgets import SyncSketch_Window
+from syncsketchGUI.vendor.Qt import QtWidgets, QtCore
+from syncsketchGUI.lib.gui.icons import *
+from syncsketchGUI.lib.gui.icons import _get_qicon
+from syncsketchGUI.lib.gui.qt_widgets import *
+from syncsketchGUI.lib.gui.syncsketchWidgets.mainWidget import DEFAULT_PRESET, VIEWPORT_YAML, PRESET_YAML
+from syncsketchGUI.lib.maya import scene as maya_scene
+
+
 class ViewportPresetWindow(SyncSketch_Window):
     """
     Video Preset Window Class
@@ -10,9 +19,7 @@ class ViewportPresetWindow(SyncSketch_Window):
         self.decorate_ui()
         self.build_connections()
         self.populate_ui()
-
-        if MAYA:
-            self.build_screenshot()
+        self.build_screenshot()
 
 
     def decorate_ui(self):
@@ -73,6 +80,7 @@ class ViewportPresetWindow(SyncSketch_Window):
         self.ui.master_layout.addLayout(self.ui.buttons_horizontalLayout)
 
     def build_connections(self):
+        """Connects all widget's callbacks"""
         self.ui.ps_refresh_pushButton.clicked.connect(self.build_screenshot)
         self.ui.screenshot_pushButton.clicked.connect(self.build_screenshot)
         self.ui.ui_thumbcamera_label.clicked.connect(self.build_screenshot)
@@ -86,6 +94,7 @@ class ViewportPresetWindow(SyncSketch_Window):
 
 
     def new_preset(self, new_preset_name = None):
+        """Create a new preset"""
         title = 'Creating Preset'
         message = 'Please choose a name for this preset.'
         user_input = InputDialog(self, title, message)
@@ -117,7 +126,6 @@ class ViewportPresetWindow(SyncSketch_Window):
     def rename_preset(self, preset_name=None, new_preset_name=None):
         title = 'Renaming Preset'
         message = 'Please choose a name for this preset.'
-        # user_input = InputDialog(self, title, message)
         current_preset = self.ui.ui_viewportpreset_comboBox.currentText()
         new_preset_name, response =  QtWidgets.QInputDialog.getText(self, "Rename this preset",  "Please enter a new Name:", QtWidgets.QLineEdit.Normal, current_preset )
         logger.info(new_preset_name)

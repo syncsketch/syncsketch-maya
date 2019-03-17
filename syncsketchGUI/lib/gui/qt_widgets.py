@@ -4,28 +4,14 @@ from syncsketchGUI.lib.gui.icons import *
 from syncsketchGUI.vendor.Qt import QtCore
 from syncsketchGUI.vendor.Qt import QtGui
 from syncsketchGUI.vendor.Qt import QtWidgets
+from syncsketchGUI.lib.connection import is_connected
 
 from syncsketchGUI.lib import database
 import syncsketchGUI.lib.user as user
 import logging
 logger = logging.getLogger(__name__)
 
-# class BrowserDialog(QtWidgets.QFileDialog):
-#     """
-#     Customized file browser dialog
-#     """
-#     selected_file = None
-#
-#     def __init__(self):
-#         super(BrowserDialog, self).__init__()
-#         self.build_connections()
-#
-#     def build_connections(self):
-#         self.fileSelected.connect(self.set_selected_file)
-#
-#     def set_selected_file(self):
-#         self.selected_file = self.selectedFiles()
-#
+
 class WarningDialog(QtWidgets.QMessageBox):
     """
     Customized modal dialog to be used for warnings.
@@ -68,6 +54,7 @@ class StatusDialog(QtWidgets.QMessageBox):
         self.setWindowTitle('title')
         self.setText('message')
         self.exec_()
+
 
 class RegularThumbnail(QtWidgets.QPushButton):
 
@@ -191,15 +178,16 @@ class RegularGridLayout(QtWidgets.QGridLayout):
         self.label = QtWidgets.QLabel(label)
         self.addWidget(self.label,  0, 0)
         self.setColumnMinimumWidth(0,90)
-        # self.setColumnMinimumWidth(1,200)
         self.setColumnStretch(0,0)
         self.setColumnStretch(1,1)
         self.setSpacing(2)
+
 
 class RegularQSpinBox(QtWidgets.QSpinBox):
     def __init__(self, parent=None):
         QtWidgets.QSpinBox.__init__(self, parent=parent)
         self.setButtonSymbols(self.NoButtons)
+
 
 class RegularComboBox(QtWidgets.QComboBox):
     def __init__(self, parent=None, color ='white'):
@@ -210,6 +198,7 @@ class RegularComboBox(QtWidgets.QComboBox):
         self.hoverColor = button_color_hover
         self.setMouseTracking(True)
 
+
     def set_combobox_index(self, selection=None, default=None):
         if selection:
             index = self.findText(selection)
@@ -219,6 +208,7 @@ class RegularComboBox(QtWidgets.QComboBox):
             self.set_combobox_index(selection=default)
         else:
             self.setCurrentIndex(0)
+
 
     def populate_combo_list(self, file, defaultValue=None, currentValue='current preset'):
         combo_file = path.get_config_yaml(file)
@@ -326,8 +316,8 @@ class SyncSketch_Window(QtWidgets.QMainWindow):
         logger.info("Closing Synsketch GUI Window")
         self.close()
 
+
     def update_login_ui(self):
-        #user Login
         self.current_user = user.SyncSketchUser()
         if self.current_user.is_logged_in() and is_connected():
             username = self.current_user.get_name()
