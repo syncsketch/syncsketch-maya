@@ -29,7 +29,7 @@ class WebLoginWindow(QWebView):
         self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.WindowStaysOnTopHint)
 
         self.load(QtCore.QUrl("https://syncsketch.com/login/?next=/users/getToken/&simple=1"))
-
+ 
         self.show()
         self.activateWindow()
         self._myBindingFunction()

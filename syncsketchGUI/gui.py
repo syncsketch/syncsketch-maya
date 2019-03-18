@@ -53,7 +53,6 @@ except ImportError:
     MAYA = False
 
 
-
 STANDALONE = False
 
 

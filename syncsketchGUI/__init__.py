@@ -22,7 +22,7 @@ formatter = logging.Formatter('[%(asctime)s - %(filename)s:%(lineno)s - %(leveln
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 # prevent logging from bubbling up to maya's logger
-logger.propagate=0
+logger.propagate = 0
 
 
 # ======================================================================
@@ -136,7 +136,6 @@ def get_current_file():
 
 
 def show_success_message(uploaded_item):
-
     title = 'Upload Successful'
     info_message = 'Your file has successfully been uploaded. Please follow this link:'
 

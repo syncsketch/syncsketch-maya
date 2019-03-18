@@ -1,5 +1,6 @@
 import logging
 import os
+import time
 import webbrowser
 from syncsketchGUI.vendor.Qt import QtCore, QtGui, QtWidgets
 logger = logging.getLogger(__name__)
@@ -22,6 +23,21 @@ from syncsketchGUI.lib.gui.literals import DEFAULT_VIEWPORT_PRESET, PRESET_YAML,
 
 USER_ACCOUNT_DATA = None
 
+class Worker(QtCore.QRunnable):
+    '''
+    Worker thread
+    '''
+
+    @QpyqtSlot()
+    def run(self):
+        '''
+        Your code goes in this function
+        '''
+        print("Thread start")
+        time.sleep(10)
+        print("Thread complete")
+
+
 class MenuWindow(SyncSketch_Window):
     """
     Main browser window of the syncsketchGUI services
@@ -33,14 +49,19 @@ class MenuWindow(SyncSketch_Window):
 
     def __init__(self, parent):
         super(MenuWindow, self).__init__(parent=parent)
+        self.threadpool = QtCore.QThreadPool()
+        print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
+        worker = Worker()
+        self.threadpool.start(worker)
+
         self.setMaximumSize(700, 650)
         self.decorate_ui()
         self.build_connections()
-        self.populate_review_panel(self, force=True)
+        accountData = self.retrievePanelData()
+        self.populate_review_panel(self, account_data=accountData, force=True)
 
         # Load UI state
         self.restore_ui_state()
-
         self.update_login_ui()
 
 
@@ -885,7 +906,8 @@ class MenuWindow(SyncSketch_Window):
 
 
     # Tree Function
-    def populate_review_panel(self, playground_only = False, item_to_add = None, force = False):
+    def retrievePanelData(self):
+        begin = time.time()
         if not is_connected():
             self.ui.ui_status_label.update(message_is_not_connected, color=error_color)
             self.isloggedIn(loggedIn=False)
@@ -911,15 +933,6 @@ class MenuWindow(SyncSketch_Window):
             account_data =  USER_ACCOUNT_DATA
 
         else:
-            # todo: fix connection verification
-            # if not connection.is_connected():
-            #     message = 'WARNING: No Internet connection'
-            #     message += 'Please check your internet connection and try refreshing again.'
-            #     color = error_color
-            #     self.ui.ui_status_label.update(message, color)
-            #     return 'unconnected'
-            #
-            # else:
             try:
                 account_data = self.current_user.get_account_data()
 
@@ -945,10 +958,16 @@ class MenuWindow(SyncSketch_Window):
         if not account_data or type(account_data) is dict:
             logger.info("Error: No SyncSketch account data found.")
             return
-
+    
+        logger.info("Account preperation took: {0}".format(
+            time.time() - begin))
+        begin = time.time()
+        return account_data
         # Add account
+    
+    def populate_review_panel(self, account_data = None, item_to_add = None, force = False):
         for account in account_data:
-            account_treeWidgetItem = self._build_widget_item(   parent = self.ui.browser_treeWidget,
+            account_treeWidgetItem = self._build_widget_item(parent = self.ui.browser_treeWidget,
                                                             item_name = account.get('name'),
                                                             item_type = 'account',
                                                             item_icon = account_icon,
@@ -956,7 +975,7 @@ class MenuWindow(SyncSketch_Window):
             # Add projects
             projects = account.get('projects')
             for project in projects:
-                project_treeWidgetItem = self._build_widget_item(   parent = account_treeWidgetItem,
+                project_treeWidgetItem = self._build_widget_item(parent = account_treeWidgetItem,
                                                                 item_name = project.get('name'),
                                                                 item_type = 'project',
                                                                 item_icon = project_icon,
@@ -993,7 +1012,8 @@ class MenuWindow(SyncSketch_Window):
 
                         media_treeWidgetItem.sizeHint(80)
 
-        #ids = get_ids_from_link(database.read_cache('upload_to_value'))
+        logger.info("Time creating widgets: {0}".format(
+            time.time() - begin))
 
         logger.info("uploaded_to_value: {}".format(database.read_cache('upload_to_value')))
         url_payload = parse_url_data(database.read_cache('upload_to_value'))
@@ -1011,3 +1031,5 @@ class MenuWindow(SyncSketch_Window):
         treewidget_item.setData(2, QtCore.Qt.EditRole, item_type)
         treewidget_item.setIcon(0, item_icon)
         return treewidget_item
+
+
