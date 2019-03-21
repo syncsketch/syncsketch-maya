@@ -17,26 +17,10 @@ from syncsketchGUI.gui import OpenPlayer
 from syncsketchGUI.gui import parse_url_data, get_current_item_from_ids, set_tree_selection, update_target_from_tree
 from syncsketchGUI.lib.gui.icons import _get_qicon
 from syncsketchGUI.lib.gui.literals import DEFAULT_VIEWPORT_PRESET, PRESET_YAML, VIEWPORT_YAML, DEFAULT_PRESET, uploadPlaceHolderStr, message_is_not_loggedin, message_is_not_connected
-
-
+from syncsketchGUI.lib.async import Worker, WorkerSignals
 
 
 USER_ACCOUNT_DATA = None
-
-class Worker(QtCore.QRunnable):
-    '''
-    Worker thread
-    '''
-
-    @QpyqtSlot()
-    def run(self):
-        '''
-        Your code goes in this function
-        '''
-        print("Thread start")
-        time.sleep(10)
-        print("Thread complete")
-
 
 class MenuWindow(SyncSketch_Window):
     """
@@ -51,18 +35,111 @@ class MenuWindow(SyncSketch_Window):
         super(MenuWindow, self).__init__(parent=parent)
         self.threadpool = QtCore.QThreadPool()
         print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
-        worker = Worker()
-        self.threadpool.start(worker)
-
+        
         self.setMaximumSize(700, 650)
         self.decorate_ui()
         self.build_connections()
         accountData = self.retrievePanelData()
-        self.populate_review_panel(self, account_data=accountData, force=True)
+        print(accountData)
+        
 
         # Load UI state
         self.restore_ui_state()
         self.update_login_ui()
+        self.asyncPopulateTree()
+        
+
+        
+
+    def execute_this_fn(self, user):
+        begin = time.time()
+        # if not is_connected():
+        #     self.ui.ui_status_label.update(message_is_not_connected, color=error_color)
+        #     self.isloggedIn(loggedIn=False)
+        #     logger.info("\nNot connected to SyncSketch ...")
+        #     return
+
+        #user = user.SyncSketchUser()
+
+        # Always refresh Tree View
+        return
+        
+        
+
+        if not user.is_logged_in():
+            return
+        else:
+            pass
+            # logger.info("Updating Account Data ...")
+
+
+        #self.isloggedIn(user.is_logged_in())
+
+        try:
+            account_data = user.get_account_data()
+
+        except Exception, err:
+            account_data = None
+            # logger.info(u'%s' %(err))
+
+
+
+        finally:
+            if account_data:
+                account_is_connected = True
+                message = 'Connected and authorized with syncsketchGUI as "{}"'.format(user.get_name())
+                color = success_color
+            else:
+                account_is_connected = False
+                message = 'WARNING: Could not connect to SyncSketch. '
+                message += message_is_not_connected
+                color = error_color
+            try:
+                pass
+                #self.ui.ui_status_label.update(message, color)
+            except:
+                pass
+
+        if not account_data or type(account_data) is dict:
+            # logger.info("Error: No SyncSketch account data found.")
+            return
+
+        logger.info("Account preperation took: {0}".format(time.time() - begin))
+
+        return account_data
+
+    def print_output(self, s):
+        self.accountData = s
+
+    def thread_complete(self):
+        self.populate_review_panel(self.accountData, force=True)
+        print("Thread Complete")
+
+        
+    def fetchData(self, user):
+        if not user.is_logged_in():
+            return None
+
+        try:
+            account_data = user.get_account_data()
+
+        except Exception, err:
+            account_data = None
+            return None
+        
+        return account_data
+
+    def asyncPopulateTree(self):
+        '''
+        Create's async calls to to get user-data from the server
+        '''
+        self.ui.browser_treeWidget.clear()
+        #worker = Worker(self.fetchData, user.SyncSketchUser())
+        worker = Worker(self.fetchData, user.SyncSketchUser())
+        worker.signals.result.connect(self.print_output)
+        worker.signals.finished.connect(self.thread_complete)
+        # Execute
+        self.threadpool.start(worker)
 
 
 
@@ -965,7 +1042,11 @@ class MenuWindow(SyncSketch_Window):
         return account_data
         # Add account
     
-    def populate_review_panel(self, account_data = None, item_to_add = None, force = False):
+    def populate_review_panel(self, account_data=None, item_to_add = None, force = False):
+        if not account_data:
+            logging.info("No Accountdata found")
+            return
+        begin = time.time()
         for account in account_data:
             account_treeWidgetItem = self._build_widget_item(parent = self.ui.browser_treeWidget,
                                                             item_name = account.get('name'),
