@@ -39,74 +39,16 @@ class MenuWindow(SyncSketch_Window):
         self.setMaximumSize(700, 650)
         self.decorate_ui()
         self.build_connections()
-        accountData = self.retrievePanelData()
-        print(accountData)
+        #accountData = self.retrievePanelData()
+        #print(accountData)
         
 
         # Load UI state
         self.restore_ui_state()
         self.update_login_ui()
-        self.asyncPopulateTree()
+        self.asyncPopulateTree(withItems=False)
         
 
-        
-
-    def execute_this_fn(self, user):
-        begin = time.time()
-        # if not is_connected():
-        #     self.ui.ui_status_label.update(message_is_not_connected, color=error_color)
-        #     self.isloggedIn(loggedIn=False)
-        #     logger.info("\nNot connected to SyncSketch ...")
-        #     return
-
-        #user = user.SyncSketchUser()
-
-        # Always refresh Tree View
-        return
-        
-        
-
-        if not user.is_logged_in():
-            return
-        else:
-            pass
-            # logger.info("Updating Account Data ...")
-
-
-        #self.isloggedIn(user.is_logged_in())
-
-        try:
-            account_data = user.get_account_data()
-
-        except Exception, err:
-            account_data = None
-            # logger.info(u'%s' %(err))
-
-
-
-        finally:
-            if account_data:
-                account_is_connected = True
-                message = 'Connected and authorized with syncsketchGUI as "{}"'.format(user.get_name())
-                color = success_color
-            else:
-                account_is_connected = False
-                message = 'WARNING: Could not connect to SyncSketch. '
-                message += message_is_not_connected
-                color = error_color
-            try:
-                pass
-                #self.ui.ui_status_label.update(message, color)
-            except:
-                pass
-
-        if not account_data or type(account_data) is dict:
-            # logger.info("Error: No SyncSketch account data found.")
-            return
-
-        logger.info("Account preperation took: {0}".format(time.time() - begin))
-
-        return account_data
 
     def print_output(self, s):
         self.accountData = s
@@ -116,12 +58,12 @@ class MenuWindow(SyncSketch_Window):
         print("Thread Complete")
 
         
-    def fetchData(self, user):
+    def fetchData(self, withItems=False, user):
         if not user.is_logged_in():
             return None
 
         try:
-            account_data = user.get_account_data()
+            account_data = user.get_account_data(withItems=withItems)
 
         except Exception, err:
             account_data = None
@@ -129,13 +71,13 @@ class MenuWindow(SyncSketch_Window):
         
         return account_data
 
-    def asyncPopulateTree(self):
+    def asyncPopulateTree(self, withItems=False):
         '''
         Create's async calls to to get user-data from the server
         '''
         self.ui.browser_treeWidget.clear()
         #worker = Worker(self.fetchData, user.SyncSketchUser())
-        worker = Worker(self.fetchData, user.SyncSketchUser())
+        worker = Worker(self.fetchData, user.SyncSketchUser(), withItems=withItems)
         worker.signals.result.connect(self.print_output)
         worker.signals.finished.connect(self.thread_complete)
         # Execute
@@ -1071,7 +1013,8 @@ class MenuWindow(SyncSketch_Window):
                                                                 item_data = review)
                     # Add items
                     items = review.get('items')
-                    for media in items:
+                    #Create empty if no items found
+                    for media in items or []:
                         #add UUID of the review container to the media, so we can use it in itemdata
                         media['uuid'] = review['uuid']
                         if not media.get('type'):

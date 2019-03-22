@@ -189,7 +189,7 @@ class SyncSketchUser():
         self.set_token('')
 
 
-    def get_account_data(self, match_user_with_os = False):
+    def get_account_data(self, match_user_with_os = False, withItems=False):
         self.auto_login()
 
         if not self.host_data:
@@ -208,7 +208,7 @@ class SyncSketchUser():
         account_data['media'] = list()
 
 
-        tree_data = self.host_data.getTree(withItems = True)
+        tree_data = self.host_data.getTree(withItems = withItems)
 
         #Return statement without indirection, pls remove
         return tree_data
