@@ -344,15 +344,13 @@ def update_target_from_tree(self, treeWidget):
         current_data['target_url'] = '{0}{1}#{2}'.format(review_base_url, item_data.get('uuid'), item_data.get('id'))
         logger.info(current_data['target_url'])
 
-    if selected_item.text(0) == 'Playground':
-        current_data['upload_to_value'] = 'Playground'
-    else:
-        while selected_item.parent():
-            current_data['breadcrumb'] = ' > '.join([selected_item.text(0), current_data['upload_to_value']])
-            selected_item = selected_item.parent()
 
-        if current_data['breadcrumb'].split(' > ')[-1] == '':
-            current_data['breadcrumb'] = current_data['upload_to_value'].rsplit(' > ', 1)[0]
+    while selected_item.parent():
+        current_data['breadcrumb'] = ' > '.join([selected_item.text(0), current_data['upload_to_value']])
+        selected_item = selected_item.parent()
+
+    if current_data['breadcrumb'].split(' > ')[-1] == '':
+        current_data['breadcrumb'] = current_data['upload_to_value'].rsplit(' > ', 1)[0]
 
 
     database.dump_cache({'breadcrumb': current_data['breadcrumb']})
