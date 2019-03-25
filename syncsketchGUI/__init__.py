@@ -195,7 +195,6 @@ def downloadVideo(current_user = None):
 def record(upload_after_creation = None, play_after_creation = None,  show_success_msg = True):
     # This a wrapper function and if called individually should mirror all the same effect as hitting 'record' in the UI
     recordData = {}
-
     recordData["playblast_file"] = _record()
 
     # Post actions
@@ -250,37 +249,26 @@ def _record():
     recArgs = {
             "show_ornaments":
                 False,
-
             "start_frame":
                 start_frame,
-
             "end_frame":
                 end_frame,
-
             "camera":
                 database.read_cache('selected_camera'),
-
             "format":
                 preset.get('format'),
-
             "viewer":
                 True if database.read_cache('ps_play_after_creation_checkBox') == 'true' else False,
-
             "filename":
                 filepath,
-
             "width":
                 preset.get('width'),
-
             "height":
                 preset.get('height'),
-
             "overwrite":
                 True if database.read_cache('ps_force_overwrite_checkBox') == 'true' else False,
-
             "compression":
                 preset.get('encoding'),
-
             "off_screen":
                 True
     }
@@ -304,7 +292,6 @@ def _upload(current_user = None, ):
 
     #todo remove this
     if not upload_file or not os.path.isfile(upload_file):
-        self.update_tooltip('WebM file cannot be sourced. Uploading the original file.', color='LightYellow')
         return
 
     # Try to upload to the last uploaded address first

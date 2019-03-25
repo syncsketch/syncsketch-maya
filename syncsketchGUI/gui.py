@@ -321,8 +321,6 @@ def update_target_from_tree(self, treeWidget):
     current_data['name'] = item_data.get('name')
 
 
-
-
     if item_type == 'project':
         review_url = '{}{}'.format(path.project_url, item_data.get('id'))
         #todo: is there a shorter way?

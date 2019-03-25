@@ -46,11 +46,13 @@ def _set_to_yaml_user(key, value):
     yaml_path = path.get_config_yaml(yaml_file)
 
     if not os.path.isfile(yaml_path):
-        yaml_path = open(yaml_path, 'w')
+        open(yaml_path, 'w')
 
     existing_data = dict()
     user_data = {str(key) : str(value)}
-
+    logging.warning("yamlpath: {} ".format(yaml_path))
+    logging.warning("userdata: {} ".format(user_data))
+    
     if os.path.isfile(yaml_path):
         existing_data = database._parse_yaml(yaml_path)
 

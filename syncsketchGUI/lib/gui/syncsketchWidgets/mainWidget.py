@@ -39,29 +39,31 @@ class MenuWindow(SyncSketch_Window):
         self.setMaximumSize(700, 650)
         self.decorate_ui()
         self.build_connections()
-        #accountData = self.retrievePanelData()
-        #print(accountData)
+        accountData = self.retrievePanelData()
+        logger.info(accountData)
         
 
         # Load UI state
         self.restore_ui_state()
         self.update_login_ui()
-        self.asyncPopulateTree(withItems=False)
+
+        #Populate Treewidget sparse
+        #self.asyncPopulateTree(withItems=False)
+        #Populate Treewidget with all items
+        #self.asyncPopulateTree(withItems=True)
         
 
-
-    def print_output(self, s):
+    def storeAccountData(self, s):
         self.accountData = s
 
-    def thread_complete(self):
+    def populateReviewPanel(self):
+        self.ui.browser_treeWidget.clear()
         self.populate_review_panel(self.accountData, force=True)
         print("Thread Complete")
 
-        
-    def fetchData(self, withItems=False, user):
+    def fetchData(self, user, withItems=False):
         if not user.is_logged_in():
             return None
-
         try:
             account_data = user.get_account_data(withItems=withItems)
 
@@ -75,22 +77,19 @@ class MenuWindow(SyncSketch_Window):
         '''
         Create's async calls to to get user-data from the server
         '''
-        self.ui.browser_treeWidget.clear()
-        #worker = Worker(self.fetchData, user.SyncSketchUser())
         worker = Worker(self.fetchData, user.SyncSketchUser(), withItems=withItems)
-        worker.signals.result.connect(self.print_output)
-        worker.signals.finished.connect(self.thread_complete)
+        worker.signals.result.connect(self.storeAccountData)
+        worker.signals.finished.connect(self.populateReviewPanel)
         # Execute
         self.threadpool.start(worker)
-
 
 
     def closeEvent(self, event):
         self.save_ui_state()
         event.accept()
 
-    def restore_ui_state(self):
 
+    def restore_ui_state(self):
         # Playblast Settings
         value = self.sanitize(database.read_cache('ps_directory_lineEdit'))
         self.ui.ps_directory_lineEdit.setText(
@@ -511,7 +510,7 @@ class MenuWindow(SyncSketch_Window):
     def disconnect_account(self):
         self.current_user.logout()
         self.isloggedIn(self)
-        self.populate_review_panel(self,  force=True)
+        #self.populate_review_panel(self,  force=True)
 
     def refresh(self):
         logging.info("Header clicked")
@@ -613,9 +612,11 @@ class MenuWindow(SyncSketch_Window):
     # Menu Item Functions
 
     def connect_account(self):
+        
         if is_connected():
             _maya_delete_ui(WebLoginWindow.window_name)
-            weblogin_window = WebLoginWindow(self)
+            print(self)
+            weblogin_window = WebLoginWindow(None)
 
         else:
             title = 'Not able to reach SyncSketch'
@@ -947,32 +948,32 @@ class MenuWindow(SyncSketch_Window):
         self.isloggedIn(self.current_user.is_logged_in())
 
 
-        global USER_ACCOUNT_DATA
-        if USER_ACCOUNT_DATA and not force:
-            account_data =  USER_ACCOUNT_DATA
+        # global USER_ACCOUNT_DATA
+        # if USER_ACCOUNT_DATA and not force:
+        #     account_data =  USER_ACCOUNT_DATA
 
-        else:
+        # else:
+        try:
+            account_data = self.current_user.get_account_data()
+
+        except Exception, err:
+            account_data = None
+            logger.info(u'%s' %(err))
+
+        finally:
+            if account_data:
+                account_is_connected = True
+                message = 'Connected and authorized with syncsketchGUI as "{}"'.format(self.current_user.get_name())
+                color = success_color
+            else:
+                account_is_connected = False
+                message = 'WARNING: Could not connect to SyncSketch. '
+                message += message_is_not_connected
+                color = error_color
             try:
-                account_data = self.current_user.get_account_data()
-
-            except Exception, err:
-                account_data = None
-                logger.info(u'%s' %(err))
-
-            finally:
-                if account_data:
-                    account_is_connected = True
-                    message = 'Connected and authorized with syncsketchGUI as "{}"'.format(self.current_user.get_name())
-                    color = success_color
-                else:
-                    account_is_connected = False
-                    message = 'WARNING: Could not connect to SyncSketch. '
-                    message += message_is_not_connected
-                    color = error_color
-                try:
-                    self.ui.ui_status_label.update(message, color)
-                except:
-                    pass
+                self.ui.ui_status_label.update(message, color)
+            except:
+                pass
 
         if not account_data or type(account_data) is dict:
             logger.info("Error: No SyncSketch account data found.")
@@ -989,6 +990,7 @@ class MenuWindow(SyncSketch_Window):
             logging.info("No Accountdata found")
             return
         begin = time.time()
+        logging.warning(account_data)
         for account in account_data:
             account_treeWidgetItem = self._build_widget_item(parent = self.ui.browser_treeWidget,
                                                             item_name = account.get('name'),
