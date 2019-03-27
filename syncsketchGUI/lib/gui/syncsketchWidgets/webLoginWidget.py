@@ -62,7 +62,10 @@ class WebLoginWindow(QWebView):
                     time.sleep(0.1)
             self.close()
             self.parent.update_login_ui()
-            self.parent.populate_review_panel()
+            #todo: turn this into a signal
+            self.parent.asyncPopulateTree(withItems=False)
+            self.parent.asyncPopulateTree(withItems=True)
+
 
 
 

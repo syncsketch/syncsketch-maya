@@ -38,32 +38,11 @@ import logging
 logger = logging.getLogger(__name__)
 
 from lib.gui.syncsketchWidgets.webLoginWidget import WebLoginWindow
+from lib.gui.qt_widgets import OpenPlayer
+import maya.cmds as cmds
 
-# ======================================================================
-# Environment Detection
-
-PLATFORM = platform.system()
-BINDING = QtCompat.__binding__
-
-try:
-    from maya import cmds
-    import maya.mel as mel
-    MAYA = True
-except ImportError:
-    MAYA = False
-
-
-STANDALONE = False
-
-
-# ======================================================================
-# Global Variables
 
 PALETTE_YAML = 'syncsketch_palette.yaml'
-
-WAIT_TIME = 0.00 # seconds
-
-
 
 # ======================================================================
 # DCC application helper functions
@@ -97,21 +76,6 @@ def _maya_web_window():
 # ======================================================================
 # Module Utilities
 
-def _call_ui_for_standalone(ui_object):
-    app = QtWidgets.QApplication(sys.argv)
-    app_ui = ui_object(None)
-
-    if not PLATFORM == 'Darwin' and BINDING == 'PySide' or BINDING == 'PyQt4':
-        palette_file = path.get_config_yaml(PALETTE_YAML)
-        style_data = database._parse_yaml(palette_file)
-        mayapalette.set_palette_from_dict(style_data)
-        mayapalette.set_style()
-        mayapalette.set_maya_tweaks()
-
-    app_ui.show()
-    sys.exit(app.exec_())
-    return app_ui
-
 def _call_ui_for_maya(ui_object):
     app_ui = ui_object(parent = _maya_main_window())
     app_ui.show()
@@ -121,44 +85,6 @@ def _call_web_ui_for_maya(ui_object):
     app_ui = ui_object(parent=_maya_web_window())
     app_ui.show()
     return app_ui
-
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = Window()
-    window.show()
-    sys.exit(app.exec_())
-# ======================================================================
-# Module Classes
-
-class OpenPlayer(QWebView):
-    """
-    Login Window Class
-    """
-    window_name = 'Login'
-    window_label = 'Login to SyncSketch'
-
-    def __init__(self, parent, url='https://syncsketch.com/pro'):
-        super(OpenPlayer, self).__init__(parent)
-
-        self.parent = parent
-        self.current_user = user.SyncSketchUser()
-
-
-        self.setWindowTitle(self.window_label)
-        self.setObjectName(self.window_name)
-        self.setWindowFlags(QtCore.Qt.Window)
-
-        self.load(QtCore.QUrl(url))
-
-
-        self.show()
-        self.activateWindow()
-        self._myBindingFunction()
-        qt_utils.align_to_center(self, self.parent)
-
-        self.setProperty('saveWindowPref', True)
 
 
 def set_tree_selection(tree, id):
@@ -281,24 +207,6 @@ def get_ids_from_link(link = database.read_cache('upload_to_value')):
     return link.split('/')[-1].split('#')
 
 
-def confirm_upload_to_playground():
-    title = 'Confirm Upload'
-    message = 'The file will be uploaded to the Playground.'
-    info_message = 'Everyone with the link can view your upload.'
-
-    confirm_dialog = QtWidgets.QMessageBox()
-    confirm_dialog.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
-    confirm_dialog.setText(message + '\n' + info_message)
-    confirm_dialog.setDefaultButton(QtWidgets.QMessageBox.Ok)
-    confirm_dialog.setIcon(QtWidgets.QMessageBox.Question)
-    confirm_dialog.setWindowTitle(title)
-
-    response = confirm_dialog.exec_()
-
-    if response == QtWidgets.QMessageBox.Ok:
-        return True
-
-
 
 # tree function
 def update_target_from_tree(self, treeWidget):
@@ -415,7 +323,6 @@ def show_syncsketch_browser_window():
 
     _maya_delete_ui(SyncSketchBrowserWindow.window_name)
     app = _call_ui_for_maya(SyncSketchBrowserWindow)
-    time.sleep(WAIT_TIME)
     panel_is_populated = populate_review_panel(app)
 
 

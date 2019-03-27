@@ -1,11 +1,10 @@
-
 from syncsketchGUI.lib.gui import icons
 from syncsketchGUI.lib.gui.icons import *
 from syncsketchGUI.vendor.Qt import QtCore
 from syncsketchGUI.vendor.Qt import QtGui
 from syncsketchGUI.vendor.Qt import QtWidgets
 from syncsketchGUI.lib.connection import is_connected
-
+from syncsketchGUI.vendor.Qt.QtWebKitWidgets import QWebView
 from syncsketchGUI.lib import database
 import syncsketchGUI.lib.user as user
 import logging
@@ -318,6 +317,9 @@ class SyncSketch_Window(QtWidgets.QMainWindow):
 
 
     def update_login_ui(self):
+        '''
+        Updates the UI based on whether the user is logged in
+        '''
         self.current_user = user.SyncSketchUser()
         if self.current_user.is_logged_in() and is_connected():
             username = self.current_user.get_name()
@@ -327,10 +329,35 @@ class SyncSketch_Window(QtWidgets.QMainWindow):
             self.ui.signup_pushButton.hide()
             self.ui.logout_pushButton.show()
         else:
-            # self.ui.ui_login_label.setText("You're not logged in")
-            # self.ui.logged_in_groupBox.hide()
             self.ui.ui_login_label.setText("You are not logged into SyncSketch")
             self.ui.ui_login_label.setStyleSheet("color: white; font-size: 11px;")
             self.ui.login_pushButton.show()
             self.ui.signup_pushButton.show()
             self.ui.logout_pushButton.hide()
+
+
+class OpenPlayer(QWebView):
+    """
+    Login Window Class
+    """
+    window_name = 'Login'
+    window_label = 'Login to SyncSketch'
+
+    def __init__(self, parent, url='https://syncsketch.com/pro'):
+        super(OpenPlayer, self).__init__(parent)
+
+        self.parent = parent
+        self.current_user = user.SyncSketchUser()
+
+        self.setWindowTitle(self.window_label)
+        self.setObjectName(self.window_name)
+        self.setWindowFlags(QtCore.Qt.Window)
+
+        self.load(QtCore.QUrl(url))
+
+        self.show()
+        self.activateWindow()
+        self._myBindingFunction()
+        qt_utils.align_to_center(self, self.parent)
+
+        self.setProperty('saveWindowPref', True)

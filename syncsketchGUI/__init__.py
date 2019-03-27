@@ -56,8 +56,6 @@ VIEWPORT_PRESET_YAML = 'syncsketch_viewport.yaml'
 # ======================================================================
 # Module Functions
 
-def show_login_dialog():
-    gui.show_login_dialog()
 
 def show_web_login_window():
     gui.show_web_login_window()
@@ -228,7 +226,7 @@ def _record():
     if not filepath or not filename:
         title = 'Playblast Location'
         message = 'Please specify playblast file name and location.'
-        qt_widgets.WarningDialog(self.parent_ui, title, message)
+        qt_widgets.WarningDialog(None, title, message)
         filepath = os.path.expanduser('~/Desktop/playblasts/')
         filename = 'playblast'
     if clipname:
@@ -372,9 +370,6 @@ def _upload(current_user = None, ):
 
 
 def playblast_and_upload():
-    if not gui.confirm_upload_to_playground():
-        return
-
     filepath = maya_scene.playblast()
     if not filepath:
         return

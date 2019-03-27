@@ -1,3 +1,5 @@
+
+
 import logging
 import os
 import time
@@ -19,7 +21,6 @@ from syncsketchGUI.lib.gui.icons import _get_qicon
 from syncsketchGUI.lib.gui.literals import DEFAULT_VIEWPORT_PRESET, PRESET_YAML, VIEWPORT_YAML, DEFAULT_PRESET, uploadPlaceHolderStr, message_is_not_loggedin, message_is_not_connected
 from syncsketchGUI.lib.async import Worker, WorkerSignals
 
-
 USER_ACCOUNT_DATA = None
 
 class MenuWindow(SyncSketch_Window):
@@ -34,13 +35,14 @@ class MenuWindow(SyncSketch_Window):
     def __init__(self, parent):
         super(MenuWindow, self).__init__(parent=parent)
         self.threadpool = QtCore.QThreadPool()
+        self.accountData = None
         print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
         
         self.setMaximumSize(700, 650)
         self.decorate_ui()
         self.build_connections()
-        accountData = self.retrievePanelData()
-        logger.info(accountData)
+        self.accountData = self.retrievePanelData()
+        logger.info(self.accountData)
         
 
         # Load UI state
@@ -48,36 +50,49 @@ class MenuWindow(SyncSketch_Window):
         self.update_login_ui()
 
         #Populate Treewidget sparse
-        #self.asyncPopulateTree(withItems=False)
+        self.asyncPopulateTree(withItems=False)
         #Populate Treewidget with all items
-        #self.asyncPopulateTree(withItems=True)
+        self.asyncPopulateTree(withItems=True)
         
 
     def storeAccountData(self, s):
+        logging.info(s)
         self.accountData = s
 
     def populateReviewPanel(self):
         self.ui.browser_treeWidget.clear()
-        self.populate_review_panel(self.accountData, force=True)
-        print("Thread Complete")
+        if self.accountData:
+            self.populate_review_panel(self.accountData, force=True)
+        else:
+            logger.warning("No Accountdata found")
 
-    def fetchData(self, user, withItems=False):
-        if not user.is_logged_in():
-            return None
+    def fetchData(self, user, logging=None, withItems=False):
+        '''
+        Meant to be called from a thread, access only local names
+        '''
         try:
             account_data = user.get_account_data(withItems=withItems)
+            if logging:
+                logging.warning('accountdata: '.format(account_data))
 
         except Exception, err:
-            account_data = None
+
             return None
-        
+    
         return account_data
 
     def asyncPopulateTree(self, withItems=False):
         '''
         Create's async calls to to get user-data from the server
+        Keyword Arguments: 
+        bool withItems -- gathers tree with or without leave items
         '''
-        worker = Worker(self.fetchData, user.SyncSketchUser(), withItems=withItems)
+        current_user = user.SyncSketchUser()
+        if not current_user.is_logged_in():
+                return
+                
+        worker = Worker(self.fetchData, current_user,
+                        logging=logging, withItems=withItems)
         worker.signals.result.connect(self.storeAccountData)
         worker.signals.finished.connect(self.populateReviewPanel)
         # Execute
@@ -510,11 +525,14 @@ class MenuWindow(SyncSketch_Window):
     def disconnect_account(self):
         self.current_user.logout()
         self.isloggedIn(self)
+        self.ui.browser_treeWidget.clear()
+        self.ui.ui_status_label.update('You have been successfully logged out', color=warning_color)
         #self.populate_review_panel(self,  force=True)
 
     def refresh(self):
         logging.info("Header clicked")
-        self.populate_review_panel(self, force=True)
+        #self.populate_review_panel(self, force=True)
+        self.asyncPopulateTree(withItems=True)
         self.repaint()
 
     def open_target_url(self):
@@ -615,8 +633,7 @@ class MenuWindow(SyncSketch_Window):
         
         if is_connected():
             _maya_delete_ui(WebLoginWindow.window_name)
-            print(self)
-            weblogin_window = WebLoginWindow(None)
+            weblogin_window = WebLoginWindow(self)
 
         else:
             title = 'Not able to reach SyncSketch'
@@ -935,15 +952,17 @@ class MenuWindow(SyncSketch_Window):
             return
 
         self.current_user = user.SyncSketchUser()
-
+        logger.warning("CurrentUser: {}".format(self.current_user))
+        logger.warning("isLoggedin: {}".format(self.current_user.is_logged_in()))
         # Always refresh Tree View
         self.ui.browser_treeWidget.clear()
 
-        if not self.current_user.is_logged_in():
-            return
+        if self.current_user.is_logged_in():
+            logger.info("User is logged in")
+            
         else:
-            logger.info("Updating Account Data ...")
-
+            logger.info("User is not logged in")
+            return
 
         self.isloggedIn(self.current_user.is_logged_in())
 
@@ -954,14 +973,14 @@ class MenuWindow(SyncSketch_Window):
 
         # else:
         try:
-            account_data = self.current_user.get_account_data()
+            self.account_data = self.current_user.get_account_data()
 
         except Exception, err:
-            account_data = None
-            logger.info(u'%s' %(err))
+            self.account_data = None
+            logger.info("err: {}".format(err))
 
         finally:
-            if account_data:
+            if self.account_data:
                 account_is_connected = True
                 message = 'Connected and authorized with syncsketchGUI as "{}"'.format(self.current_user.get_name())
                 color = success_color
@@ -975,19 +994,16 @@ class MenuWindow(SyncSketch_Window):
             except:
                 pass
 
-        if not account_data or type(account_data) is dict:
+        if not self.account_data or type(self.account_data) is dict:
             logger.info("Error: No SyncSketch account data found.")
             return
     
-        logger.info("Account preperation took: {0}".format(
-            time.time() - begin))
-        begin = time.time()
-        return account_data
-        # Add account
-    
+        logger.info("Account preperation took: {0}".format(time.time() - begin))
+        return self.account_data
+
     def populate_review_panel(self, account_data=None, item_to_add = None, force = False):
         if not account_data:
-            logging.info("No Accountdata found")
+            logging.info("No account_data found")
             return
         begin = time.time()
         logging.warning(account_data)
