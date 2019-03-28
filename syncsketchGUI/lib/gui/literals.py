@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-# @Author: yafes
-# @Date:   2019-03-16 21:46:51
-# @Last Modified by:   yafes
-# @Last Modified time: 2019-03-16 21:49:32
-
 from syncsketchGUI.lib import database
 
 PRESET_YAML = 'syncsketch_preset.yaml'

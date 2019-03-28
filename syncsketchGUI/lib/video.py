@@ -1,9 +1,3 @@
-# -*- coding: UTF-8 -*-
-# ======================================================================
-# @Author   : SyncSketch LLC
-# @Email    : dev@syncsketch.com
-# @Version  : 1.0.0
-# ======================================================================
 import datetime
 import json
 import os
