@@ -1,5 +1,3 @@
-
-
 import logging
 import os
 import time
@@ -37,13 +35,13 @@ class MenuWindow(SyncSketch_Window):
         self.threadpool = QtCore.QThreadPool()
         self.accountData = None
         print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
-        
+
         self.setMaximumSize(700, 650)
         self.decorate_ui()
         self.build_connections()
         self.accountData = self.retrievePanelData()
         logger.info(self.accountData)
-        
+
 
         # Load UI state
         self.restore_ui_state()
@@ -53,7 +51,7 @@ class MenuWindow(SyncSketch_Window):
         self.asyncPopulateTree(withItems=False)
         #Populate Treewidget with all items
         self.asyncPopulateTree(withItems=True)
-        
+
 
     def storeAccountData(self, s):
         logging.info(s)
@@ -74,23 +72,21 @@ class MenuWindow(SyncSketch_Window):
             account_data = user.get_account_data(withItems=withItems)
             if logging:
                 logging.warning('accountdata: '.format(account_data))
-
         except Exception, err:
-
             return None
-    
+
         return account_data
 
     def asyncPopulateTree(self, withItems=False):
         '''
         Create's async calls to to get user-data from the server
-        Keyword Arguments: 
+        Keyword Arguments:
         bool withItems -- gathers tree with or without leave items
         '''
         current_user = user.SyncSketchUser()
         if not current_user.is_logged_in():
                 return
-                
+
         worker = Worker(self.fetchData, current_user,
                         logging=logging, withItems=withItems)
         worker.signals.result.connect(self.storeAccountData)
@@ -630,7 +626,7 @@ class MenuWindow(SyncSketch_Window):
     # Menu Item Functions
 
     def connect_account(self):
-        
+
         if is_connected():
             _maya_delete_ui(WebLoginWindow.window_name)
             weblogin_window = WebLoginWindow(self)
@@ -959,7 +955,7 @@ class MenuWindow(SyncSketch_Window):
 
         if self.current_user.is_logged_in():
             logger.info("User is logged in")
-            
+
         else:
             logger.info("User is not logged in")
             return
@@ -997,7 +993,7 @@ class MenuWindow(SyncSketch_Window):
         if not self.account_data or type(self.account_data) is dict:
             logger.info("Error: No SyncSketch account data found.")
             return
-    
+
         logger.info("Account preperation took: {0}".format(time.time() - begin))
         return self.account_data
 

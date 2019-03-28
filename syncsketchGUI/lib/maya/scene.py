@@ -44,7 +44,7 @@ def get_available_compressions(format = None):
     return mel.eval(mel_command)
 
 def get_available_formats():
-    return cmds.playblast(query = True, format = True)
+    return cmds.playblast(query=True, format=True)
 
 def get_available_cameras():
     return cmds.listCameras()
@@ -113,7 +113,7 @@ def get_current_camera(panel=None):
                                     parent=True,
                                     fullPath=True)[0]
 
-def get_all_mdoelPanels():
+def get_all_modelPanels():
     return cmds.getPanel(type="modelPanel")
 
 def get_active_editor():
@@ -159,37 +159,6 @@ def get_InOutFrames(type = 'Time Slider'):
         pass
     return in_out
 
-
-
-def modifyXMLData(xmlFile, xmlFileSaved, offsetFrames):
-    tree = ET.parse(xmlFile)
-    root = tree.getroot()
-    for neighbor in root.iter('frame'):
-        current_frame = int(neighbor.attrib.get('time'))
-        neighbor.set('time', str(current_frame + offsetFrames))
-    tree.write(xmlFileSaved)
-
-
-def updateZip(zipname, filename, data):
-    # generate a temp file
-    tmpfd, tmpname = tempfile.mkstemp(dir=os.path.dirname(zipname))
-    os.close(tmpfd)
-
-    # create a temp copy of the archive without filename
-    with zipfile.ZipFile(zipname, 'r') as zin:
-        with zipfile.ZipFile(tmpname, 'w') as zout:
-            zout.comment = zin.comment  # preserve the comment
-            for item in zin.infolist():
-                if item.filename != filename:
-                    zout.writestr(item, zin.read(item.filename))
-
-    # replace with the temp archive
-    os.remove(zipname)
-    os.rename(tmpname, zipname)
-
-    # now add filename with its new data
-    with zipfile.ZipFile(zipname, mode='a', compression=zipfile.ZIP_DEFLATED) as zf:
-        zf.writestr(filename, data)
 
 
 def modifyGreasePencil(zipname, offset=0):
@@ -240,8 +209,10 @@ def apply_imageplane(filename):
 
 
 def add_extension(file):
-    # Find out the file extension manually because maya wouldn't
-    # return the extension if the the viewer is turned off
+    '''
+    Find out the file extension manually because maya wouldn't
+    return the extension if the the viewer is turned off
+    '''
     extension = None
 
     if '.' in file:
@@ -259,6 +230,7 @@ def add_extension(file):
 
     file = '{}.{}'.format(file.rsplit('.', 1)[0], extension)
     return path.sanitize(file)
+
 
 def playblast_with_settings( viewport_preset = None, viewport_preset_yaml = None, **recArgs):
     '''
@@ -380,14 +352,6 @@ def playblast(filepath = None, width = 1280, height = 720, start_frame = 0, end_
                 except Exception, err:
                     logger.info(u'%s' %(err))
 
-
-
-#
-# def save_viewport_preset_from_all_panels(cache_file):
-#     modelpanels = cmds.getPanel(type="modelPanel")
-#     for panel in modelpanels:
-#         savePresetFromPanel(cache_file, panel, panel)
-
 # save active panel as a preset
 def save_viewport_preset(cache_file, presetName, panel=None):
     if not panel:
@@ -496,7 +460,7 @@ def screenshot_current_editor(cache_file, presetName, panel=None, camera=None):
         fname = capture.snap(**options)
 
         if not fname:
-            log.warning("Preview failed")
+            logging.warning("Preview failed")
             return
         return fname
 
@@ -525,68 +489,3 @@ def getShapeNodes(obj):
     else:
         howManyShapes = len(getShape[0])
     return(getShape, howManyShapes)
-
-
-def getSyncSketchPlayerBlastNodes():
-    cam = cmds.ls("syncSketchPlayer_camera*")[0]
-    imagePlane = cmds.ls("syncSketchPlayer_camera*")[0]
-
-def createOrUpdatePlayblastCam(frameOffset, moviePath, separateCam = False):
-    logger.info("\n\n\creating the cam\n\n\n")
-    if separateCam:
-        cam = cmds.ls("syncSketchPlayer_camera*")
-        logger.info("is separate")
-    else:
-        cam = get_current_camera()
-
-    imagePlane = cmds.ls("syncSketchPlayer_imageplane*")
-
-    if not(cam and imagePlane):
-        cam = cmds.camera(name="syncSketchPlayer_camera")
-        cameraShape = cmds.listRelatives(cam, shapes=True)[0]
-        imagePlane = cmds.imagePlane(name="syncSketchPlayer_imageplane", camera=cameraShape, quickTime=True,
-                                       lookThrough=cameraShape, showInAllViews=False)
-        implagePlaneShape = cmds.listRelatives(imagePlane, shapes=True)[0]
-
-    else:
-        if cmds.objectType( cam ) != 'camera':
-            cameraShape = cmds.listRelatives(cam, shapes=True)[0]
-        else:
-            cameraShape = cam
-        implagePlaneShape = cmds.listRelatives(imagePlane, shapes=True)[0]
-
-    cmds.setAttr(implagePlaneShape + '.imageName', moviePath, type="string")
-    cmds.setAttr(implagePlaneShape + '.useFrameExtension', 1)
-    cmds.setAttr(implagePlaneShape + '.textureFilter', 1)
-    cmds.setAttr(implagePlaneShape + '.type', 2)
-    cmds.setAttr(implagePlaneShape + '.frameOffset', 1)
-    cmds.setAttr(implagePlaneShape + '.imageName', moviePath, type="string")
-
-
-def removePlayblastCam():
-    objects_to_remove = cmds.ls("syncSketchPlayer*")
-    cmds.delete(objects_to_remove)
-
-def lookThruPlayblastCam():
-    currentCamShape = get_current_camera()
-    currentPane = get_active_editor()
-    database.save_cache('selected_camera', currentCamShape)
-    database.save_cache('current_pane', currentPane)
-    cam = cmds.ls("syncSketchPlayer_camera*")
-    if cam:
-        cmds.lookThru(cam[0])
-        cmds.refresh(currentView=True)
-    else:
-        logger.info("no syncSketchPlayer_camera found")
-    # currentView(currentPane)
-
-def lookThruActiveCam():
-    currentCamName = database.read_cache('selected_camera')
-    cam = cmds.ls(currentCamName)
-    if cam:
-        cmds.lookThru(cam[0])
-        cmds.refresh(currentView=False)
-    else:
-        # Todo: should fall back to default camera
-        logger.info("no syncSketchPlayer_camera found")
-    # currentView(currentPane)

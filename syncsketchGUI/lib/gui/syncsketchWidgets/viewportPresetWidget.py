@@ -148,7 +148,7 @@ class ViewportPresetWindow(SyncSketch_Window):
         preset_file = path.get_config_yaml(VIEWPORT_YAML)
         if not preset_name:
             preset_name = self.ui.ui_viewportpreset_comboBox.currentText()
-        panels = maya_scene.get_all_mdoelPanels()
+        panels = maya_scene.get_all_modelPanels()
         maya_scene.apply_viewport_preset(preset_file, preset_name, panels)
 
     def apply_preset(self, preset_name = None):

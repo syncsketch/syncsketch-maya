@@ -11,6 +11,8 @@ import time
 import webbrowser
 import logging
 from syncsketchGUI.lib.gui.syncsketchWidgets import infoDialog
+import pprint
+from pprint import pformat
 
 logger = logging.getLogger('syncsketchGUI')
 logger.setLevel(logging.DEBUG)
@@ -311,7 +313,8 @@ def _upload(current_user = None, ):
     upload_to_value = item_name
     logger.info('Selected Item: %s'%item_name)
 
-    time.sleep(WAIT_TIME)
+    #todo: whats the effect of this?
+    #time.sleep(WAIT_TIME)
 
     # Don't need to login if we're uploading to playground.
     # Treewidget item selection must be review type to upload.
@@ -327,7 +330,6 @@ def _upload(current_user = None, ):
     if item_type == 'review':
         logger.info('Uploading {} to {} with review_id {}'.format(upload_file, upload_to_value, review_id))
         uploaded_item = current_user.upload_media_to_review(review_id, upload_file, noConvertFlag = True, itemParentId = False, data = postData)
-        from pprint import pformat
         logger.info("uploaded_item: {0}".format(pformat(uploaded_item)))
 
     elif item_type == 'media':
@@ -336,8 +338,6 @@ def _upload(current_user = None, ):
         logger.info("filepath %s"%upload_file)
         logger.info("Trying to upload %s to item_id %s, review %s"%(upload_file,item_id,review_id))
         uploaded_item = current_user.upload_media_to_review(review_id, upload_file, noConvertFlag = True, itemParentId = item_id, data = postData)
-        import pprint
-        from pprint import pformat
         logger.info(pformat(uploaded_item))
     else:
         uploaded_item = None
@@ -360,7 +360,7 @@ def _upload(current_user = None, ):
     logger.info('Upload successful. Uploaded item {} to {}'.format(upload_file, uploaded_media_url))
 
     if 'none' in uploaded_media_url.lower():
-        uploaded_media_url = str()
+        uploaded_media_url = ""
 
     if uploaded_media_url:
         uploaded_media_url.replace(path.playground_url, path.playground_display_url)
@@ -441,8 +441,4 @@ def cycle_viewport_presets():
 
     database.save_cache('current_viewport_preset', presets[i], yaml_file = CACHE_YAML)
     maya_scene.apply_viewport_preset(cache, presets[i])
-
-def createOrUpdatePlayblastCam():
-    filePath = database.read_cache('last_recorded')
-    maya_scene.createOrUpdatePlayblastCam(frameOffset=0, moviePath=filePath)
 
