@@ -4,6 +4,7 @@ import time
 import webbrowser
 from syncsketchGUI.vendor.Qt import QtCore, QtGui, QtWidgets
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.CRITICAL)
 from syncsketchGUI.lib import video, user, database
 from syncsketchGUI.lib.gui.qt_widgets import *
 from syncsketchGUI.lib.gui.qt_utils import *
@@ -40,12 +41,18 @@ class MenuWindow(SyncSketch_Window):
         self.decorate_ui()
         self.build_connections()
         self.accountData = self.retrievePanelData()
-        logger.info(self.accountData)
+        logger.critical(self.accountData)
+
+
 
 
         # Load UI state
         self.restore_ui_state()
         self.update_login_ui()
+
+        #Not logged in or outdated api, token
+        if not self.accountData:
+            return
 
         #Populate Treewidget sparse
         self.asyncPopulateTree(withItems=False)

@@ -168,6 +168,7 @@ class SyncSketchUser():
                                                        useExpiringToken=True,
                                                        host = self.api_host,
                                                        debug=True)
+            return self.host_data
 
     def is_logged_in(self):
         if self.get_name() and self.get_token():

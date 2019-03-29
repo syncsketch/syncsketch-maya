@@ -1,11 +1,3 @@
-# -*- coding: UTF-8 -*-
-# ======================================================================
-# @Author   : SyncSketch LLC
-# @Email    : dev@syncsketchGUI.com
-# @Version  : 1.0.0
-# ======================================================================
-# Environment Detection
-
 import os
 import time
 import webbrowser
@@ -15,7 +7,7 @@ import pprint
 from pprint import pformat
 
 logger = logging.getLogger('syncsketchGUI')
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.CRITICAL)
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
 
