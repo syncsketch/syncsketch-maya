@@ -39,11 +39,18 @@ if DEV:\n\
     SYNCSKETCH_GUI_RELEASE_PATH = '/Users/chavez/deleteMePls/syncsketchGUI'\n\
 \n\
 \n\
-InstallPath = {\n\
+ScriptInstallPath = {\n\
     'Darwin': '{0}/Library/Preferences/Autodesk/maya/scripts/'.format(expanduser('~')),\n\
     'linux64': '$HOME/maya/scripts/',  # Todo: Not tested\n\
     'Windows': '{0}/maya/scripts/'.format(expanduser('~'))\n\
 }\n\
+\n\
+PluginInstallPath = {\n\
+    'Darwin': '{0}/Library/Preferences/Autodesk/maya/plug-ins/'.format(expanduser('~')),\n\
+    'linux64': '$HOME/maya/scripts/',  # Todo: Not tested\n\
+    'Windows': '{0}/maya/scripts/'.format(expanduser('~')) # Todo: Not tested\n\
+}\n\
+\n\
 \n\
 \n\
 class Icon():\n\
@@ -306,7 +313,7 @@ class IconButton(QPushButton):\n\
 class SyncSketchInstaller(QObject):\n\
     def showit(self):\n\
         self.installer = installerUI()\n\
-        self.installer.installButton.clicked.connect(self.__syncsketchIntall)\n\
+        self.installer.installButton.clicked.connect(self.__syncsketchInstall)\n\
         self.installer.closeButton.clicked.connect(self.__closeButton)\n\
         self.installer.launchButton.clicked.connect(self.__launchButton)\n\
         self.installer.show()\n\
@@ -322,9 +329,10 @@ class SyncSketchInstaller(QObject):\n\
             from syncsketchGUI import install_shelf\n\
             install_shelf()\n\
 \n\
-        #Install Timeline\n\
-        import syncsketchGUI\n\
-        syncsketchGUI.add_timeline_context_menu()\n\
+\n\
+        #Load Plugin And Autoload it\n\
+        cmds.loadPlugin("SyncSketchPlugin")\n\
+        cmds.pluginInfo("SyncSketchPlugin",  edit=True, autoload=True)\n\
 \n\
         #Create Default's for current OS\n\
         self.createGoodDefaults()\n\
@@ -353,7 +361,7 @@ class SyncSketchInstaller(QObject):\n\
 \n\
         # Add TimeLineMenu's if they doesn't exist\n\
 \n\
-    def __syncsketchIntall(self):\n\
+    def __syncsketchInstall(self):\n\
         self.installer.installButton.hide()\n\
         self.installer.closeButton.hide()\n\
         self.installer.installShelf.hide()\n\
@@ -435,12 +443,12 @@ class installThread(QThread):\n\
 \n\
         if Literals.PLATFORM == 'Windows':\n\
             PYTHON_PATH = os.path.join(os.getenv('MAYA_LOCATION'), 'bin', 'mayapy.exe')\n\
-            MAYA_SCRIPTS_PATH = InstallPath['Windows']\n\
+            MAYA_SCRIPTS_PATH = ScriptInstallPath['Windows']\n\
             PIP_PATH = os.path.join(os.getenv('APPDATA'), 'Python', 'Scripts', 'pip2.7.exe')\n\
 \n\
         elif Literals.PLATFORM == 'Darwin':\n\
             PYTHON_PATH = '/usr/bin/python'\n\
-            MAYA_SCRIPTS_PATH = InstallPath['Darwin']\n\
+            MAYA_SCRIPTS_PATH = ScriptInstallPath['Darwin']\n\
             PIP_PATH = os.path.join(expanduser('~'), 'Library', 'Python', '2.7', 'bin', 'pip2.7')\n\
 \n\
         FFMPEG_PATH = os.path.join(MAYA_SCRIPTS_PATH, 'ffmpeg', 'bin')\n\
@@ -500,7 +508,7 @@ class installThread(QThread):\n\
             # Install SyncsketchGUI\n\
             # Todo: We might wan't to check first if there is already a syncsketchGUI installed in a different path\n\
             # todo: By using target, pip show won't find this package anymore\n\
-            \n\
+\n\
             if os.path.isdir(Literals.SYNCSKETCH_INSTALL_PATH):\n\
                 shutil.rmtree(Literals.SYNCSKETCH_INSTALL_PATH, ignore_errors=True)\n\
                 # todo: delete as well SyncsketchGUI-1.0.0.dist-info\n\
@@ -521,6 +529,14 @@ class installThread(QThread):\n\
             if not INSTALL_SSGUI_ONLY:\n\
                 downloadFFmpegToDisc(platform=Literals.PLATFORM, moveToLocation=FFMPEG_PATH)\n\
 \n\
+\n\
+\n\
+            if Literals.PLATFORM == 'Darwin':\n\
+                if not os.path.isdir(PluginInstallPath['Darwin']):\n\
+                    os.makedirs(PluginInstallPath['Darwin'])\n\
+                shutil.copy(os.path.join(Literals.SYNCSKETCH_INSTALL_PATH, "SyncSketchPlugin.py"), \n\
+                    os.path.join(PluginInstallPath['Darwin'], "SyncSketchPlugin.py")\n\
+                    )\n\
 \n\
         except Exception as e:\n\
             print(e)\n\

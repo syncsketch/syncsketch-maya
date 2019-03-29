@@ -17,8 +17,8 @@ import maya.utils
 import maya.cmds
 from functools import partial
 
-DEV = True
-INSTALL_SSGUI_ONLY = True
+DEV = False
+INSTALL_SSGUI_ONLY = False
 
 MAYA_API_VERSION = int(str(cmds.about(apiVersion=True))[:4])
 if MAYA_API_VERSION >= 2017:
