@@ -315,7 +315,7 @@ class SyncSketch_Window(QtWidgets.QMainWindow):
         logger.info("Closing Synsketch GUI Window")
         self.close()
 
-
+    #todo: this is a good candidate to be a decorators 
     def update_login_ui(self):
         '''
         Updates the UI based on whether the user is logged in

@@ -26,8 +26,8 @@ class MenuWindow(SyncSketch_Window):
     """
     Main browser window of the syncsketchGUI services
     """
-    window_name = 'syncsketchGUI_menu_window'
-    window_label = 'SyncSketch'
+    window_name='syncsketchGUI_menu_window'
+    window_label='SyncSketch'
 
     account_is_connected = False
 
@@ -35,8 +35,6 @@ class MenuWindow(SyncSketch_Window):
         super(MenuWindow, self).__init__(parent=parent)
         self.threadpool = QtCore.QThreadPool()
         self.accountData = None
-        print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
-
         self.setMaximumSize(700, 650)
         self.decorate_ui()
         self.build_connections()
@@ -92,7 +90,7 @@ class MenuWindow(SyncSketch_Window):
         '''
         current_user = user.SyncSketchUser()
         if not current_user.is_logged_in():
-                return
+            return
 
         worker = Worker(self.fetchData, current_user,
                         logging=logging, withItems=withItems)
@@ -121,7 +119,7 @@ class MenuWindow(SyncSketch_Window):
             True if value == 'true' else False)
 
         value = database.read_cache('current_preset')
-        self.ui.ui_formatPreset_comboBox.set_combobox_index( selection=value)
+        self.ui.ui_formatPreset_comboBox.set_combobox_index(selection=value)
 
         self.populate_camera_comboBox()
 
@@ -151,18 +149,18 @@ class MenuWindow(SyncSketch_Window):
             'current_range_type':
                 self.ui.ui_range_comboBox.currentText(),
             'ps_play_after_creation_checkBox':
-                self.bool_to_str( self.ui.ps_play_after_creation_checkBox.isChecked() ),
+                self.bool_to_str(self.ui.ps_play_after_creation_checkBox.isChecked()),
             'ps_upload_after_creation_checkBox':
-                self.bool_to_str( self.ui.ps_upload_after_creation_checkBox.isChecked() ),
+                self.bool_to_str(self.ui.ps_upload_after_creation_checkBox.isChecked()),
             'us_filename_lineEdit':
                 self.ui.us_filename_lineEdit.text(),
             'ps_open_afterUpload_checkBox':
-                self.bool_to_str( self.ui.ps_open_afterUpload_checkBox.isChecked() )}
+                self.bool_to_str(self.ui.ps_open_afterUpload_checkBox.isChecked())}
         database.dump_cache(ui_setting)
 
 
     def bool_to_str(self, val):
-        strVal = 'true' if val else 'false'
+        strVal='true' if val else 'false'
         return strVal
 
 
@@ -234,7 +232,7 @@ class MenuWindow(SyncSketch_Window):
         self.ui.main_layout = QtWidgets.QGridLayout()
         self.ui.ui_status_layout = QtWidgets.QHBoxLayout()
         self.ui.ui_login_layout.setSpacing(0)
-        self.ui.ui_status_layout.setContentsMargins(0,0,0,10)
+        self.ui.ui_status_layout.setContentsMargins(0, 0, 0, 10)
         self.ui.master_layout.addLayout(self.ui.ui_login_layout)
         self.ui.master_layout.addLayout(self.ui.ui_status_layout)
         self.ui.master_layout.addLayout(self.ui.main_layout)
@@ -249,13 +247,13 @@ class MenuWindow(SyncSketch_Window):
         self.ui.ui_mainRight_gridLayout.setSpacing(2)
         self.ui.ui_reviewSelection_hBoxLayout = QtWidgets.QHBoxLayout()
 
-        self.ui.main_layout.addLayout(self.ui.ui_mainLeft_gridLayout, 0,0)
-        self.ui.main_layout.addLayout(self.ui.ui_mainRight_gridLayout, 0,1)
+        self.ui.main_layout.addLayout(self.ui.ui_mainLeft_gridLayout, 0, 0)
+        self.ui.main_layout.addLayout(self.ui.ui_mainRight_gridLayout, 0, 1)
 
-        self.ui.main_layout.setColumnMinimumWidth(0,320)
-        self.ui.main_layout.setColumnMinimumWidth(1,320)
-        self.ui.main_layout.setColumnStretch(0,1)
-        self.ui.main_layout.setColumnStretch(1,0)
+        self.ui.main_layout.setColumnMinimumWidth(0, 320)
+        self.ui.main_layout.setColumnMinimumWidth(1, 320)
+        self.ui.main_layout.setColumnStretch(0, 1)
+        self.ui.main_layout.setColumnStretch(1, 0)
 
         # Adding ui_mainLeft_gridLayout
         self.ui.ui_record_gridLayout = QtWidgets.QVBoxLayout()
@@ -278,8 +276,8 @@ class MenuWindow(SyncSketch_Window):
         self.ui.ui_targetSelection_groupbox.setLayout(self.ui.ui_targetSelection_gridLayout)
 
 
-        self.ui.ui_mainLeft_gridLayout.addLayout(self.ui.ui_record_gridLayout,0,0)
-        self.ui.ui_mainLeft_gridLayout.addLayout(self.ui.ui_clipSelection_gridLayout,1,0)
+        self.ui.ui_mainLeft_gridLayout.addLayout(self.ui.ui_record_gridLayout, 0, 0)
+        self.ui.ui_mainLeft_gridLayout.addLayout(self.ui.ui_clipSelection_gridLayout, 1, 0)
 
 
 
@@ -321,52 +319,52 @@ class MenuWindow(SyncSketch_Window):
         self.ui.target_info_label2 = QtWidgets.QLabel()
 
         # upload_layout -  format preset
-        self.ui.upload_formatPreset_layout = RegularGridLayout(self, label = 'Format Preset' )
+        self.ui.upload_formatPreset_layout = RegularGridLayout(self, label='Format Preset')
         self.ui.ui_record_gridLayout.addLayout(self.ui.upload_formatPreset_layout)
         self.ui.ui_formatPreset_comboBox = RegularComboBox(self)
         self.ui.ps_preset_description = QtWidgets.QLabel()
         self.ui.ps_preset_description.setStyleSheet("font: 9pt")
         self.ui.ps_preset_description.setIndent(5)
         self.ui.ps_format_toolButton = RegularToolButton(self, icon = file_icon)
-        self.ui.upload_formatPreset_layout.addWidget(self.ui.ui_formatPreset_comboBox,  0, 1)
-        self.ui.upload_formatPreset_layout.addWidget(self.ui.ps_format_toolButton,  0, 2)
-        self.ui.upload_formatPreset_layout.addWidget(self.ui.ps_preset_description,  1, 1,1,2)
+        self.ui.upload_formatPreset_layout.addWidget(self.ui.ui_formatPreset_comboBox, 0, 1)
+        self.ui.upload_formatPreset_layout.addWidget(self.ui.ps_format_toolButton, 0, 2)
+        self.ui.upload_formatPreset_layout.addWidget(self.ui.ps_preset_description,  1, 1, 1, 2)
 
         # upload_layout - viewport preset
-        self.ui.upload_viewportPreset_layout = RegularGridLayout(self, label = 'Viewport Preset')
+        self.ui.upload_viewportPreset_layout = RegularGridLayout(self, label='Viewport Preset')
         self.ui.ui_record_gridLayout.addLayout(self.ui.upload_viewportPreset_layout)
         self.ui.ui_viewportpreset_comboBox = RegularComboBox(self)
         self.ui.ui_viewport_toolButton = RegularToolButton(self, icon = preset_icon)
-        self.ui.upload_viewportPreset_layout.addWidget(self.ui.ui_viewportpreset_comboBox,  0, 1)
-        self.ui.upload_viewportPreset_layout.addWidget(self.ui.ui_viewport_toolButton,  0, 2)
+        self.ui.upload_viewportPreset_layout.addWidget(self.ui.ui_viewportpreset_comboBox, 0, 1)
+        self.ui.upload_viewportPreset_layout.addWidget(self.ui.ui_viewport_toolButton, 0, 2)
 
         # upload_layout - camera
-        self.ui.upload_cameraPreset_layout = RegularGridLayout(self, label = 'Camera')
+        self.ui.upload_cameraPreset_layout = RegularGridLayout(self, label='Camera')
         self.ui.ui_record_gridLayout.addLayout(self.ui.upload_cameraPreset_layout)
         self.ui.ui_cameraPreset_comboBox = RegularComboBox(self)
         self.ui.ui_camera_toolButton = RegularToolButton(self, icon = fill_icon)
-        self.ui.upload_cameraPreset_layout.addWidget(self.ui.ui_cameraPreset_comboBox,  0, 1)
-        self.ui.upload_cameraPreset_layout.addWidget(self.ui.ui_camera_toolButton,  0, 2)
+        self.ui.upload_cameraPreset_layout.addWidget(self.ui.ui_cameraPreset_comboBox, 0, 1)
+        self.ui.upload_cameraPreset_layout.addWidget(self.ui.ui_camera_toolButton, 0, 2)
 
         # upload_layout - range
-        self.ui.upload_range_layout = RegularGridLayout(self, label = 'Frame Range')
+        self.ui.upload_range_layout = RegularGridLayout(self, label='Frame Range')
         self.ui.ui_record_gridLayout.addLayout(self.ui.upload_range_layout)
         self.ui.ui_range_comboBox = RegularComboBox(self)
         self.ui.ui_range_comboBox.addItems(["Start / End", "Time Slider","Highlighted","Current Frame"])
         self.ui.ui_range_toolButton = RegularToolButton(self, icon = fill_icon)
         self.ui.ui_rangeIn_textEdit  = RegularLineEdit()
         self.ui.ui_rangeOut_textEdit  = RegularLineEdit()
-        self.ui.upload_range_layout.addWidget(self.ui.ui_range_comboBox,  0, 1)
-        self.ui.upload_range_layout.addWidget(self.ui.ui_rangeIn_textEdit,  0, 2)
+        self.ui.upload_range_layout.addWidget(self.ui.ui_range_comboBox, 0, 1)
+        self.ui.upload_range_layout.addWidget(self.ui.ui_rangeIn_textEdit, 0, 2)
         self.ui.upload_range_layout.setColumnStretch(2,0)
-        self.ui.upload_range_layout.addWidget(self.ui.ui_rangeOut_textEdit,  0, 3)
+        self.ui.upload_range_layout.addWidget(self.ui.ui_rangeOut_textEdit, 0, 3)
         self.ui.upload_range_layout.setColumnStretch(3,0)
         self.ui.ui_rangeIn_textEdit.setFixedWidth(40)
         self.ui.ui_rangeOut_textEdit.setFixedWidth(40)
 
         self.ui.ui_rangeIn_textEdit.setAlignment(QtCore.Qt.AlignRight)
         self.ui.ui_rangeOut_textEdit.setAlignment(QtCore.Qt.AlignRight)
-        self.ui.upload_range_layout.addWidget(self.ui.ui_range_toolButton,  0, 4)
+        self.ui.upload_range_layout.addWidget(self.ui.ui_range_toolButton, 0, 4)
 
         self.onlyInt = QtGui.QIntValidator()
         self.ui.ui_rangeIn_textEdit.setValidator(self.onlyInt)
@@ -375,47 +373,47 @@ class MenuWindow(SyncSketch_Window):
         self.ui.ui_rangeOut_textEdit.setPlaceholderText('End')
 
         # upload_layout - Directory
-        self.ui.upload_directory_layout = RegularGridLayout(self, label = 'Directory')
+        self.ui.upload_directory_layout = RegularGridLayout(self, label='Directory')
         self.ui.ui_record_gridLayout.addLayout(self.ui.upload_directory_layout)
         self.ui.ps_directory_lineEdit = QtWidgets.QLineEdit()
         self.ui.ps_directory_lineEdit.setPlaceholderText('Output Directory')
         self.ui.ps_directory_toolButton = RegularToolButton(self, icon = directory_icon)
-        self.ui.upload_directory_layout.addWidget(self.ui.ps_directory_lineEdit,  0, 1)
-        self.ui.upload_directory_layout.addWidget(self.ui.ps_directory_toolButton,  0, 2)
+        self.ui.upload_directory_layout.addWidget(self.ui.ps_directory_lineEdit, 0, 1)
+        self.ui.upload_directory_layout.addWidget(self.ui.ps_directory_toolButton, 0, 2)
 
         # record_layout - filename
-        self.ui.upload_filename_layout = RegularGridLayout(self, label = 'Clip Name')
+        self.ui.upload_filename_layout = RegularGridLayout(self, label='Clip Name')
         self.ui.ui_record_gridLayout.addLayout(self.ui.upload_filename_layout)
         self.ui.us_filename_lineEdit = QtWidgets.QLineEdit()
         self.ui.us_filename_lineEdit.setPlaceholderText('File Name or Prefix')
         self.ui.ps_filename_toolButton = RegularToolButton(self)
 
         self.ui.ps_filename_toolButton.setEnabled(0)
-        self.ui.upload_filename_layout.addWidget(self.ui.us_filename_lineEdit,  0, 1)
-        self.ui.upload_filename_layout.addWidget(self.ui.ps_filename_toolButton,  0, 2)
+        self.ui.upload_filename_layout.addWidget(self.ui.us_filename_lineEdit, 0, 1)
+        self.ui.upload_filename_layout.addWidget(self.ui.ps_filename_toolButton, 0, 2)
 
         # record_layout - clipname
-        self.ui.upload_clipname_layout = RegularGridLayout(self, label = 'Clip Suffix ')
+        self.ui.upload_clipname_layout = RegularGridLayout(self, label='Clip Suffix ')
         self.ui.ui_record_gridLayout.addLayout(self.ui.upload_clipname_layout)
         self.ui.ps_clipname_lineEdit = QtWidgets.QLineEdit()
         self.ui.ps_clipname_lineEdit.setPlaceholderText('Clip Suffix (optional)')
         self.ui.ps_clipname_toolButton = RegularToolButton(self)
         self.ui.ps_clipname_toolButton.setEnabled(0)
-        self.ui.upload_clipname_layout.addWidget(self.ui.ps_clipname_lineEdit,  0, 1)
-        self.ui.upload_clipname_layout.addWidget(self.ui.ps_clipname_toolButton,  0, 2)
+        self.ui.upload_clipname_layout.addWidget(self.ui.ps_clipname_lineEdit, 0, 1)
+        self.ui.upload_clipname_layout.addWidget(self.ui.ps_clipname_toolButton, 0, 2)
 
         # record_layout - after record
-        self.ui.upload_after_layout = RegularGridLayout(self, label = 'After Record')
+        self.ui.upload_after_layout = RegularGridLayout(self, label='After Record')
         self.ui.ps_play_after_creation_checkBox = QtWidgets.QCheckBox()
         self.ui.ps_play_after_creation_checkBox.setChecked(True)
         self.ui.ps_play_after_creation_checkBox.setText('Play')
         self.ui.ps_upload_after_creation_checkBox = QtWidgets.QCheckBox()
         self.ui.ps_upload_after_creation_checkBox.setText('Upload')
-        self.ui.upload_after_layout.addWidget(self.ui.ps_play_after_creation_checkBox,  0, 1)
-        self.ui.upload_after_layout.addWidget(self.ui.ps_upload_after_creation_checkBox,  0, 2)
+        self.ui.upload_after_layout.addWidget(self.ui.ps_play_after_creation_checkBox, 0, 1)
+        self.ui.upload_after_layout.addWidget(self.ui.ps_upload_after_creation_checkBox, 0, 2)
         self.ui.ui_record_gridLayout.addLayout(self.ui.upload_after_layout)
         # record_layout - record button
-        self.ui.ui_record_pushButton = RegularButton(self, icon = record_icon, color=record_color)
+        self.ui.ui_record_pushButton = RegularButton(self, icon=record_icon, color=record_color)
         self.ui.ui_record_pushButton.setText("RECORD")
         self.ui.ui_record_gridLayout.addWidget(self.ui.ui_record_pushButton)
 
@@ -435,22 +433,22 @@ class MenuWindow(SyncSketch_Window):
         self.ui.ui_thumb_gridLayout = QtWidgets.QGridLayout()
         self.ui.ui_thumb_gridLayout.setSpacing(3)
         self.ui.ui_clipSelection_gridLayout.addLayout(self.ui.ui_thumb_gridLayout)
-        self.ui.video_thumbOverlay_pushButton = HoverButton(icon = play_icon)
+        self.ui.video_thumbOverlay_pushButton = HoverButton(icon=play_icon)
 
         self.ui.ui_lastfile_layout = QtWidgets.QHBoxLayout()
 
         self.ui.ui_lastfileSelection_layout = QtWidgets.QHBoxLayout()
-        self.ui.ps_filename_toolButton = RegularToolButton(self, icon = file_icon)
+        self.ui.ps_filename_toolButton = RegularToolButton(self, icon=file_icon)
         self.ui.ps_filename_toolButton.clicked.connect(self.openFileNameDialog)
         self.ui.ui_lastfileSelection_layout.addWidget(self.ui.ps_lastfile_comboBox)
         self.ui.ui_lastfileSelection_layout.addWidget(self.ui.ps_filename_toolButton)
 
 
-        self.ui.ui_thumb_gridLayout.addLayout(self.ui.ui_lastfileSelection_layout,  0, 0)
+        self.ui.ui_thumb_gridLayout.addLayout(self.ui.ui_lastfileSelection_layout, 0, 0)
         self.ui.ui_thumb_gridLayout.addLayout(self.ui.ui_lastfile_layout,  1, 0)
-        self.ui.ui_thumb_gridLayout.addWidget(self.ui.video_thumb_pushButton,2,0)
-        self.ui.ui_thumb_gridLayout.addWidget(self.ui.video_thumbOverlay_pushButton,2,0)
-        self.ui.ui_thumb_gridLayout.addWidget(self.ui.cs_info_label,3,0)
+        self.ui.ui_thumb_gridLayout.addWidget(self.ui.video_thumb_pushButton, 2, 0)
+        self.ui.ui_thumb_gridLayout.addWidget(self.ui.video_thumbOverlay_pushButton, 2, 0)
+        self.ui.ui_thumb_gridLayout.addWidget(self.ui.cs_info_label, 3, 0)
         # To DO should be cleaner
         self.ui.video_thumbOverlay_pushButton.setIconSize(QtCore.QSize(320, 180))
         self.ui.video_thumbOverlay_pushButton.setToolTip('Play Clip')
@@ -459,13 +457,13 @@ class MenuWindow(SyncSketch_Window):
 
         self.ui.ui_clipSelection_gridLayout.setAlignment(QtCore.Qt.AlignCenter)
         # upload_layout - after upload
-        self.ui.ps_record_after_layout = RegularGridLayout(self, label = 'After Upload')
+        self.ui.ps_record_after_layout = RegularGridLayout(self, label='After Upload')
         self.ui.ps_open_afterUpload_checkBox = QtWidgets.QCheckBox()
         self.ui.ps_open_afterUpload_checkBox.setChecked(True)
         self.ui.ps_open_afterUpload_checkBox.setText('Open SyncSketch')
         self.ui.ps_afterUpload_label = QtWidgets.QLabel("After Upload")
-        self.ui.ps_record_after_layout.addWidget(self.ui.ps_open_afterUpload_checkBox,  0, 1)
-        self.ui.ui_clipSelection_gridLayout.addLayout(self.ui.ps_record_after_layout,  10)
+        self.ui.ps_record_after_layout.addWidget(self.ui.ps_open_afterUpload_checkBox, 0, 1)
+        self.ui.ui_clipSelection_gridLayout.addLayout(self.ui.ps_record_after_layout, 10)
 
         # ui_record_gridLayout
         self.ui.ui_upload_pushButton = RegularButton(self, icon = upload_icon, color=upload_color)
@@ -479,7 +477,7 @@ class MenuWindow(SyncSketch_Window):
         self.ui.ui_download_pushButton = RegularButton(self, icon = download_icon, color=download_color)
         self.ui.ui_download_pushButton.setToolTip('Download from SyncSketch Review Target')
         self.ui.ui_download_pushButton.setText("DOWNLOAD")
-        self.ui.ui_targetSelection_gridLayout.addWidget(self.ui.ui_download_pushButton,  10, 0)
+        self.ui.ui_targetSelection_gridLayout.addWidget(self.ui.ui_download_pushButton, 10, 0)
 
 
         self.ui.ui_login_label = QtWidgets.QLabel()
@@ -519,7 +517,7 @@ class MenuWindow(SyncSketch_Window):
         self.ui.ui_viewportpreset_comboBox.populate_combo_list(VIEWPORT_YAML, DEFAULT_VIEWPORT_PRESET)
         self.update_last_recorded()
 
-        self.ui.ui_range_comboBox.set_combobox_index( selection='Start / End')
+        self.ui.ui_range_comboBox.set_combobox_index(selection='Start / End')
 
         self.set_rangeFromComboBox()
 
@@ -639,8 +637,8 @@ class MenuWindow(SyncSketch_Window):
             weblogin_window = WebLoginWindow(self)
 
         else:
-            title = 'Not able to reach SyncSketch'
-            message = 'Having trouble to connect to SyncSketch.\nMake sure you have an internet connection!'
+            title='Not able to reach SyncSketch'
+            message='Having trouble to connect to SyncSketch.\nMake sure you have an internet connection!'
             WarningDialog(self, title, message)
 
     def open_support(self):
@@ -702,7 +700,7 @@ class MenuWindow(SyncSketch_Window):
             with suppressedUI(self.ui.ps_lastfile_comboBox):
                 self.ui.ps_lastfile_comboBox.clear()
                 self.ui.ps_lastfile_comboBox.addItems(clips)
-                self.ui.ps_lastfile_comboBox.set_combobox_index( selection = database.read_cache('last_recorded')['filename'], default=r"")
+                self.ui.ps_lastfile_comboBox.set_combobox_index(selection = database.read_cache('last_recorded')['filename'], default=r"")
             self.update_clip_info()
 
 
@@ -710,7 +708,7 @@ class MenuWindow(SyncSketch_Window):
         val = self.ui.ps_lastfile_comboBox.currentText()
         database.dump_cache({'selected_clip': val})
 
-        info_string = 'Please select a format preset'
+        info_string='Please select a format preset'
         info_string = self.ui.ui_formatPreset_comboBox.currentText()
         format_preset_file = path.get_config_yaml(PRESET_YAML)
         data = database._parse_yaml(yaml_file = format_preset_file)[val]
@@ -836,7 +834,7 @@ class MenuWindow(SyncSketch_Window):
 
         info_string = str()
         if not clip_info:
-            error_message = 'N/A. Please check if the file exists.'
+            error_message='N/A. Please check if the file exists.'
             self.ui.cs_info_label.setText(error_message)
             return
 
@@ -859,7 +857,7 @@ class MenuWindow(SyncSketch_Window):
 
         if  'width' in clip_info['streams'][0].keys() and \
             'height' in clip_info['streams'][0].keys():
-            info_string += ' | {}x{}'.format( clip_info['streams'][0]['width'],
+            info_string += ' | {}x{}'.format(clip_info['streams'][0]['width'],
                                                 clip_info['streams'][0]['height'])
 
         self.ui.cs_info_label.setContentsMargins(0, 0, 0, 0)
@@ -969,12 +967,6 @@ class MenuWindow(SyncSketch_Window):
 
         self.isloggedIn(self.current_user.is_logged_in())
 
-
-        # global USER_ACCOUNT_DATA
-        # if USER_ACCOUNT_DATA and not force:
-        #     account_data =  USER_ACCOUNT_DATA
-
-        # else:
         try:
             self.account_data = self.current_user.get_account_data()
 
@@ -985,11 +977,11 @@ class MenuWindow(SyncSketch_Window):
         finally:
             if self.account_data:
                 account_is_connected = True
-                message = 'Connected and authorized with syncsketchGUI as "{}"'.format(self.current_user.get_name())
+                message='Connected and authorized with syncsketchGUI as "{}"'.format(self.current_user.get_name())
                 color = success_color
             else:
                 account_is_connected = False
-                message = 'WARNING: Could not connect to SyncSketch. '
+                message='WARNING: Could not connect to SyncSketch. '
                 message += message_is_not_connected
                 color = error_color
             try:
@@ -1013,7 +1005,7 @@ class MenuWindow(SyncSketch_Window):
         for account in account_data:
             account_treeWidgetItem = self._build_widget_item(parent = self.ui.browser_treeWidget,
                                                             item_name = account.get('name'),
-                                                            item_type = 'account',
+                                                            item_type='account',
                                                             item_icon = account_icon,
                                                             item_data = account)
             # Add projects
@@ -1021,7 +1013,7 @@ class MenuWindow(SyncSketch_Window):
             for project in projects:
                 project_treeWidgetItem = self._build_widget_item(parent = account_treeWidgetItem,
                                                                 item_name = project.get('name'),
-                                                                item_type = 'project',
+                                                                item_type='project',
                                                                 item_icon = project_icon,
                                                                 item_data = project)
                 # Add reviews
@@ -1029,7 +1021,7 @@ class MenuWindow(SyncSketch_Window):
                 for review in reviews:
                     review_treeWidgetItem = self._build_widget_item(parent = project_treeWidgetItem,
                                                                 item_name = review.get('name'),
-                                                                item_type = 'review',
+                                                                item_type='review',
                                                                 item_icon = review_icon,
                                                                 item_data = review)
                     # Add items
@@ -1049,9 +1041,9 @@ class MenuWindow(SyncSketch_Window):
                         else:
                             specified_media_icon = media_unknown_icon
 
-                        media_treeWidgetItem = self._build_widget_item( parent = review_treeWidgetItem,
+                        media_treeWidgetItem = self._build_widget_item(parent = review_treeWidgetItem,
                                                                     item_name = media.get('name'),
-                                                                    item_type = 'media',
+                                                                    item_type='media',
                                                                     item_icon = specified_media_icon,
                                                                     item_data = media)
 
@@ -1062,7 +1054,7 @@ class MenuWindow(SyncSketch_Window):
 
         logger.info("uploaded_to_value: {}".format(database.read_cache('upload_to_value')))
         url_payload = parse_url_data(database.read_cache('upload_to_value'))
-        logger.info("url_payload: {}".format(url_payload) )
+        logger.info("url_payload: {}".format(url_payload))
         get_current_item_from_ids(self.ui.browser_treeWidget, url_payload)
         set_tree_selection(self.ui.browser_treeWidget, None)
         USER_ACCOUNT_DATA = account_data
