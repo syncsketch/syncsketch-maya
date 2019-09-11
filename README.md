@@ -9,6 +9,8 @@ The syncsketch-maya plugin which will allow you to
 
 See a quick Intro Video for this plugin here: https://vimeo.com/syncsketch/integrationmaya
 
+See a good use case, demonstrated by Zeina Masri on how to animate from reference: https://vimeo.com/359388029
+
 # Installation
 
 ### Drag & Drop
