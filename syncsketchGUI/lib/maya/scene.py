@@ -214,7 +214,8 @@ def add_extension(file):
     return the extension if the the viewer is turned off
     '''
     extension = None
-
+    #Assumptions that might not hold up, we should maybe consider setting
+    #mov as a default for all
     if '.' in file:
         extension = file.rsplit('.', 1)[-1]
 
@@ -224,7 +225,7 @@ def add_extension(file):
         elif sys.platform == 'linux2':
             extension = 'mov'
         elif sys.platform == 'win32':
-            extension = 'avi'
+            extension = 'mov'
         else:
             extension = 'mov'
 

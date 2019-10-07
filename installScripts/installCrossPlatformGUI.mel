@@ -331,8 +331,8 @@ class SyncSketchInstaller(QObject):\n\
 \n\
 \n\
         #Load Plugin And Autoload it\n\
-        cmds.loadPlugin("SyncSketchPlugin")\n\
-        cmds.pluginInfo("SyncSketchPlugin",  edit=True, autoload=True)\n\
+        cmds.loadPlugin(\"SyncSketchPlugin\")\n\
+        cmds.pluginInfo(\"SyncSketchPlugin\",  edit=True, autoload=True)\n\
 \n\
         #Create Default's for current OS\n\
         self.createGoodDefaults()\n\
@@ -534,8 +534,8 @@ class installThread(QThread):\n\
             if Literals.PLATFORM == 'Darwin':\n\
                 if not os.path.isdir(PluginInstallPath['Darwin']):\n\
                     os.makedirs(PluginInstallPath['Darwin'])\n\
-                shutil.copy(os.path.join(Literals.SYNCSKETCH_INSTALL_PATH, "SyncSketchPlugin.py"), \n\
-                    os.path.join(PluginInstallPath['Darwin'], "SyncSketchPlugin.py")\n\
+                shutil.copy(os.path.join(Literals.SYNCSKETCH_INSTALL_PATH, \"SyncSketchPlugin.py\"), \n\
+                    os.path.join(PluginInstallPath['Darwin'], \"SyncSketchPlugin.py\")\n\
                     )\n\
 \n\
         except Exception as e:\n\

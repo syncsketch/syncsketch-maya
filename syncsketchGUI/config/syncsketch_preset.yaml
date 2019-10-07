@@ -10,7 +10,7 @@ HD720p (OSX):
   width: 1280
 HD720p (Windows):
   encoding: H.264
-  format: avi
+  format: qt
   height: 768
   width: 1280
 Small:
