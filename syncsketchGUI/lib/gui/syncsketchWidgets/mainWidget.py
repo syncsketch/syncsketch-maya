@@ -617,7 +617,7 @@ class MenuWindow(SyncSketch_Window):
             self.ui.ui_upload_pushButton.setText("UPLOAD\n Clip as new Version of '%s'"%targetdata["name"])
             # self.ui.us_ui_upload_pushButton.setStyleSheet(upload_color)x
 
-            thumbURL = self.current_user.get_item_info(targetdata['media_id'])['objects'][0]['thumb']
+            thumbURL = self.current_user.get_item_info(targetdata['media_id'])['objects'][0]['thumbnail_url']
             logging.info("thumbURL: {}".format(thumbURL))
             self.ui.thumbnail_itemPreview.set_icon_from_url(thumbURL)
 
