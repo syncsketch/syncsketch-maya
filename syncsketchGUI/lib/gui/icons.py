@@ -21,7 +21,7 @@ def _get_qicon_from_url(url):
     '''
 
     testfile = urllib.URLopener()
-    tmpname = tempfile.NamedTemporaryFile()
+    tmpname = tempfile.NamedTemporaryFile(delete=False)
     try:
         thumb = testfile.retrieve(url, tmpname.name)
     except:
