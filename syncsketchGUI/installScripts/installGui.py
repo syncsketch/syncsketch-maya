@@ -17,6 +17,7 @@ import maya.utils
 import maya.cmds
 from functools import partial
 from syncsketchGUI.installScripts.maintenance import getLatestSetupPyFileFromLocal, getLatestSetupPyFileFromRepo
+import syncsketchGUI.lib.user as user
 
 DEV = False
 INSTALL_SSGUI_ONLY = False
@@ -69,6 +70,7 @@ class InstallOptions(object):
 
     installShelf = 1
     upgrade = 0
+    tokenData = {}
 
 
 class Ressources(object):
@@ -221,7 +223,7 @@ class installerUI(QWidget, UIDesktop):
             self.upgradeInfo.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
             self.upgradeInfo.setMargin(5)
             self.upgradeInfo.setStyleSheet(
-                'QLabel {text-decoration: color: #00c899}; font: 16pt')
+                'QLabel {color: #00c899; font: 16pt}')
         outer.addWidget(self.upgradeInfo)
 
 
@@ -338,10 +340,10 @@ class SyncSketchInstaller(QObject):
         self.installer.closeButton.hide()
         self.installer.animatedGif.hide()
         self.installer.waitLabel.hide()
-        print("setting text for upgradeInfo")
-        self.installer.upgradeInfo.setText("Upgrade Successfull")
+        self.installer.upgradeInfo.setText('Upgrade Successfull')
         self.installer.upgradeInfo.setStyleSheet(
-            'QLabel {text-decoration: color: #00a17b}; font: 16pt')
+            'QLabel {color: #00a17b; font: 16pt}')
+        restoreCredentialsFile()
 
 
         # Install the Shelf
@@ -402,6 +404,14 @@ class SyncSketchInstaller(QObject):
         # Open UI
         from syncsketchGUI import standalone
         reload(standalone)
+
+def restoreCredentialsFile():
+    current_user = user.SyncSketchUser()
+    current_user.set_name(InstallOptions.tokenData['email'])
+    # todo we should remove api_key
+    current_user.set_token(InstallOptions.tokenData['token'])
+    current_user.set_api_key(InstallOptions.tokenData['token'])
+    current_user.auto_login()
 
 
 def downloadFFmpegToDisc(platform=None, moveToLocation=None):

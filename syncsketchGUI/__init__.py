@@ -7,6 +7,7 @@ import logging
 from syncsketchGUI.lib.gui.syncsketchWidgets import infoDialog
 import pprint
 from pprint import pformat
+import syncsketchGUI.lib.user as user
 
 logger = logging.getLogger('syncsketchGUI')
 logger.setLevel(logging.CRITICAL)
@@ -35,8 +36,17 @@ if getVersionDifference():
     if not installGui.InstallOptions.upgrade == 1:
         #If this is set to 1, it means upgrade was already installed
         installGui.InstallOptions.upgrade = 1
+        
+        #Preserve Credentials
+        current_user = user.SyncSketchUser()
+
+        installGui.InstallOptions.tokenData['username'] = current_user.get_name()
+        installGui.InstallOptions.tokenData['token'] = current_user.get_token()
+        installGui.InstallOptions.tokenData['api_key'] = current_user.get_api_key()
         Installer = installGui.SyncSketchInstaller()
         Installer.showit()
+
+
 else:
     logger.info("You are using the latest release of this package")
 
