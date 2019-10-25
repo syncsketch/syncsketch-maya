@@ -9,16 +9,6 @@
     sourceType  : python
 
 - shelfButton:
-    annotation  : Target
-    command     : import syncsketchGUI; reload (syncsketchGUI); syncsketchGUI.reload_toolkit (); syncsketchGUI.show_syncsketch_browser_window()
-    image       : icon_target_100.png
-    image1      : icon_target_100.png
-    image2      : icon_target_150.png
-    image3      : icon_target_200.png
-    label       : Target
-    sourceType  : python
-
-- shelfButton:
     annotation  : Record
     command     : import syncsketchGUI; reload (syncsketchGUI); syncsketchGUI.reload_toolkit (); syncsketchGUI.record ()
     image       : icon_record_100.png
