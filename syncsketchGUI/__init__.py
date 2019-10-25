@@ -24,9 +24,11 @@ logger.propagate = 0
 WAIT_TIME = 0.1 # seconds
 
 
-# ======================================================================
-# API Import
+# Check for Updates
+from installScripts.maintenance import getVersionDifference
 
+if getVersionDifference():
+    print("YOU ARE {} VERSIONS BEHIND".format(getVersionDifference()))
 # ======================================================================
 # Core Imports
 
