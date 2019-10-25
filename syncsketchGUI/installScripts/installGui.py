@@ -409,7 +409,7 @@ def restoreCredentialsFile():
     current_user = user.SyncSketchUser()
     print("InstallOptions.tokenData: {}".format(InstallOptions.tokenData))
     if InstallOptions.tokenData:
-        current_user.set_name(InstallOptions.tokenData['email'])
+        current_user.set_name(InstallOptions.tokenData['username'])
         # todo we should remove api_key
         current_user.set_token(InstallOptions.tokenData['token'])
         current_user.set_api_key(InstallOptions.tokenData['token'])
