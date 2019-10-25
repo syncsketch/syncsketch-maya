@@ -29,6 +29,8 @@ from installScripts.maintenance import getVersionDifference
 
 if getVersionDifference():
     print("YOU ARE {} VERSIONS BEHIND".format(getVersionDifference()))
+    import maya.mel as mel
+    
 # ======================================================================
 # Core Imports
 
