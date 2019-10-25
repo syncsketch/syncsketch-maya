@@ -1,3 +1,5 @@
+from syncsketchGUI.installScripts import installGui
+from installScripts.maintenance import getVersionDifference
 import os
 import time
 import webbrowser
@@ -24,17 +26,20 @@ logger.propagate = 0
 WAIT_TIME = 0.1 # seconds
 
 
-# Check for Updates
-from installScripts.maintenance import getVersionDifference
+# Check for Updates and load Upgrade UI if Needed
 
 if getVersionDifference():
-    print("YOU ARE {} VERSIONS BEHIND".format(getVersionDifference()))
-    import maya.mel as mel
-    
-# ======================================================================
-# Core Imports
+    logger.info("YOU ARE {} VERSIONS BEHIND".format(getVersionDifference()))
 
-from syncsketchGUI.lib import user, path
+
+    if not installGui.InstallOptions.upgrade == 1:
+        #If this is set to 1, it means upgrade was already installed
+        installGui.InstallOptions.upgrade = 1
+        Installer = installGui.SyncSketchInstaller()
+        Installer.showit()
+else:
+    logger.info("You are using the latest release of this package")
+
 from syncsketchGUI.lib import video, database
 from syncsketchGUI.lib.gui import icons, qt_utils, qt_widgets
 import gui

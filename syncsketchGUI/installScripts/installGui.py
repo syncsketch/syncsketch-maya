@@ -16,6 +16,7 @@ import zipfile
 import maya.utils
 import maya.cmds
 from functools import partial
+from syncsketchGUI.installScripts.maintenance import getLatestSetupPyFileFromLocal, getLatestSetupPyFileFromRepo
 
 DEV = False
 INSTALL_SSGUI_ONLY = False
@@ -67,6 +68,7 @@ class InstallOptions(object):
         pass
 
     installShelf = 1
+    upgrade = 0
 
 
 class Ressources(object):
@@ -185,7 +187,8 @@ class installerUI(QWidget, UIDesktop):
         logo.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
         logo.setMargin(15)
         outer.addWidget(logo, 0)
-        subtext = QLabel(u'SyncSketch Integration for Maya')
+        subtext = QLabel(
+            u'Update Available: Would you like to upgrade to the latest?' if InstallOptions.upgrade else 'SyncSketch Integration for Maya')
         outer.addWidget(subtext)
         subtext.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
         subtext.setMargin(5)
@@ -201,14 +204,25 @@ class installerUI(QWidget, UIDesktop):
         outer.addLayout(infoLayout, 0)
         infoLayout.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
 
-        tutorialButton = LinkButton('Tutorial Video', link=syncsketchMayaPluginVideoURL)
-        infoLayout.addWidget(tutorialButton, 0)
+        if not InstallOptions.upgrade:
+            tutorialButton = LinkButton('Tutorial Video', link=syncsketchMayaPluginVideoURL)
+            infoLayout.addWidget(tutorialButton, 0)
 
-        repoButton = LinkButton('Github Repo', link=syncsketchMayaPluginRepoURL)
-        infoLayout.addWidget(repoButton, 0)
+            repoButton = LinkButton('Github Repo', link=syncsketchMayaPluginRepoURL)
+            infoLayout.addWidget(repoButton, 0)
 
-        documentationButton = LinkButton('Documentation', link=syncsketchMayaPluginDocsURL)
-        infoLayout.addWidget(documentationButton, 0)
+            documentationButton = LinkButton('Documentation', link=syncsketchMayaPluginDocsURL)
+            infoLayout.addWidget(documentationButton, 0)
+        else:
+            fromVersion = getLatestSetupPyFileFromLocal()
+            toVersion = getLatestSetupPyFileFromRepo()
+            self.upgradeInfo = QLabel(
+                u'Upgrading from {} to {}'.format(fromVersion, toVersion))
+            self.upgradeInfo.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
+            self.upgradeInfo.setMargin(5)
+            self.upgradeInfo.setStyleSheet(
+                'QLabel {text-decoration: color: #00c899}; font: 16pt')
+        outer.addWidget(self.upgradeInfo)
 
 
         spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -232,8 +246,9 @@ class installerUI(QWidget, UIDesktop):
 
         ButtonLayout.addStretch()
         outer.addLayout(ButtonLayout)
-
-        self.installButton = IconButton('Install', highlight=True)
+        if InstallOptions.upgrade == 1:
+            self.installButton = IconButton('Upgrade', highlight=True)
+        self.installButton = IconButton('Upgrade' if InstallOptions.upgrade else 'Install', highlight=True)
         self.launchButton = IconButton('Launch Syncsketch UI', highlight=True, success=True)
         self.launchButton.hide()
         self.closeButton = IconButton(' Close', icon=Ressources.closeIcon)
@@ -317,15 +332,22 @@ class SyncSketchInstaller(QObject):
         self.installer.launchButton.clicked.connect(self.__launchButton)
         self.installer.show()
 
+
     def done(self):
         self.installer.launchButton.show()
         self.installer.closeButton.hide()
         self.installer.animatedGif.hide()
         self.installer.waitLabel.hide()
+        print("setting text for upgradeInfo")
+        self.installer.upgradeInfo.setText("Upgrade Successfull")
+        self.installer.upgradeInfo.setStyleSheet(
+            'QLabel {text-decoration: color: #00a17b}; font: 16pt')
+
 
         # Install the Shelf
         if InstallOptions.installShelf:
-            from syncsketchGUI import install_shelf
+            from syncsketchGUI import install_shelf, uninstall_shelf
+            uninstall_shelf()
             install_shelf()
 
 
@@ -546,6 +568,6 @@ class installThread(QThread):
                 print('cleaning up temporary files: {0}'.format(tmpdir))
                 shutil.rmtree(tmpdir, ignore_errors=True)
 
-
-Installer = SyncSketchInstaller()
-Installer.showit()
+if __name__ == '__main__':
+    Installer = SyncSketchInstaller()
+    Installer.showit()

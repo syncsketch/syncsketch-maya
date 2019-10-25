@@ -17,6 +17,7 @@ import zipfile\n\
 import maya.utils\n\
 import maya.cmds\n\
 from functools import partial\n\
+from syncsketchGUI.installScripts.maintenance import getLatestSetupPyFileFromLocal, getLatestSetupPyFileFromRepo\n\
 \n\
 DEV = False\n\
 INSTALL_SSGUI_ONLY = False\n\
@@ -68,6 +69,7 @@ class InstallOptions(object):\n\
         pass\n\
 \n\
     installShelf = 1\n\
+    upgrade = 0\n\
 \n\
 \n\
 class Ressources(object):\n\
@@ -186,7 +188,8 @@ class installerUI(QWidget, UIDesktop):\n\
         logo.setAlignment(Qt.AlignCenter | Qt.AlignCenter)\n\
         logo.setMargin(15)\n\
         outer.addWidget(logo, 0)\n\
-        subtext = QLabel(u'SyncSketch Integration for Maya')\n\
+        subtext = QLabel(\n\
+            u'Would you like to upgrade syncsketchGUI for Maya?' if InstallOptions.upgrade else 'SyncSketch Integration for Maya')\n\
         outer.addWidget(subtext)\n\
         subtext.setAlignment(Qt.AlignCenter | Qt.AlignCenter)\n\
         subtext.setMargin(5)\n\
@@ -202,14 +205,25 @@ class installerUI(QWidget, UIDesktop):\n\
         outer.addLayout(infoLayout, 0)\n\
         infoLayout.setAlignment(Qt.AlignCenter | Qt.AlignCenter)\n\
 \n\
-        tutorialButton = LinkButton('Tutorial Video', link=syncsketchMayaPluginVideoURL)\n\
-        infoLayout.addWidget(tutorialButton, 0)\n\
+        if not InstallOptions.upgrade:\n\
+            tutorialButton = LinkButton('Tutorial Video', link=syncsketchMayaPluginVideoURL)\n\
+            infoLayout.addWidget(tutorialButton, 0)\n\
 \n\
-        repoButton = LinkButton('Github Repo', link=syncsketchMayaPluginRepoURL)\n\
-        infoLayout.addWidget(repoButton, 0)\n\
+            repoButton = LinkButton('Github Repo', link=syncsketchMayaPluginRepoURL)\n\
+            infoLayout.addWidget(repoButton, 0)\n\
 \n\
-        documentationButton = LinkButton('Documentation', link=syncsketchMayaPluginDocsURL)\n\
-        infoLayout.addWidget(documentationButton, 0)\n\
+            documentationButton = LinkButton('Documentation', link=syncsketchMayaPluginDocsURL)\n\
+            infoLayout.addWidget(documentationButton, 0)\n\
+        else:\n\
+            fromVersion = getLatestSetupPyFileFromLocal()\n\
+            toVersion = getLatestSetupPyFileFromRepo()\n\
+            subtext = QLabel(\n\
+                u'Upgrading from {} to {}'.format(fromVersion, toVersion))\n\
+            subtext.setAlignment(Qt.AlignCenter | Qt.AlignCenter)\n\
+            subtext.setMargin(5)\n\
+            subtext.setStyleSheet(\n\
+                'QLabel {text-decoration: color: #00c899}; font-size: 16pt')\n\
+        outer.addWidget(subtext)\n\
 \n\
 \n\
         spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Expanding)\n\
@@ -233,8 +247,9 @@ class installerUI(QWidget, UIDesktop):\n\
 \n\
         ButtonLayout.addStretch()\n\
         outer.addLayout(ButtonLayout)\n\
-\n\
-        self.installButton = IconButton('Install', highlight=True)\n\
+        if InstallOptions.upgrade == 1:\n\
+            self.installButton = IconButton('Upgrade', highlight=True)\n\
+        self.installButton = IconButton('Upgrade' if InstallOptions.upgrade else 'Install', highlight=True)\n\
         self.launchButton = IconButton('Launch Syncsketch UI', highlight=True, success=True)\n\
         self.launchButton.hide()\n\
         self.closeButton = IconButton(' Close', icon=Ressources.closeIcon)\n\
@@ -547,7 +562,7 @@ class installThread(QThread):\n\
                 print('cleaning up temporary files: {0}'.format(tmpdir))\n\
                 shutil.rmtree(tmpdir, ignore_errors=True)\n\
 \n\
-\n\
-Installer = SyncSketchInstaller()\n\
-Installer.showit()\n\
+if __name__ == '__main__':\n\
+    Installer = SyncSketchInstaller()\n\
+    Installer.showit()\n\
 ");
