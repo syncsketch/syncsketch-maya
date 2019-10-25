@@ -1,5 +1,5 @@
 from syncsketchGUI.installScripts import installGui
-from installScripts.maintenance import getVersionDifference
+from syncsketchGUI.installScripts.maintenance import getVersionDifference
 import os
 import time
 import webbrowser
@@ -36,13 +36,15 @@ if getVersionDifference():
     if not installGui.InstallOptions.upgrade == 1:
         #If this is set to 1, it means upgrade was already installed
         installGui.InstallOptions.upgrade = 1
-        
+
         #Preserve Credentials
         current_user = user.SyncSketchUser()
 
-        installGui.InstallOptions.tokenData['username'] = current_user.get_name()
-        installGui.InstallOptions.tokenData['token'] = current_user.get_token()
-        installGui.InstallOptions.tokenData['api_key'] = current_user.get_api_key()
+        if current_user.is_logged_in():
+            installGui.InstallOptions.tokenData['username'] = current_user.get_name()
+            installGui.InstallOptions.tokenData['token'] = current_user.get_token()
+            installGui.InstallOptions.tokenData['api_key'] = current_user.get_api_key()
+            print("This is: {}".format(installGui.InstallOptions.tokenData))
         Installer = installGui.SyncSketchInstaller()
         Installer.showit()
 

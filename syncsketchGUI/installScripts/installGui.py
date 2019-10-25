@@ -224,7 +224,7 @@ class installerUI(QWidget, UIDesktop):
             self.upgradeInfo.setMargin(5)
             self.upgradeInfo.setStyleSheet(
                 'QLabel {color: #00c899; font: 16pt}')
-        outer.addWidget(self.upgradeInfo)
+            outer.addWidget(self.upgradeInfo)
 
 
         spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -407,11 +407,15 @@ class SyncSketchInstaller(QObject):
 
 def restoreCredentialsFile():
     current_user = user.SyncSketchUser()
-    current_user.set_name(InstallOptions.tokenData['email'])
-    # todo we should remove api_key
-    current_user.set_token(InstallOptions.tokenData['token'])
-    current_user.set_api_key(InstallOptions.tokenData['token'])
-    current_user.auto_login()
+    print("InstallOptions.tokenData: {}".format(InstallOptions.tokenData))
+    if InstallOptions.tokenData:
+        current_user.set_name(InstallOptions.tokenData['email'])
+        # todo we should remove api_key
+        current_user.set_token(InstallOptions.tokenData['token'])
+        current_user.set_api_key(InstallOptions.tokenData['token'])
+        current_user.auto_login()
+    else:
+        print("No User data found, skipping syncsketch_user.yaml")
 
 
 def downloadFFmpegToDisc(platform=None, moveToLocation=None):
