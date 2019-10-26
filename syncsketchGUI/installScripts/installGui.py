@@ -8,6 +8,7 @@ import glob
 import urllib2
 import tempfile
 import shutil
+
 import sys
 import subprocess
 import platform
@@ -16,8 +17,7 @@ import zipfile
 import maya.utils
 import maya.cmds
 from functools import partial
-from syncsketchGUI.installScripts.maintenance import getLatestSetupPyFileFromLocal, getLatestSetupPyFileFromRepo
-import syncsketchGUI.lib.user as user
+
 
 DEV = False
 INSTALL_SSGUI_ONLY = False
@@ -64,13 +64,18 @@ class Icon():
         return pixmap
 
 
+
+
 class InstallOptions(object):
     def __init__(self):
         pass
 
+
+
     installShelf = 1
     upgrade = 0
     tokenData = {}
+
 
 
 class Ressources(object):
@@ -216,6 +221,8 @@ class installerUI(QWidget, UIDesktop):
             documentationButton = LinkButton('Documentation', link=syncsketchMayaPluginDocsURL)
             infoLayout.addWidget(documentationButton, 0)
         else:
+            from syncsketchGUI.installScripts.maintenance import getLatestSetupPyFileFromLocal, getLatestSetupPyFileFromRepo
+
             fromVersion = getLatestSetupPyFileFromLocal()
             toVersion = getLatestSetupPyFileFromRepo()
             self.upgradeInfo = QLabel(
@@ -343,7 +350,10 @@ class SyncSketchInstaller(QObject):
         self.installer.upgradeInfo.setText('Upgrade Successfull')
         self.installer.upgradeInfo.setStyleSheet(
             'QLabel {color: #00a17b; font: 16pt}')
-        restoreCredentialsFile()
+
+        if InstallOptions.upgrade == 1:
+            import syncsketchGUI.lib.user as user
+            restoreCredentialsFile()
 
 
         # Install the Shelf
