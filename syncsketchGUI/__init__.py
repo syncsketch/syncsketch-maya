@@ -52,6 +52,7 @@ if getVersionDifference():
 else:
     logger.info("You are using the latest release of this package")
 
+from syncsketchGUI.lib import user, path
 from syncsketchGUI.lib import video, database
 from syncsketchGUI.lib.gui import icons, qt_utils, qt_widgets
 import gui
