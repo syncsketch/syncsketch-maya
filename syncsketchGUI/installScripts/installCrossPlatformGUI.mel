@@ -348,12 +348,14 @@ class SyncSketchInstaller(QObject):\n\
         self.installer.closeButton.hide()\n\
         self.installer.animatedGif.hide()\n\
         self.installer.waitLabel.hide()\n\
-        self.installer.upgradeInfo.setText('Upgrade Successfull')\n\
-        self.installer.upgradeInfo.setStyleSheet(\n\
-            'QLabel {color: #00a17b; font: 16pt}')\n\
+\n\
 \n\
         if InstallOptions.upgrade == 1:\n\
             restoreCredentialsFile()\n\
+            self.installer.upgradeInfo.setText('Upgrade Successfull')\n\
+            self.installer.subtext.setText('')\n\
+            self.installer.upgradeInfo.setStyleSheet(\n\
+                'QLabel {color: #00a17b; font: 16pt}')\n\
 \n\
 \n\
         # Install the Shelf\n\
@@ -543,7 +545,7 @@ class installThread(QThread):\n\
                 print(subprocess.check_output(cmd))\n\
 \n\
             # Install Dependencies\n\
-            cmd = '{0} install --upgrade --user {1} pyyaml requests[security]'.format(PIP_PATH,\n\
+            cmd = '{0} install --force-reinstall --user {1} pyyaml requests[security]'.format(PIP_PATH,\n\
                                                                                                SYNCSKETCH_API_RELEASE_PATH).split(\n\
                 ' ')\n\
             if not INSTALL_SSGUI_ONLY:\n\
