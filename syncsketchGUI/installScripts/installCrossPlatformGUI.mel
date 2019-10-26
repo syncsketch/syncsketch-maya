@@ -408,15 +408,13 @@ class SyncSketchInstaller(QObject):\n\
 \n\
 def restoreCredentialsFile():\n\
     current_user = user.SyncSketchUser()\n\
-    print("InstallOptions.tokenData: {}".format(InstallOptions.tokenData))\n\
     if InstallOptions.tokenData:\n\
         current_user.set_name(InstallOptions.tokenData['username'])\n\
         # todo we should remove api_key\n\
         current_user.set_token(InstallOptions.tokenData['token'])\n\
         current_user.set_api_key(InstallOptions.tokenData['token'])\n\
         current_user.auto_login()\n\
-    else:\n\
-        print("No User data found, skipping syncsketch_user.yaml")\n\
+\n\
 \n\
 \n\
 def downloadFFmpegToDisc(platform=None, moveToLocation=None):\n\
