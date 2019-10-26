@@ -353,7 +353,6 @@ class SyncSketchInstaller(QObject):\n\
             'QLabel {color: #00a17b; font: 16pt}')\n\
 \n\
         if InstallOptions.upgrade == 1:\n\
-            import syncsketchGUI.lib.user as user\n\
             restoreCredentialsFile()\n\
 \n\
 \n\
@@ -417,6 +416,8 @@ class SyncSketchInstaller(QObject):\n\
         reload(standalone)\n\
 \n\
 def restoreCredentialsFile():\n\
+    #We assume that User already has a previous version installed\n\
+    import syncsketchGUI.lib.user as user\n\
     current_user = user.SyncSketchUser()\n\
     if InstallOptions.tokenData:\n\
         current_user.set_name(InstallOptions.tokenData['username'])\n\
