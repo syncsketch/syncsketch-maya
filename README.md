@@ -24,7 +24,7 @@ If you are familiar with python and pip, you can go for a manual installation  a
 
 1. Install the Syncsketch-API + extras
  
-> `pip2.7.exe install --upgrade --user https://github.com/syncsketch/python-api/archive/v1.0.1.zip pyyaml requests[security]`
+> `pip2.7.exe install --upgrade --user https://github.com/syncsketch/python-api/archive/v1.0.4.zip pyyaml requests[security]`
 
 2. Install the Syncsketch-GUI
  
