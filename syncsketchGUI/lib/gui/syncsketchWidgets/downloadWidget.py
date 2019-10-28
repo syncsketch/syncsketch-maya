@@ -43,7 +43,7 @@ class DownloadWindow(SyncSketch_Window):
         review_id = database.read_cache('target_review_id')
         media_id  = database.read_cache('target_media_id')
         target_url  = database.read_cache('upload_to_value')
-        thumb_url = current_user.get_item_info(media_id)['objects'][0]['thumb']
+        thumb_url = current_user.get_item_info(media_id)['objects'][0]['thumbnail_url']
 
 
         self.ui.review_target_url.setText(target_url)

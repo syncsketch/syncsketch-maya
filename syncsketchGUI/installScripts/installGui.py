@@ -49,7 +49,7 @@ ScriptInstallPath = {
 PluginInstallPath = {
     'Darwin': '{0}/Library/Preferences/Autodesk/maya/plug-ins/'.format(expanduser('~')),
     'linux64': '$HOME/maya/scripts/',  # Todo: Not tested
-    'Windows': '{0}/maya/scripts/'.format(expanduser('~')) # Todo: Not tested
+    'Windows': '{0}/maya/scripts/'.format(expanduser('~'))
 }
 
 
@@ -404,7 +404,7 @@ class SyncSketchInstaller(QObject):
         self.myThread = installThread()
         self.connect(self.myThread, SIGNAL('finished()'), self.done)
         self.myThread.start()
-
+ 
     def __closeButton(self):
         self.installer.clean()
         self.installer.close()
@@ -426,7 +426,6 @@ def restoreCredentialsFile():
         current_user.set_token(InstallOptions.tokenData['token'])
         current_user.set_api_key(InstallOptions.tokenData['token'])
         current_user.auto_login()
-
 
 
 def downloadFFmpegToDisc(platform=None, moveToLocation=None):
@@ -552,8 +551,7 @@ class installThread(QThread):
                 print(subprocess.check_output(cmd))
 
             # Install SyncsketchGUI
-            # Todo: We might wan't to check first if there is already a syncsketchGUI installed in a different path
-            # todo: By using target, pip show won't find this package anymore
+            # * By using target, pip show won't find this package anymore
 
             if os.path.isdir(Literals.SYNCSKETCH_INSTALL_PATH):
                 shutil.rmtree(Literals.SYNCSKETCH_INSTALL_PATH, ignore_errors=True)
