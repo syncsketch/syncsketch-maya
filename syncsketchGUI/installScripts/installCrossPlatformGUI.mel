@@ -43,14 +43,14 @@ if DEV:\n\
 \n\
 ScriptInstallPath = {\n\
     'Darwin': '{0}/Library/Preferences/Autodesk/maya/scripts/'.format(expanduser('~')),\n\
-    'linux64': '$HOME/maya/scripts/',  # Todo: Not tested\n\
+    'linux64': '$HOME/maya/scripts/',\n\
     'Windows': '{0}/maya/scripts/'.format(expanduser('~'))\n\
 }\n\
 \n\
 PluginInstallPath = {\n\
     'Darwin': '{0}/Library/Preferences/Autodesk/maya/plug-ins/'.format(expanduser('~')),\n\
-    'linux64': '$HOME/maya/scripts/',  # Todo: Not tested\n\
-    'Windows': '{0}/maya/scripts/'.format(expanduser('~')) # Todo: Not tested\n\
+    'linux64': '$HOME/maya/scripts/',\n\
+    'Windows': '{0}/maya/scripts/'.format(expanduser('~'))\n\
 }\n\
 \n\
 \n\
@@ -405,7 +405,7 @@ class SyncSketchInstaller(QObject):\n\
         self.myThread = installThread()\n\
         self.connect(self.myThread, SIGNAL('finished()'), self.done)\n\
         self.myThread.start()\n\
-\n\
+ \n\
     def __closeButton(self):\n\
         self.installer.clean()\n\
         self.installer.close()\n\
@@ -427,7 +427,6 @@ def restoreCredentialsFile():\n\
         current_user.set_token(InstallOptions.tokenData['token'])\n\
         current_user.set_api_key(InstallOptions.tokenData['token'])\n\
         current_user.auto_login()\n\
-\n\
 \n\
 \n\
 def downloadFFmpegToDisc(platform=None, moveToLocation=None):\n\
@@ -553,8 +552,7 @@ class installThread(QThread):\n\
                 print(subprocess.check_output(cmd))\n\
 \n\
             # Install SyncsketchGUI\n\
-            # Todo: We might wan't to check first if there is already a syncsketchGUI installed in a different path\n\
-            # todo: By using target, pip show won't find this package anymore\n\
+            # * By using target, pip show won't find this package anymore\n\
 \n\
             if os.path.isdir(Literals.SYNCSKETCH_INSTALL_PATH):\n\
                 shutil.rmtree(Literals.SYNCSKETCH_INSTALL_PATH, ignore_errors=True)\n\

@@ -128,7 +128,7 @@ def show_download_window():
 def show_viewport_preset_window():
     gui.show_viewport_preset_window()
 
-#todo don't raise error
+
 def get_current_file():
     # validate file name
     filename = database.read_cache('last_recorded_selection')
@@ -198,7 +198,7 @@ def download(current_user = None):
     logger.info("target_media_id: %s"%media_id)
     return current_user.download_greasepencil(review_id, media_id )
 
-#todo: refator both to one function
+
 def downloadVideo(current_user = None):
     if not current_user:
         current_user = user.SyncSketchUser()
@@ -329,8 +329,6 @@ def _upload(current_user = None, ):
     upload_to_value = item_name
     logger.info('Selected Item: %s'%item_name)
 
-    #todo: whats the effect of this?
-    #time.sleep(WAIT_TIME)
 
     # Don't need to login if we're uploading to playground.
     # Treewidget item selection must be review type to upload.
@@ -369,7 +367,6 @@ def _upload(current_user = None, ):
 
     review_data = current_user.get_review_data_from_id(review_id)
     review_url = review_data.get('reviewURL')
-    #todo: what is revision?
     #uploaded_media_url = '{}'.format(review_url)
     uploaded_media_url = '{}#{}'.format(review_url, uploaded_item['id'])
     logger.info("review_data: {}".format(review_data))

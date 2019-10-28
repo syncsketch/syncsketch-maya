@@ -159,7 +159,7 @@ class SyncSketchUser():
     # Auto Login
     def auto_login(self):
         # logger.warning(  " doing autologin: %s"%self.api_host)
-        # todo: debug is set to true, do we wan't this?
+
         if not self.host_data:
             logging.info("self.get_name(): {} self.get_api_key() {} self.api_host {}".format(
                 self.get_name(), self.get_api_key(), self.api_host,))
@@ -167,7 +167,7 @@ class SyncSketchUser():
                                                        self.get_api_key(),
                                                        useExpiringToken=True,
                                                        host = self.api_host,
-                                                       debug=True)
+                                                       debug=False)
             return self.host_data
 
     def is_logged_in(self):

@@ -42,13 +42,13 @@ if DEV:
 
 ScriptInstallPath = {
     'Darwin': '{0}/Library/Preferences/Autodesk/maya/scripts/'.format(expanduser('~')),
-    'linux64': '$HOME/maya/scripts/',  # Todo: Not tested
+    'linux64': '$HOME/maya/scripts/',
     'Windows': '{0}/maya/scripts/'.format(expanduser('~'))
 }
 
 PluginInstallPath = {
     'Darwin': '{0}/Library/Preferences/Autodesk/maya/plug-ins/'.format(expanduser('~')),
-    'linux64': '$HOME/maya/scripts/',  # Todo: Not tested
+    'linux64': '$HOME/maya/scripts/',
     'Windows': '{0}/maya/scripts/'.format(expanduser('~'))
 }
 

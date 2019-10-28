@@ -51,7 +51,6 @@ class WebLoginWindow(QWebView):
                     tokenData = json.loads(jsonData)
                     logger.warning("tokenData: {0}".format(tokenData))
                     self.current_user.set_name(tokenData["email"])
-                    # todo we should remove api_key
                     self.current_user.set_token(tokenData["token"])
                     self.current_user.set_api_key(tokenData["token"])
                     self.current_user.auto_login()

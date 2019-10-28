@@ -225,7 +225,6 @@ def update_target_from_tree(self, treeWidget):
 
     if item_type == 'project':
         review_url = '{}{}'.format(path.project_url, item_data.get('id'))
-        #todo: is there a shorter way?
         self.ui.thumbnail_itemPreview.clear()
     elif item_type == 'review': # and not item_data.get('reviewURL'):
         current_data['review_id'] = item_data.get('id')
@@ -237,7 +236,7 @@ def update_target_from_tree(self, treeWidget):
         parent_data = parent_item.data(1, QtCore.Qt.EditRole)
         current_data['review_id'] = parent_data.get('id')
         current_data['media_id'] = item_data.get('id')
-        #todo: yfs: clean this
+        # * Expected url links
         #https://syncsketch.com/sketch/300639#692936
         #https://www.syncsketch.com/sketch/5a8d634c8447#692936/619482
         #current_data['target_url'] = '{}#{}'.format(review_base_url + str(current_data['review_id']), current_data['media_id'])

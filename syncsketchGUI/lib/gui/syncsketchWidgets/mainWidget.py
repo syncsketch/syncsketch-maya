@@ -14,7 +14,6 @@ from syncsketchGUI.gui import  _maya_delete_ui, show_download_window
 from syncsketchGUI.lib.gui.syncsketchWidgets.webLoginWidget import WebLoginWindow
 import syncsketchGUI
 from syncsketchGUI.gui import OpenPlayer
-#todo: create helper class
 from syncsketchGUI.gui import parse_url_data, get_current_item_from_ids, set_tree_selection, update_target_from_tree
 from syncsketchGUI.lib.gui.icons import _get_qicon
 from syncsketchGUI.lib.gui.literals import DEFAULT_VIEWPORT_PRESET, PRESET_YAML, VIEWPORT_YAML, DEFAULT_PRESET, uploadPlaceHolderStr, message_is_not_loggedin, message_is_not_connected
@@ -55,6 +54,10 @@ class MenuWindow(SyncSketch_Window):
         #Populate Treewidget with all items
         self.asyncPopulateTree(withItems=True)
 
+        self.setFocusPolicy(Qt.StrongFocus)
+    
+    def focusInEvent(self, event):
+        self.label.setText('Got focus')
 
     def storeAccountData(self, s):
         logging.info(s)

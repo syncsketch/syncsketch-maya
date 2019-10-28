@@ -1,5 +1,9 @@
+import sys
+import os
+path, filename = os.path.split(sys.argv[0])
+pythonInstallerPath = os.path.join(path, "installGui.py")
 lines = []
-with open("installGui.py", "r") as f:
+with open(pythonInstallerPath, "r") as f:
     lines = f.readlines()
 
 lines.insert(0, "python(\"\n")
@@ -9,6 +13,7 @@ for line in lines:
     print(line)
 
 newText += "\");"
-with open("installCrossPlatformGUI.mel", "w") as f:
+melInstallerPath = os.path.join(path, "installCrossPlatformGUI.mel")
+with open(melInstallerPath, "w") as f:
     f.write(newText)
 exit()
