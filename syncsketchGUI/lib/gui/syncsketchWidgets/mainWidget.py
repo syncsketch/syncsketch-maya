@@ -42,8 +42,6 @@ class MenuWindow(SyncSketch_Window):
         logger.critical(self.accountData)
 
 
-
-
         # Load UI state
         self.restore_ui_state()
         self.update_login_ui()
@@ -106,6 +104,12 @@ class MenuWindow(SyncSketch_Window):
 
 
     def restore_ui_state(self):
+        self.ui.ps_upload_after_creation_checkBox.setEnabled(
+            True if self.current_user.is_logged_in() else False)
+
+        self.ui.ui_upload_pushButton.setEnabled(
+            True if self.current_user.is_logged_in() else False)
+
         # Playblast Settings
         value = self.sanitize(database.read_cache('ps_directory_lineEdit'))
         self.ui.ps_directory_lineEdit.setText(
@@ -128,7 +132,7 @@ class MenuWindow(SyncSketch_Window):
 
         value = database.read_cache('ps_upload_after_creation_checkBox')
         self.ui.ps_upload_after_creation_checkBox.setChecked(
-            True if value == 'true' else False)
+            True if value == 'true' and self.current_user.is_logged_in() else False)
 
         value = database.read_cache('us_filename_lineEdit')
         self.ui.us_filename_lineEdit.setText(
@@ -531,7 +535,7 @@ class MenuWindow(SyncSketch_Window):
         #self.populate_review_panel(self,  force=True)
 
     def refresh(self):
-        logging.info("Header clicked")
+        logging.info("Refresh Clicked, trying to refresh if logged in")
         #self.populate_review_panel(self, force=True)
         self.asyncPopulateTree(withItems=True)
         self.repaint()
@@ -933,6 +937,7 @@ class MenuWindow(SyncSketch_Window):
     # Tooltip Area Functions
 
     # loggedin window
+    # todo: this is similar to is_logged_in, we might wan't to move it there
     def isloggedIn(self,loggedIn=False):
         if loggedIn:
             message =  "Successfully logged in as %s"%self.current_user.get_name()

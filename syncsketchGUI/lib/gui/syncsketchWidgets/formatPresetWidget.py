@@ -37,6 +37,7 @@ class FormatPresetWindow(SyncSketch_Window):
         self.ui.ui_formatpreset_layout.setSpacing(1)
         self.ui.ui_formatPreset_comboBox = RegularComboBox()
         self.ui.ui_formatpreset_layout.addWidget(self.ui.ui_formatPreset_comboBox)
+        
 
 
         self.ui.ps_new_preset_pushButton = RegularToolButton()
@@ -199,11 +200,10 @@ class FormatPresetWindow(SyncSketch_Window):
         presetData = database._parse_yaml(presetFile)
         if not presetData:
             return
-
         if not presetName:
-            self.ui.ui_formatPreset_comboBox.set_combobox_index( selection=DEFAULT_PRESET)
-            self.ui.format_comboBox.set_combobox_index( selection='avi')
-            self.ui.encoding_comboBox.set_combobox_index( selection='none')
+            self.ui.ui_formatPreset_comboBox.set_combobox_index(selection=database.read_cache('current_preset'))
+            self.ui.format_comboBox.set_combobox_index(selection='avi')
+            self.ui.encoding_comboBox.set_combobox_index(selection='none')
             self.ui.width_spinBox.setValue(1280)
             self.ui.height_spinBox.setValue(720)
 

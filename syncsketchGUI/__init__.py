@@ -77,7 +77,7 @@ def show_web_login_window():
 
 def reload_toolkit():
     """
-    Convenient Method to reload, mainly for
+    Convenient Method to reload
     """
     from syncsketchGUI.lib import path
     from syncsketchGUI.lib import database

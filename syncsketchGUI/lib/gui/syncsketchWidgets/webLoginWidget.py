@@ -66,9 +66,6 @@ class WebLoginWindow(QWebView):
             self.parent.asyncPopulateTree(withItems=False)
             self.parent.asyncPopulateTree(withItems=True)
 
-
-
-
     def _myBindingFunction(self):
         self.page().mainFrame().loadFinished.connect(self.changed)
         self.page().mainFrame().urlChanged.connect(self.changed)
