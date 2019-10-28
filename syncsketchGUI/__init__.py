@@ -27,8 +27,7 @@ logger.propagate = 0
 WAIT_TIME = 0.1 # seconds
 
 
-# Check for Updates and load Upgrade UI if Needed
-
+# * Check for Updates and load Upgrade UI if Needed
 if getVersionDifference():
     logger.info("YOU ARE {} VERSIONS BEHIND".format(getVersionDifference()))
 
@@ -77,6 +76,9 @@ def show_web_login_window():
     gui.show_web_login_window()
 
 def reload_toolkit():
+    """
+    Convenient Method to reload, mainly for
+    """
     from syncsketchGUI.lib import path
     from syncsketchGUI.lib import database
     from syncsketchGUI.lib import video
