@@ -54,10 +54,6 @@ class MenuWindow(SyncSketch_Window):
         #Populate Treewidget with all items
         self.asyncPopulateTree(withItems=True)
 
-        self.setFocusPolicy(Qt.StrongFocus)
-    
-    def focusInEvent(self, event):
-        self.label.setText('Got focus')
 
     def storeAccountData(self, s):
         logging.info(s)

@@ -59,6 +59,14 @@ def make_safe(raw_path):
     safe_path = os.path.normpath(quoted_path)
     return safe_path
 
+def make_url_offlineMode(url):
+    '''
+    Add's offline Mode key to a given url
+    '''
+     #https://www.syncsketch.com/sketch/b280d3a7cb30/#1127001
+     #https://www.syncsketch.com/sketch/b280d3a7cb30/#offlineMode=1?1127001
+    return url.replace("#", "#offlineMode=1?")
+
 def validate_email_address(email_address):
     '''
     Check to make sure if the given email address if valid

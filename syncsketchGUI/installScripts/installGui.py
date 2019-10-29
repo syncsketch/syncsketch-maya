@@ -194,11 +194,11 @@ class installerUI(QWidget, UIDesktop):
         logo.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
         logo.setMargin(15)
         outer.addWidget(logo, 0)
-        subtext = QLabel(
+        self.subtext = QLabel(
             u'Update Available: Would you like to upgrade to the latest?' if InstallOptions.upgrade else 'SyncSketch Integration for Maya')
-        outer.addWidget(subtext)
-        subtext.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
-        subtext.setMargin(5)
+        outer.addWidget(self.subtext)
+        self.subtext.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
+        self.subtext.setMargin(5)
 
         palette = self.palette()
         palette.setColor(self.backgroundRole(), '#2b353b')

@@ -10,7 +10,7 @@ from pprint import pformat
 import syncsketchGUI.lib.user as user
 
 logger = logging.getLogger('syncsketchGUI')
-logger.setLevel(logging.CRITICAL)
+logger.setLevel(logging.INFO)
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
 
@@ -165,13 +165,14 @@ def show_success_message(uploaded_item):
 def play(filename = None):
     if not filename:
         filename = get_current_file()
-        return
     filename = path.make_safe(filename)
     video.play_in_default_player(filename)
     logger.info('Playing current video: {}'.format(filename.replace('"', '')))
 
 
 def upload(open_after_upload = None, show_success_msg = False):
+
+    logger.info("open_after_upload Url: {}".format(open_after_upload))
     uploaded_item = _upload()
     if not uploaded_item:
         return
@@ -180,7 +181,11 @@ def upload(open_after_upload = None, show_success_msg = False):
         open_after_upload = True if database.read_cache('ps_open_afterUpload_checkBox') == 'true' else False
 
     if open_after_upload:
-        webbrowser.open(uploaded_item['reviewURL'], new=2, autoraise=True)
+        url = path.make_url_offlineMode(uploaded_item['reviewURL'])
+        print(logger.info("Url: {}".format(url)))
+        logger.info("Opening Url: {}".format(uploaded_item['reviewURL']))
+        webbrowser.open(url, new=2, autoraise=True)
+
 
     if not open_after_upload:
         show_success_message(uploaded_item)
