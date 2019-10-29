@@ -352,7 +352,7 @@ class SyncSketchInstaller(QObject):
         if InstallOptions.upgrade == 1:
             restoreCredentialsFile()
             self.installer.upgradeInfo.setText('Upgrade Successfull')
-            self.installer.subtext.setText('.')
+            self.installer.subtext.setText('')
             self.installer.upgradeInfo.setStyleSheet(
                 'QLabel {color: #00a17b; font: 16pt}')
 

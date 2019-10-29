@@ -28,7 +28,7 @@ WAIT_TIME = 0.1 # seconds
 
 
 # * Check for Updates and load Upgrade UI if Needed
-updateNeeded = 1 # getVersionDifference()
+updateNeeded = getVersionDifference()
 if updateNeeded:
 	logger.info("YOU ARE {} VERSIONS BEHIND".format(updateNeeded))
 
