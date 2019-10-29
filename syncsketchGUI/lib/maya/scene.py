@@ -159,15 +159,45 @@ def get_InOutFrames(type = 'Time Slider'):
         pass
     return in_out
 
+def modifyXMLData(xmlFile, xmlFileSaved, offsetFrames):
+    tree = ET.parse(xmlFile)
+    root = tree.getroot()
+    for neighbor in root.iter('frame'):
+        current_frame = int(neighbor.attrib.get('time'))
+        neighbor.set('time', str(current_frame + offsetFrames))
+    tree.write(xmlFileSaved)
+
+def updateZip(zipname, filename, data):
+    # generate a temp file
+    tmpfd, tmpname = tempfile.mkstemp(dir=os.path.dirname(zipname))
+    os.close(tmpfd)
+
+    # create a temp copy of the archive without filename
+    with zipfile.ZipFile(zipname, 'r') as zin:
+        with zipfile.ZipFile(tmpname, 'w') as zout:
+            zout.comment = zin.comment  # preserve the comment
+            for item in zin.infolist():
+                if item.filename != filename:
+                    zout.writestr(item, zin.read(item.filename))
+
+    # replace with the temp archive
+    os.remove(zipname)
+    os.rename(tmpname, zipname)
+
+    # now add filename with its new data
+    with zipfile.ZipFile(zipname, mode='a', compression=zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr(filename, data)
 
 
 def modifyGreasePencil(zipname, offset=0):
+    print(zipname)
     if not offset:
         return zipname
     xmlfileName = 'greasePencil.xml'
     with zipfile.ZipFile(zipname, mode='a', compression=zipfile.ZIP_DEFLATED) as zf:
         for f in zf.namelist():
             logger.info(f)
+            print(f)
         zipFileXML = zf.open(xmlfileName)
         # Generate temp file name for modified zml file
         tmpname = tempfile.TemporaryFile()
@@ -198,11 +228,17 @@ def apply_greasepencil(filename, clear_existing_frames=False):
     pm.greasePencilCtx(ctxName, edit = True, importArchive =  filename )
 
 
-def apply_imageplane(filename):
+def apply_imageplane(filename, camera=None):
     import maya.cmds as cmds
-    ssCamera = cmds.camera()
+    #Get Camera Shapes
+    if not camera:
+        ssCamera = cmds.camera()[1]
 
-    imagePlane = cmds.imagePlane(camera=ssCamera[1])
+    else:
+        # todo: there might be another camera in this hierarchy
+        ssCamera = filter((lambda x: x if "Shape" in x else None), cmds.ls(camera, dag=True))[0]
+
+    imagePlane = cmds.imagePlane(camera=ssCamera)
     cmds.setAttr("{}.type".format(imagePlane[1], 2), 2)
     cmds.setAttr("{}.imageName".format(imagePlane[1], 2), filename, type='string')
 

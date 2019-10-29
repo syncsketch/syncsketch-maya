@@ -4,7 +4,7 @@ import time
 import webbrowser
 from syncsketchGUI.vendor.Qt import QtCore, QtGui, QtWidgets
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.CRITICAL)
+logger.setLevel(logging.INFO)
 from syncsketchGUI.lib import video, user, database
 from syncsketchGUI.lib.gui.qt_widgets import *
 from syncsketchGUI.lib.gui.qt_utils import *

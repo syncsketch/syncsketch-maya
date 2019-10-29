@@ -291,7 +291,7 @@ class SyncSketch_Window(QtWidgets.QMainWindow):
 
         self.align_to_center(self.parent)
 
-        
+
 
     def align_to_center(self, align_object):
         """

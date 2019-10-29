@@ -82,7 +82,7 @@ class DownloadWindow(SyncSketch_Window):
         self.ui.downloadGP_application_checkbox.setFixedWidth(60)
         self.ui.downloadGP_application_layout.setColumnStretch(1,0)
         self.ui.downloadGP_application_comboBox = RegularComboBox()
-        self.ui.downloadGP_application_comboBox.addItems(["... to active Viewport/Camera"])
+        self.ui.downloadGP_application_comboBox.addItems(maya_scene.get_available_cameras())
         self.ui.downloadGP_application_layout.addWidget(self.ui.downloadGP_application_checkbox,  0, 1)
         self.ui.downloadGP_application_layout.addWidget(self.ui.downloadGP_application_comboBox,  0, 2)
         self.ui.downloadGP_application_layout.setColumnStretch(2,1)
@@ -125,4 +125,5 @@ class DownloadWindow(SyncSketch_Window):
         downloaded_item = syncsketchGUI.downloadVideo()
         if downloaded_item:
             logger.info(downloaded_item)
-            maya_scene.apply_imageplane(downloaded_item)
+            camera = self.ui.downloadGP_application_comboBox.currentText()
+            maya_scene.apply_imageplane(downloaded_item, camera)
