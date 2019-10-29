@@ -36,7 +36,7 @@ if getVersionDifference():
         import urllib2
         """Parses latest setup.py's version number"""
         response = urllib2.urlopen(
-            'https://raw.githubusercontent.com/syncsketch/syncsketch-maya/eea0ddd8134673f9d110d9bee51ad77df158cab4/syncsketchGUI/installScripts/installGui.py')
+            'https://raw.githubusercontent.com/syncsketch/syncsketch-maya/release/syncsketchGUI/installScripts/installGui.py')
         data = response.read()
 
         #Let's get the path of the installer
