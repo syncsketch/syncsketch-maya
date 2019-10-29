@@ -28,9 +28,8 @@ WAIT_TIME = 0.1 # seconds
 
 
 # * Check for Updates and load Upgrade UI if Needed
-updateNeeded = getVersionDifference()
-if updateNeeded:
-	logger.info("YOU ARE {} VERSIONS BEHIND".format(updateNeeded))
+if getVersionDifference():
+	logger.info("YOU ARE {} VERSIONS BEHIND".format(getVersionDifference()))
 
 	#Let's first make sure to replace the installerGui with the latest.
 	def getLatestInstallerPyFileFromRepo():
@@ -53,11 +52,11 @@ if updateNeeded:
 		with open(installerPath, "w") as file:
 			file.write(data)
 
-		reload(syncsketchGUI.installScripts.installGui)
 
-	getLatestInstallerPyFileFromRepo()
 
+	#getLatestInstallerPyFileFromRepo()
 	if not installGui.InstallOptions.upgrade == 1:
+		reload(syncsketchGUI.installScripts.installGui )
 		#If this is set to 1, it means upgrade was already installed
 		installGui.InstallOptions.upgrade = 1
 
