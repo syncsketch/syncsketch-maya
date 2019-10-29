@@ -44,6 +44,7 @@ class MenuWindow(SyncSketch_Window):
         # Load UI state
         self.restore_ui_state()
         self.update_login_ui()
+        # self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
         #Not logged in or outdated api, token
         if not self.accountData:
@@ -53,6 +54,12 @@ class MenuWindow(SyncSketch_Window):
         self.asyncPopulateTree(withItems=False)
         #Populate Treewidget with all items
         self.asyncPopulateTree(withItems=True)
+
+    # def focusInEvent(self, event):
+    #     import maya.cmds as cmds
+    #     print cmds.modelEditor(cmds.getPanel(wf=True), q=True, camera=True)
+
+
 
 
     def storeAccountData(self, s):
@@ -743,6 +750,7 @@ class MenuWindow(SyncSketch_Window):
         self.cameras = [active_cam]
         self.cameras += maya_scene.get_available_cameras()
         self.ui.ui_cameraPreset_comboBox.addItems(self.cameras)
+        logger.info("maya_scene.get_current_camera(): {}".format(maya_scene.get_current_camera()))
         self.ui.ui_cameraPreset_comboBox.set_combobox_index(selection=value, default=maya_scene.get_current_camera())
 
 
