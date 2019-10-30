@@ -16,6 +16,8 @@ def getLatestSetupPyFileFromRepo():
 def getLatestSetupPyFileFromLocal():
     """Checks locally installed packages version number"""
     import pkg_resources
+    #reload module to make sure we have loaded the latest live install
+    reload(pkg_resources)
     local = pkg_resources.get_distribution(
         "syncSketchGUI").version
     return local
