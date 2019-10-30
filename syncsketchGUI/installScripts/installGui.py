@@ -521,7 +521,6 @@ class installThread(QThread):
                     cmd = 'curl https://bootstrap.pypa.io/get-pip.py -o {0}'.format(pipInstaller).split(' ')
                     if not INSTALL_SSGUI_ONLY:
                         print('Calling shell command: {0}'.format(cmd))
-                        # todo remove call to shell for security reasons
                         print(subprocess.check_output(cmd))
 
                 else:

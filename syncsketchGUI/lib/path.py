@@ -64,8 +64,10 @@ def make_url_offlineMode(url):
     Add's offline Mode key to a given url
     '''
      #https://www.syncsketch.com/sketch/b280d3a7cb30/#1127001
-     #https://www.syncsketch.com/sketch/b280d3a7cb30/#offlineMode=1?1127001
-    return url.replace("#", "#offlineMode=1?")
+     #https://www.syncsketch.com/sketch/b280d3a7cb30/#1127001
+    print(url)
+    print(url.replace("#", "?offlineMode=1#/"))
+    return url.replace("#", "?offlineMode=1#/")
 
 def validate_email_address(email_address):
     '''

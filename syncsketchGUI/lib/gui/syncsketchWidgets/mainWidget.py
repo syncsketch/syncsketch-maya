@@ -53,7 +53,7 @@ class MenuWindow(SyncSketch_Window):
         #Populate Treewidget sparse
         self.asyncPopulateTree(withItems=False)
         #Populate Treewidget with all items
-        self.asyncPopulateTree(withItems=True)
+        #self.asyncPopulateTree(withItems=True)
 
     # def focusInEvent(self, event):
     #     import maya.cmds as cmds

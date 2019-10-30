@@ -173,6 +173,7 @@ def get_current_file():
 
 
 def show_success_message(uploaded_item):
+    # todo: add offlineMode here as well
     title = 'Upload Successful'
     info_message = 'Your file has successfully been uploaded. Please follow this link:'
 
@@ -332,7 +333,7 @@ def _upload(current_user = None, ):
     username = current_user.get_name()
     upload_file = get_current_file()
 
-    #todo remove this
+
     if not upload_file or not os.path.isfile(upload_file):
         return
 

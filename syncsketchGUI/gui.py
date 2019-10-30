@@ -123,7 +123,7 @@ def get_current_item_from_ids(tree, payload=None):
 
     iterator = QtWidgets.QTreeWidgetItemIterator(tree, QtWidgets.QTreeWidgetItemIterator.All)
     # by default select first item(playground)
-    # todo: make sure we're not parsing for the correct review id
+    
     while iterator.value():
         item = iterator.value()
         item_data = item.data(1, QtCore.Qt.EditRole)
