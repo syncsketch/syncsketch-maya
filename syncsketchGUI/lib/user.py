@@ -187,7 +187,6 @@ class SyncSketchUser():
         self.set_api_key('')
         self.set_token('')
 
-
     def get_account_data(self, match_user_with_os = False, withItems=False):
         self.auto_login()
 

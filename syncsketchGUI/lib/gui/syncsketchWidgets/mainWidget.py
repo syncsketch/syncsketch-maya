@@ -34,6 +34,9 @@ class MenuWindow(SyncSketch_Window):
         super(MenuWindow, self).__init__(parent=parent)
         self.threadpool = QtCore.QThreadPool()
         self.accountData = None
+        self.reviewData = None
+        self.reviewParent = None
+
         self.setMaximumSize(700, 650)
         self.decorate_ui()
         self.build_connections()
@@ -60,7 +63,11 @@ class MenuWindow(SyncSketch_Window):
     #     print cmds.modelEditor(cmds.getPanel(wf=True), q=True, camera=True)
 
 
-
+    def storeReviewData(self, s):
+        print("storereviewData {}".format(s[0]))
+        print("storereviewData {}".format(s[1]))
+        self.reviewData = s[0]
+        #self.reviewParent = s[1]
 
     def storeAccountData(self, s):
         logging.info(s)
@@ -85,6 +92,66 @@ class MenuWindow(SyncSketch_Window):
             return None
 
         return account_data
+
+    def load_leafs(self, user, reviewId=None):
+
+        items = user.host_data.getMediaByReviewId(reviewId)['objects']
+
+        return (items, reviewId)
+
+
+    def populateReviewItems(self):
+        items = self.reviewData
+        parentItem = self.reviewParent
+        parentItem.takeChildren()
+        print("items: {} ".format(items))
+
+        for media in items or []:
+            #add UUID of the review container to the media, so we can use it in itemdata
+            media['uuid'] = self.review['uuid']
+            if not media.get('type'):
+                specified_media_icon = media_unknown_icon
+            elif 'video' in media.get('type').lower():
+                specified_media_icon = media_video_icon
+            elif 'image' in media.get('type').lower():
+                specified_media_icon = media_image_icon
+            elif 'sketchfab' in media.get('type').lower():
+                specified_media_icon = media_sketchfab_icon
+            else:
+                specified_media_icon = media_unknown_icon
+
+            media_treeWidgetItem = self._build_widget_item(parent = parentItem,
+                                                        item_name = media.get('name'),
+                                                        item_type='media',
+                                                        item_icon = specified_media_icon,
+                                                        item_data = media)
+
+            media_treeWidgetItem.sizeHint(80)
+
+
+
+    def asyncLoadLeafs(self, target):
+        '''
+        Load leaf element's using a worker
+        '''
+        selected_item = target#.currentItem()
+        review = selected_item.data(1, QtCore.Qt.EditRole)
+        item_type = selected_item.data(2, QtCore.Qt.EditRole)
+        self.reviewParent = target
+
+        if item_type == "review":
+            current_user = user.SyncSketchUser()
+            current_user.auto_login()
+            if not current_user.is_logged_in():
+                return
+
+            self.review = review
+            worker = Worker(self.load_leafs, current_user, reviewId=review['id'])
+            worker.signals.result.connect(self.storeReviewData)
+            worker.signals.finished.connect(self.populateReviewItems)
+            # Execute
+            self.threadpool.start(worker)
+
 
     def asyncPopulateTree(self, withItems=False):
         '''
@@ -201,6 +268,7 @@ class MenuWindow(SyncSketch_Window):
 
         #tree widget functions
         self.ui.browser_treeWidget.currentItemChanged.connect(self.validate_review_url)
+        self.ui.browser_treeWidget.currentItemChanged.connect(self.asyncLoadLeafs)
         self.ui.browser_treeWidget.doubleClicked.connect(self.open_upload_to_url)
 
         # Videos / Playblast Settings
@@ -298,12 +366,16 @@ class MenuWindow(SyncSketch_Window):
         self.ui.ui_treeWidget_layout = QtWidgets.QVBoxLayout()
 
         self.ui.browser_treeWidget = QtWidgets. QTreeWidget()
+
+
         self.ui.browser_treeWidget.header().setStyleSheet("color: %s"%success_color)
 
         highlight_palette = self.ui.browser_treeWidget.palette()
         highlight_palette.setColor(QtGui.QPalette.Highlight, highlight_color)
         self.ui.browser_treeWidget.setPalette(highlight_palette)
         self.ui.browser_treeWidget.setHeaderLabel('refresh')
+
+        self.ui.browser_treeWidget.expanded.connect(self.expandedTest)
 
 
         self.ui.browser_treeWidget.header().setSectionsClickable(True)
@@ -531,6 +603,21 @@ class MenuWindow(SyncSketch_Window):
 
         self.set_rangeFromComboBox()
 
+    # def expandedTest(self, target):
+    #     print self.ui.browser_treeWidget.currentItem()
+    #     print self.ui.browser_treeWidget.currentItem().text(0)
+    #     print self.ui.browser_treeWidget.currentItem().data(0)
+    #     print dir(self.ui.browser_treeWidget.currentItem())
+    #     selected_item = target#.currentItem()
+    #     print(dir(selected_item))
+    #     #['__class__', '__copy__', '__delattr__', '__dict__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__le__', '__lt__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', 'child', 'column', 'data', 'flags', 'internalId', 'internalPointer', 'isValid', 'model', 'parent', 'row', 'sibling']
+    #     print("target data {} row: {} parent: {}\n".format(selected_item.data(), selected_item.row(), selected_item.parent()))
+    #     print selected_item.data(0, QtCore.Qt.EditRole)
+    #     print selected_item.data(1, QtCore.Qt.EditRole)
+        # review = selected_item.data(1, QtCore.Qt.EditRole)
+        # item_type = selected_item.data(2, QtCore.Qt.EditRole)
+        # print("22220 {}\n".format(target) * 2)
+
 
 
     def disconnect_account(self):
@@ -543,7 +630,7 @@ class MenuWindow(SyncSketch_Window):
     def refresh(self):
         logging.info("Refresh Clicked, trying to refresh if logged in")
         #self.populate_review_panel(self, force=True)
-        self.asyncPopulateTree(withItems=True)
+        self.asyncPopulateTree(withItems=False)
         self.repaint()
 
     def open_target_url(self):
@@ -589,6 +676,7 @@ class MenuWindow(SyncSketch_Window):
 
         fileName, _ = QtWidgets.QFileDialog.getOpenFileName(self, "QFileDialog.getOpenFileName()", "", file_filters, options=options)
         self.ui.ps_lastfile_comboBox.set_combobox_index(selection=fileName)
+
 
 
     def validate_review_url(self, target = None):
@@ -1030,6 +1118,7 @@ class MenuWindow(SyncSketch_Window):
                                                                 item_data = project)
                 # Add reviews
                 reviews = project.get('reviews')
+
                 for review in reviews:
                     review_treeWidgetItem = self._build_widget_item(parent = project_treeWidgetItem,
                                                                 item_name = review.get('name'),
@@ -1038,8 +1127,9 @@ class MenuWindow(SyncSketch_Window):
                                                                 item_data = review)
                     # Add items
                     items = review.get('items')
-                    #Create empty if no items found
-                    for media in items or []:
+                    # * If there are no reviews, create still a dumy element to get an arrow icon
+                    # * to visualize that the item needs to be expanded
+                    for media in items or [{'uuid':'', 'type':'video'}]:
                         #add UUID of the review container to the media, so we can use it in itemdata
                         media['uuid'] = review['uuid']
                         if not media.get('type'):
@@ -1080,5 +1170,3 @@ class MenuWindow(SyncSketch_Window):
         treewidget_item.setData(2, QtCore.Qt.EditRole, item_type)
         treewidget_item.setIcon(0, item_icon)
         return treewidget_item
-
-
