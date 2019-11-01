@@ -65,9 +65,10 @@ def make_url_offlineMode(url):
     '''
      #https://www.syncsketch.com/sketch/b280d3a7cb30/#1127001
      #https://www.syncsketch.com/sketch/b280d3a7cb30/#1127001
+     #converts to: https://www.syncsketch.com/sketch/b280d3a7cb30/?offlineMode=1#/1127001
     print(url)
-    print(url.replace("#", "?offlineMode=1#/"))
-    return url.replace("#", "?offlineMode=1#/")
+    print(url.replace("/#", "?offlineMode=1#"))
+    return url.replace("/#", "?offlineMode=1#"))
 
 def validate_email_address(email_address):
     '''
