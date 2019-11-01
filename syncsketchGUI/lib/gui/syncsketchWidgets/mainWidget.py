@@ -375,7 +375,7 @@ class MenuWindow(SyncSketch_Window):
         self.ui.browser_treeWidget.setPalette(highlight_palette)
         self.ui.browser_treeWidget.setHeaderLabel('refresh')
 
-        self.ui.browser_treeWidget.expanded.connect(self.expandedTest)
+        #self.ui.browser_treeWidget.expanded.connect(self.expandedTest)
 
 
         self.ui.browser_treeWidget.header().setSectionsClickable(True)
