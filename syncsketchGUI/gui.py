@@ -122,8 +122,7 @@ def get_current_item_from_ids(tree, payload=None):
 
 
     iterator = QtWidgets.QTreeWidgetItemIterator(tree, QtWidgets.QTreeWidgetItemIterator.All)
-    # by default select first item(playground)
-    
+
     while iterator.value():
         item = iterator.value()
         item_data = item.data(1, QtCore.Qt.EditRole)
@@ -163,7 +162,7 @@ def parse_url_data(link=database.read_cache('upload_to_value')):
 
 
     if not link[0:len(baseUrl)] == baseUrl:
-        print("URL need's to start with: {}".format(baseUrl))
+        logger.info("URL need's to start with: {}".format(baseUrl))
         return
 
     data = {"uuid":0, "id":0, "revision_id":0}

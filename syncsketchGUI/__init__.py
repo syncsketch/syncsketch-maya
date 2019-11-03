@@ -243,7 +243,6 @@ def record(upload_after_creation = None, play_after_creation = None,  show_succe
     # Post actions
 
     # To Do - post Recording script call
-    # Upload to the selected review or playground if the box is checked
     if upload_after_creation is None:
         upload_after_creation = True if database.read_cache('ps_upload_after_creation_checkBox') == 'true' else False
 
@@ -357,9 +356,6 @@ def _upload(current_user = None, ):
     logger.info('Selected Item: %s'%item_name)
 
 
-    # Don't need to login if we're uploading to playground.
-    # Treewidget item selection must be review type to upload.
-    # If selection is other item type, warn the user.
     last_recorded_data = database.read_cache('last_recorded')
 
     postData = {
@@ -393,6 +389,8 @@ def _upload(current_user = None, ):
 
 
     review_data = current_user.get_review_data_from_id(review_id)
+    # * this is an old call, that we should replace with an async worker
+    #
     review_url = review_data.get('reviewURL')
     #uploaded_media_url = '{}'.format(review_url)
     uploaded_media_url = '{}#{}'.format(review_url, uploaded_item['id'])
@@ -402,8 +400,6 @@ def _upload(current_user = None, ):
     if 'none' in uploaded_media_url.lower():
         uploaded_media_url = ""
 
-    if uploaded_media_url:
-        uploaded_media_url.replace(path.playground_url, path.playground_display_url)
     uploaded_item['reviewURL'] = uploaded_media_url
     return uploaded_item
 
@@ -422,7 +418,6 @@ def playblast_and_upload():
     if not user_input.response:
         return
 
-    uploaded_media_url = user.upload_to_playground(webm_file, user_input.response_text)
     if not uploaded_media_url:
         return
 

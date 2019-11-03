@@ -69,19 +69,6 @@ def _get_from_yaml_user(key):
     return user_data.get(key)
 
 
-
-def _upload_to_playground(filepath, user_email = ''):
-    files = {'file': open(filepath, 'rb')}
-    logger.warning("Uploading %s for user %s"%(files,user_email))
-    response = requests.post(path.playground_url,
-                              files = files,
-                              data = {'userEmail' : user_email,
-                                        "creator": user_email,
-                                        'noConvertFlag' : no_convert})
-
-    # for k, v in response.__dict__.items():
-    #     logger.warning(  k.ljust(10), ':', v)
-
     return response.json()
 
 
@@ -252,9 +239,6 @@ class SyncSketchUser():
 
 
     def upload_media_to_review(self, review_id, filepath, noConvertFlag = False, itemParentId = False, data={}):
-        if review_id == 'playground':
-            return _upload_to_playground(filepath, user_email)
-
         self.auto_login()
         if not self.host_data:
             logger.warning('Please login first.')
@@ -280,8 +264,6 @@ class SyncSketchUser():
 
     # Todo set path properly
     def download_greasepencil(self, reviewId, itemId):
-
-        # currently we bail if user is using playground or is
         # not logged in
         """
             Download overlay sketches for Maya Greasepencil. Function will download a zip file which contains
@@ -326,11 +308,4 @@ class SyncSketchUser():
                     f.write(chunk)
         return local_filename
 
-
-# ======================================================================
-# Module Functions
-
-def upload_to_playground(filepath, user_email):
-    uploaded_media_url = _upload_to_playground(filepath, user_email)
-    return uploaded_media_url
 

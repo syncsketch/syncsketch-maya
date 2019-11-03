@@ -5,13 +5,8 @@ logger = logging.getLogger(__name__)
 
 # ======================================================================
 # Web Paths
-
 api_host_url = "https://www.syncsketch.com"
 home_url = api_host_url
-
-playground_url = api_host_url + '/items/uploadToPlayground/'
-# playground_url = 'https://www.syncsketch.com/playground/'
-playground_display_url = api_host_url + '/playground/'
 project_url = api_host_url + '/pro/#project/'
 contact_url = api_host_url + '/contact/'
 signup_url = api_host_url + '/register/'

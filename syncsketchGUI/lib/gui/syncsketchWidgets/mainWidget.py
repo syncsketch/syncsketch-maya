@@ -375,7 +375,7 @@ class MenuWindow(SyncSketch_Window):
         self.ui.browser_treeWidget.setPalette(highlight_palette)
         self.ui.browser_treeWidget.setHeaderLabel('refresh')
 
-        #self.ui.browser_treeWidget.expanded.connect(self.expandedTest)
+        self.ui.browser_treeWidget.expanded.connect(self.expandedTest)
 
 
         self.ui.browser_treeWidget.header().setSectionsClickable(True)
@@ -603,21 +603,19 @@ class MenuWindow(SyncSketch_Window):
 
         self.set_rangeFromComboBox()
 
-    # def expandedTest(self, target):
-    #     print self.ui.browser_treeWidget.currentItem()
-    #     print self.ui.browser_treeWidget.currentItem().text(0)
-    #     print self.ui.browser_treeWidget.currentItem().data(0)
-    #     print dir(self.ui.browser_treeWidget.currentItem())
-    #     selected_item = target#.currentItem()
-    #     print(dir(selected_item))
-    #     #['__class__', '__copy__', '__delattr__', '__dict__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__gt__', '__hash__', '__init__', '__le__', '__lt__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', 'child', 'column', 'data', 'flags', 'internalId', 'internalPointer', 'isValid', 'model', 'parent', 'row', 'sibling']
-    #     print("target data {} row: {} parent: {}\n".format(selected_item.data(), selected_item.row(), selected_item.parent()))
-    #     print selected_item.data(0, QtCore.Qt.EditRole)
-    #     print selected_item.data(1, QtCore.Qt.EditRole)
-        # review = selected_item.data(1, QtCore.Qt.EditRole)
-        # item_type = selected_item.data(2, QtCore.Qt.EditRole)
-        # print("22220 {}\n".format(target) * 2)
-
+    # * double check last item selected, looks like after this func, it stopped
+    def expandedTest(self, target):
+        """
+        Select the item that is in the expanded hierarchy
+        which triggers the load of items.
+        """
+        selected_item = target
+        item =  self.ui.browser_treeWidget.itemFromIndex(selected_item)
+        item_type = item.data(2, QtCore.Qt.EditRole)
+        if item_type == "review":
+            item.takeChildren()
+            self.ui.browser_treeWidget.setCurrentItem(item)
+            item.setSelected(True)
 
 
     def disconnect_account(self):
@@ -975,9 +973,6 @@ class MenuWindow(SyncSketch_Window):
         logger.debug("uploaded_media_url: {}".format(uploaded_media_url))
         if 'none' in uploaded_media_url.lower():
             uploaded_media_url = str()
-
-        if uploaded_media_url:
-            uploaded_media_url.replace(path.playground_url, path.playground_display_url)
 
         logger.info('u\Uploaded_media_url: %s'%uploaded_media_url)
         database.dump_cache({'us_last_upload_url_pushButton' : uploaded_media_url})
