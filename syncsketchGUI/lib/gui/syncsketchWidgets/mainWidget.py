@@ -279,7 +279,6 @@ class MenuWindow(SyncSketch_Window):
         self.ui.ui_viewportpreset_comboBox.currentIndexChanged.connect(self.update_current_viewport_preset)
         self.ui.ui_cameraPreset_comboBox.currentIndexChanged.connect(self.update_current_camera)
 
-        self.ui.ps_lastfile_comboBox.currentIndexChanged.connect(self.update_last_recorded)
 
         self.ui.ps_format_toolButton.clicked.connect(self.manage_preset)
         self.ui.ps_directory_toolButton.clicked.connect(self.get_directory_from_browser)
@@ -507,9 +506,9 @@ class MenuWindow(SyncSketch_Window):
 
         # - - -
         # record_layout - camera
-        self.ui.ps_lastfile_comboBox = RegularComboBox(self)
+        self.ui.ps_lastfile_line_edit = RegularLineEdit(self)
 
-        self.ui.ps_lastfile_comboBox.setEditable(1)
+        self.ui.ps_lastfile_line_edit.setReadOnly(1)
         self.ui.video_thumb_pushButton = QtWidgets.QPushButton()
         self.ui.cs_info_label = QtWidgets.QLabel()
         self.ui.cs_info_label.setStyleSheet("font: 9pt")
@@ -525,7 +524,7 @@ class MenuWindow(SyncSketch_Window):
         self.ui.ui_lastfileSelection_layout = QtWidgets.QHBoxLayout()
         self.ui.ps_filename_toolButton = RegularToolButton(self, icon=file_icon)
         self.ui.ps_filename_toolButton.clicked.connect(self.openFileNameDialog)
-        self.ui.ui_lastfileSelection_layout.addWidget(self.ui.ps_lastfile_comboBox)
+        self.ui.ui_lastfileSelection_layout.addWidget(self.ui.ps_lastfile_line_edit)
         self.ui.ui_lastfileSelection_layout.addWidget(self.ui.ps_filename_toolButton)
 
 
@@ -638,7 +637,7 @@ class MenuWindow(SyncSketch_Window):
     def open_target_url(self):
         url = self.sanitize(self.ui.target_lineEdit.text())
         if url:
-            webbrowser.open(url)
+            webbrowser.open(path.make_url_offlineMode(url))
 
 
     def update_clip_thumb(self, imageWidget):
@@ -677,7 +676,7 @@ class MenuWindow(SyncSketch_Window):
         file_filters = "All Files(*);; "
 
         fileName, _ = QtWidgets.QFileDialog.getOpenFileName(self, "QFileDialog.getOpenFileName()", "", file_filters, options=options)
-        self.ui.ps_lastfile_comboBox.set_combobox_index(selection=fileName)
+        self.ui.ps_lastfile_line_edit.setText(fileName)
 
 
 
@@ -714,7 +713,7 @@ class MenuWindow(SyncSketch_Window):
             # self.ui.us_ui_upload_pushButton.setStyleSheet(upload_color)
 
         elif target == "media":
-            self.ui.ui_upload_pushButton.setText("UPLOAD\n Clip as new Version of '%s'"%targetdata["name"])
+            self.ui.ui_upload_pushButton.setText("UPLOAD\n Clip to Review '%s'"%targetdata["name"])
             # self.ui.us_ui_upload_pushButton.setStyleSheet(upload_color)x
 
             thumbURL = self.current_user.get_item_info(targetdata['media_id'])['objects'][0]['thumbnail_url']
@@ -797,15 +796,14 @@ class MenuWindow(SyncSketch_Window):
             pass
 
         if clips:
-            with suppressedUI(self.ui.ps_lastfile_comboBox):
-                self.ui.ps_lastfile_comboBox.clear()
-                self.ui.ps_lastfile_comboBox.addItems(clips)
-                self.ui.ps_lastfile_comboBox.set_combobox_index(selection = database.read_cache('last_recorded')['filename'], default=r"")
+            with suppressedUI(self.ui.ps_lastfile_line_edit):
+                self.ui.ps_lastfile_line_edit.clear()
+                self.ui.ps_lastfile_line_edit.setText(database.read_cache('last_recorded')['filename'])
             self.update_clip_info()
 
 
     def update_current_clip(self):
-        val = self.ui.ps_lastfile_comboBox.currentText()
+        val = self.ui.ps_lastfile_line_edit.text()
         database.dump_cache({'selected_clip': val})
 
         info_string='Please select a format preset'
@@ -865,7 +863,7 @@ class MenuWindow(SyncSketch_Window):
         self.validate_review_url()
         url = database.read_cache('upload_to_value')
         if url:
-            webbrowser.open(url)
+            webbrowser.open(path.make_url_offlineMode(url))
 
     def playblast(self):
         # store current preset since subsequent calls will use that data exclusively
