@@ -61,8 +61,13 @@ def make_url_offlineMode(url):
      #https://www.syncsketch.com/sketch/b280d3a7cb30/#1127001
      #https://www.syncsketch.com/sketch/b280d3a7cb30/#1127001
      #converts to: https://www.syncsketch.com/sketch/b280d3a7cb30/?offlineMode=1#/1127001
-    print(url)
+     #https://syncsketch.com/sketch/806b718865d3#1127977
+     #https://syncsketch.com/sketch/806b718865d3?offlineMode=1#
+
+
     offlineUrl = url.replace("/#", "?offlineMode=1#")
+    if offlineUrl == url:
+        offlineUrl = url.replace("#", "?offlineMode=1#")
     return offlineUrl
 
 def validate_email_address(email_address):

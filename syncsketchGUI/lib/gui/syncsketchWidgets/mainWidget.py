@@ -861,9 +861,10 @@ class MenuWindow(SyncSketch_Window):
 
     def open_upload_to_url(self):
         self.validate_review_url()
-        url = database.read_cache('upload_to_value')
+        url = path.make_url_offlineMode(database.read_cache('upload_to_value'))
+        logger.info("Opening Url: {} ".format(url))
         if url:
-            webbrowser.open(path.make_url_offlineMode(url))
+            webbrowser.open(url)
 
     def playblast(self):
         # store current preset since subsequent calls will use that data exclusively
