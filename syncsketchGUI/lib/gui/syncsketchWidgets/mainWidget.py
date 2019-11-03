@@ -177,6 +177,9 @@ class MenuWindow(SyncSketch_Window):
 
 
     def restore_ui_state(self):
+        self.ui.ui_record_pushButton.setEnabled(
+            True if self.current_user.is_logged_in() else False)
+
         self.ui.ps_upload_after_creation_checkBox.setEnabled(
             True if self.current_user.is_logged_in() else False)
 
@@ -623,6 +626,7 @@ class MenuWindow(SyncSketch_Window):
         self.isloggedIn(self)
         self.ui.browser_treeWidget.clear()
         self.ui.ui_status_label.update('You have been successfully logged out', color=warning_color)
+        self.restore_ui_state()
         #self.populate_review_panel(self,  force=True)
 
     def refresh(self):
