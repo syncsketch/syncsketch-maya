@@ -210,7 +210,7 @@ def upload(open_after_upload = None, show_success_msg = False):
 
 
     if not open_after_upload:
-        show_success_message(uploaded_item)
+        show_success_message(path.make_url_offlineMode(uploaded_item))
 
     return uploaded_item
 
