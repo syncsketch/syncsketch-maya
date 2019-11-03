@@ -196,6 +196,8 @@ def upload(open_after_upload = None, show_success_msg = False):
 
     logger.info("open_after_upload Url: {}".format(open_after_upload))
     uploaded_item = _upload()
+
+
     if not uploaded_item:
         return
 
@@ -332,7 +334,6 @@ def _upload(current_user = None, ):
     username = current_user.get_name()
     upload_file = get_current_file()
 
-
     if not upload_file or not os.path.isfile(upload_file):
         return
 
@@ -349,9 +350,6 @@ def _upload(current_user = None, ):
 
     # Upload To
     current_item = selected_item
-    upload_to_value = str()
-
-
     upload_to_value = item_name
     logger.info('Selected Item: %s'%item_name)
 
