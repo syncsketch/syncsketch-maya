@@ -10,13 +10,14 @@ from pprint import pformat
 from syncsketchGUI.lib import user as user
 
 logger = logging.getLogger('syncsketchGUI')
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.CRITICAL)
 ch = logging.StreamHandler()
-ch.setLevel(logging.INFO)
+ch.setLevel(logging.CRITICAL)
 
 # create formatter
 formatter = logging.Formatter('[%(asctime)s - %(filename)s:%(lineno)s - %(levelname)s - %(message)s]', "%Y-%m-%d %H:%M:%S")
 ch.setFormatter(formatter)
+
 logger.addHandler(ch)
 # prevent logging from bubbling up to maya's logger
 logger.propagate = 0
@@ -206,13 +207,14 @@ def upload(open_after_upload = None, show_success_msg = False):
 
     if open_after_upload:
         url = path.make_url_offlineMode(uploaded_item['reviewURL'])
-        print(logger.info("Url: {}".format(url)))
+        logger.info("Url: {}".format(url))
+        logger.info("Uploaded Item: {}".format(uploaded_item))
         logger.info("Opening Url: {}".format(uploaded_item['reviewURL']))
         webbrowser.open(url, new=2, autoraise=True)
 
 
     if not open_after_upload:
-        show_success_message(path.make_url_offlineMode(uploaded_item))
+        show_success_message(path.make_url_offlineMode(uploaded_item['reviewURL']))
 
     return uploaded_item
 
@@ -327,7 +329,7 @@ def _record():
     return playblast_file
 
 
-def _upload(current_user = None, ):
+def _upload(current_user=None, ):
     errorLog = None
     if not current_user:
         current_user = user.SyncSketchUser()
@@ -385,10 +387,10 @@ def _upload(current_user = None, ):
         logger.info('ERROR: This Upload failed: %s'%(errorLog))
         return
 
-
-    review_data = current_user.get_review_data_from_id(review_id)
     # * this is an old call, that we should replace with an async worker
-    #
+    review_data = current_user.get_review_data_from_id(review_id)
+
+
     review_url = review_data.get('reviewURL')
     #uploaded_media_url = '{}'.format(review_url)
     uploaded_media_url = '{}#{}'.format(review_url, uploaded_item['id'])

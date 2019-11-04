@@ -30,6 +30,12 @@ from vendor.Qt import QtWidgets
 
 import logging
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.CRITICAL)
+
+ch = logging.StreamHandler()
+ch.setLevel(logging.CRITICAL)
+
+
 
 from lib.gui.syncsketchWidgets.webLoginWidget import WebLoginWindow
 from lib.gui.qt_widgets import OpenPlayer
@@ -80,10 +86,26 @@ def _call_web_ui_for_maya(ui_object):
     app_ui.show()
     return app_ui
 
+# def trigger_load_expanded(tree, id):
+#     """
+#     Given a unique item'id set's the selection on the treeview
+#     """
+#     if not id:
+#         return
+#     iterator = QtWidgets.QTreeWidgetItemIterator(tree, QtWidgets.QTreeWidgetItemIterator.All)
+#     while iterator.value():
+#         item = iterator.value()
+#         itemData = item.data(1, QtCore.Qt.EditRole)
+#         if itemData.get('id') == id:
+#             tree.setCurrentItem(item, 1)
+#             tree.scrollToItem(item)
+#         iterator += 1
+#     return itemData
+
 
 def set_tree_selection(tree, id):
     """
-    Given a uniqute item'id set's the selection on the treeview
+    Given a unique item'id set's the selection on the treeview
     """
     if not id:
         return
@@ -96,6 +118,16 @@ def set_tree_selection(tree, id):
             tree.scrollToItem(item)
         iterator += 1
     return itemData
+
+def getReviewById(tree, reviewId):
+    iterator = QtWidgets.QTreeWidgetItemIterator(tree, QtWidgets.QTreeWidgetItemIterator.All)
+
+    while iterator.value():
+        item = iterator.value()
+        item_data = item.data(1, QtCore.Qt.EditRole)
+        if item_data.get('id') == reviewId:
+            return item
+        iterator +=1
 
 
 def get_current_item_from_ids(tree, payload=None):
@@ -118,6 +150,7 @@ def get_current_item_from_ids(tree, payload=None):
 
     #Nothing useful found return
     else:
+        logging.info("No uuid or id in payload, aborting")
         return
 
 
@@ -175,13 +208,13 @@ def parse_url_data(link=database.read_cache('upload_to_value')):
         if uuidPart:
             data['uuid'] = uuidPart[0]
         else:
-            print("link need's to be of the form https://www.syncsketch.com/sketch/bff609f9cbac/ got {}".format(link))
+            logger.info("link need's to be of the form https://www.syncsketch.com/sketch/bff609f9cbac/ got {}".format(link))
     #Find ID
     if len(payload) > 1:
         if payload[1].startswith("#"):
             data['id'] = payload[1][1:]
         else:
-            print("link need's to be of the form https://www.syncsketch.com/sketch/bff609f9cbac/#711273 got {}".format(link))
+            logger.info("link need's to be of the form https://www.syncsketch.com/sketch/bff609f9cbac/#711273 got {}".format(link))
 
     if len(payload) > 3:
         pass

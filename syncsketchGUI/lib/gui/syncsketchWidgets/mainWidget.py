@@ -4,7 +4,11 @@ import time
 import webbrowser
 from syncsketchGUI.vendor.Qt import QtCore, QtGui, QtWidgets
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.CRITICAL)
+ch = logging.StreamHandler()
+ch.setLevel(logging.CRITICAL)
+
+
 from syncsketchGUI.lib import video, user, database
 from syncsketchGUI.lib.gui.qt_widgets import *
 from syncsketchGUI.lib.gui.qt_utils import *
@@ -14,7 +18,7 @@ from syncsketchGUI.gui import  _maya_delete_ui, show_download_window
 from syncsketchGUI.lib.gui.syncsketchWidgets.webLoginWidget import WebLoginWindow
 import syncsketchGUI
 from syncsketchGUI.gui import OpenPlayer
-from syncsketchGUI.gui import parse_url_data, get_current_item_from_ids, set_tree_selection, update_target_from_tree
+from syncsketchGUI.gui import parse_url_data, get_current_item_from_ids, set_tree_selection, update_target_from_tree, getReviewById
 from syncsketchGUI.lib.gui.icons import _get_qicon
 from syncsketchGUI.lib.gui.literals import DEFAULT_VIEWPORT_PRESET, PRESET_YAML, VIEWPORT_YAML, DEFAULT_PRESET, uploadPlaceHolderStr, message_is_not_loggedin, message_is_not_connected
 from syncsketchGUI.lib.async import Worker, WorkerSignals
@@ -45,9 +49,9 @@ class MenuWindow(SyncSketch_Window):
 
 
         # Load UI state
+
         self.restore_ui_state()
         self.update_login_ui()
-        # self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
         #Not logged in or outdated api, token
         if not self.accountData:
@@ -55,19 +59,14 @@ class MenuWindow(SyncSketch_Window):
 
         #Populate Treewidget sparse
         self.asyncPopulateTree(withItems=False)
+        #self.restore_ui_state()
         #Populate Treewidget with all items
         #self.asyncPopulateTree(withItems=True)
 
-    # def focusInEvent(self, event):
-    #     import maya.cmds as cmds
-    #     print cmds.modelEditor(cmds.getPanel(wf=True), q=True, camera=True)
-
-
     def storeReviewData(self, s):
-        print("storereviewData {}".format(s[0]))
-        print("storereviewData {}".format(s[1]))
+        logger.info("storereviewData {}".format(s[0]))
+        logger.info("storereviewData {}".format(s[1]))
         self.reviewData = s[0]
-        #self.reviewParent = s[1]
 
     def storeAccountData(self, s):
         logging.info(s)
@@ -87,16 +86,15 @@ class MenuWindow(SyncSketch_Window):
         try:
             account_data = user.get_account_data(withItems=withItems)
             if logging:
-                logging.warning('accountdata: '.format(account_data))
+                pass
+                #logging.warning('accountdata: '.format(account_data))
         except Exception, err:
             return None
 
         return account_data
 
     def load_leafs(self, user, reviewId=None):
-
         items = user.host_data.getMediaByReviewId(reviewId)['objects']
-
         return (items, reviewId)
 
 
@@ -127,14 +125,42 @@ class MenuWindow(SyncSketch_Window):
                                                         item_data = media)
 
             media_treeWidgetItem.sizeHint(80)
+            # * this is an obsolute call
+            set_tree_selection(self.ui.browser_treeWidget, None)
+
+            #Make sure we select the last uploaded item
+            if database.read_cache("upload_to_value"):
+                logger.info("upload_to_value is set, updating lineEdit")
+                self.ui.target_lineEdit.setText(database.read_cache("upload_to_value"))
+                self.select_item_from_target_input()
+            else:
+                logger.info("Nothing to set in the lineedit")
 
 
 
-    def asyncLoadLeafs(self, target):
+    def asyncLoadLeafs(self, target=None):
         '''
         Load leaf element's using a worker
         '''
-        selected_item = target#.currentItem()
+        if not target:
+            reviewId = database.read_cache('target_review_id')
+            if reviewId:
+                logging.info("Restoring reviewId section for : {} ".format(reviewId))
+                target = getReviewById(self.ui.browser_treeWidget, reviewId=reviewId)
+                if not target:
+                    logging.info("Couldn't find reviewID in treewidget : {} ".format(reviewId))
+                    return
+                else:
+                    logging.info("Restoring review section for : {} ".format(target))
+                #self.asyncLoadLeafs(review)
+            else:
+                return
+
+        logger.info("target type: {}".format(type(target)))
+        logger.info("target: {}".format(target))
+        logger.info("target dir: {}".format(dir(target)))
+
+        selected_item = target
         review = selected_item.data(1, QtCore.Qt.EditRole)
         item_type = selected_item.data(2, QtCore.Qt.EditRole)
         self.reviewParent = target
@@ -153,6 +179,7 @@ class MenuWindow(SyncSketch_Window):
             self.threadpool.start(worker)
 
 
+
     def asyncPopulateTree(self, withItems=False):
         '''
         Create's async calls to to get user-data from the server
@@ -167,11 +194,14 @@ class MenuWindow(SyncSketch_Window):
                         logging=logging, withItems=withItems)
         worker.signals.result.connect(self.storeAccountData)
         worker.signals.finished.connect(self.populateReviewPanel)
+        #Chain restore_ui_state
+        worker.signals.finished.connect(self.asyncLoadLeafs)
         # Execute
         self.threadpool.start(worker)
 
 
     def closeEvent(self, event):
+        logger.info("Closing Window")
         self.save_ui_state()
         event.accept()
 
@@ -217,6 +247,14 @@ class MenuWindow(SyncSketch_Window):
         value = database.read_cache('ps_open_afterUpload_checkBox')
         self.ui.ps_open_afterUpload_checkBox.setChecked(
             True if value == 'true' else False)
+
+
+        reviewId = database.read_cache('target_review_id')
+        if reviewId:
+            logging.info("Restoring reviewId section for : {} ".format(reviewId))
+            review = getReviewById(self.ui.browser_treeWidget, reviewId=reviewId)
+            logging.info("Restoring review section for : {} ".format(review))
+            self.asyncLoadLeafs(review)
 
 
     def save_ui_state(self):
@@ -284,6 +322,7 @@ class MenuWindow(SyncSketch_Window):
         self.ui.ps_directory_toolButton.clicked.connect(self.get_directory_from_browser)
 
         self.ui.target_lineEdit.editingFinished.connect(self.select_item_from_target_input)
+       
         # Videos / Playblast Settings
         self.ui.ui_viewport_toolButton.clicked.connect(self.manage_viewport_preset)
 
@@ -377,7 +416,7 @@ class MenuWindow(SyncSketch_Window):
         self.ui.browser_treeWidget.setPalette(highlight_palette)
         self.ui.browser_treeWidget.setHeaderLabel('refresh')
 
-        self.ui.browser_treeWidget.expanded.connect(self.expandedTest)
+        #self.ui.browser_treeWidget.expanded.connect(self.expandedTest)
 
 
         self.ui.browser_treeWidget.header().setSectionsClickable(True)
@@ -611,6 +650,7 @@ class MenuWindow(SyncSketch_Window):
         Select the item that is in the expanded hierarchy
         which triggers the load of items.
         """
+        logging.info("Expanding treewidget")
         selected_item = target
         item =  self.ui.browser_treeWidget.itemFromIndex(selected_item)
         item_type = item.data(2, QtCore.Qt.EditRole)
@@ -973,7 +1013,7 @@ class MenuWindow(SyncSketch_Window):
 
 
     def update_target_from_upload(self, uploaded_media_url):
-        logger.debug("uploaded_media_url: {}".format(uploaded_media_url))
+        logger.debug("update_target_from_upload uploaded_media_url: {}".format(uploaded_media_url))
         if 'none' in uploaded_media_url.lower():
             uploaded_media_url = str()
 
@@ -982,12 +1022,14 @@ class MenuWindow(SyncSketch_Window):
         # self.ui.us_last_upload_url_pushButton.setText(uploaded_media_url)
 
         database.dump_cache({'upload_to_value' : uploaded_media_url})
-        self.refresh()
+        # todo this shouldn't be abstracted
+        #self.refresh()
 
-    # Upload Settings
+
+
     def upload(self):
-
         # savedata
+        logging.info("Upload only function")
         self.save_ui_state()
 
         uploaded_item = syncsketchGUI.upload()
@@ -997,6 +1039,14 @@ class MenuWindow(SyncSketch_Window):
             return
 
         self.update_target_from_upload(uploaded_item['reviewURL'])
+
+        #Upload done let's set url from that
+        if database.read_cache("us_last_upload_url_pushButton"):
+            logger.info("us_last_upload_url_pushButton is set, updating lineEdit")
+            self.ui.target_lineEdit.setText(database.read_cache("us_last_upload_url_pushButton"))
+            self.select_item_from_target_input()
+        else:
+            logger.info("Nothing to set in the lineedit")
 
     # Upload Settings
     def download(self):
@@ -1098,7 +1148,7 @@ class MenuWindow(SyncSketch_Window):
         if not account_data:
             logging.info("No account_data found")
             return
-        begin = time.time()
+
         logging.warning(account_data)
         for account in account_data:
             account_treeWidgetItem = self._build_widget_item(parent = self.ui.browser_treeWidget,
@@ -1149,14 +1199,11 @@ class MenuWindow(SyncSketch_Window):
 
                         media_treeWidgetItem.sizeHint(80)
 
-        logger.info("Time creating widgets: {0}".format(
-            time.time() - begin))
-
         logger.info("uploaded_to_value: {}".format(database.read_cache('upload_to_value')))
         url_payload = parse_url_data(database.read_cache('upload_to_value'))
         logger.info("url_payload: {}".format(url_payload))
         get_current_item_from_ids(self.ui.browser_treeWidget, url_payload)
-        set_tree_selection(self.ui.browser_treeWidget, None)
+
         USER_ACCOUNT_DATA = account_data
 
         self.populate_upload_settings()
