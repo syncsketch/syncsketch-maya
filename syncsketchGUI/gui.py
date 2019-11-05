@@ -208,13 +208,13 @@ def parse_url_data(link=database.read_cache('upload_to_value')):
         if uuidPart:
             data['uuid'] = uuidPart[0]
         else:
-            logger.info("link need's to be of the form https://www.syncsketch.com/sketch/bff609f9cbac/ got {}".format(link))
+            print("link need's to be of the form https://www.syncsketch.com/sketch/bff609f9cbac/ got {}".format(link))
     #Find ID
     if len(payload) > 1:
         if payload[1].startswith("#"):
             data['id'] = payload[1][1:]
         else:
-            logger.info("link need's to be of the form https://www.syncsketch.com/sketch/bff609f9cbac/#711273 got {}".format(link))
+            print("link need's to be of the form https://www.syncsketch.com/sketch/bff609f9cbac/#711273 got {}".format(link))
 
     if len(payload) > 3:
         pass

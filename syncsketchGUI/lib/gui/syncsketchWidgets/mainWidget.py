@@ -37,6 +37,7 @@ class MenuWindow(SyncSketch_Window):
     def __init__(self, parent):
         super(MenuWindow, self).__init__(parent=parent)
         self.threadpool = QtCore.QThreadPool()
+        self.threadpool.setMaxThreadCount(1)
         self.accountData = None
         self.reviewData = None
         self.reviewParent = None
@@ -50,7 +51,7 @@ class MenuWindow(SyncSketch_Window):
 
         # Load UI state
 
-        self.restore_ui_state()
+        
         self.update_login_ui()
 
         #Not logged in or outdated api, token
@@ -58,10 +59,13 @@ class MenuWindow(SyncSketch_Window):
             return
 
         #Populate Treewidget sparse
-        self.asyncPopulateTree(withItems=False)
+        #self.asyncProcessRunning = False
+        self.populateTree()
         #self.restore_ui_state()
         #Populate Treewidget with all items
         #self.asyncPopulateTree(withItems=True)
+        self.restore_ui_state()
+
 
     def storeReviewData(self, s):
         logger.info("storereviewData {}".format(s[0]))
@@ -100,8 +104,9 @@ class MenuWindow(SyncSketch_Window):
 
     def populateReviewItems(self):
         items = self.reviewData
-        parentItem = self.reviewParent
-        parentItem.takeChildren()
+        if not self.reviewParent:
+            return
+        self.reviewParent.takeChildren()
         print("items: {} ".format(items))
 
         for media in items or []:
@@ -118,7 +123,7 @@ class MenuWindow(SyncSketch_Window):
             else:
                 specified_media_icon = media_unknown_icon
 
-            media_treeWidgetItem = self._build_widget_item(parent = parentItem,
+            media_treeWidgetItem = self._build_widget_item(parent = self.reviewParent,
                                                         item_name = media.get('name'),
                                                         item_type='media',
                                                         item_icon = specified_media_icon,
@@ -142,6 +147,7 @@ class MenuWindow(SyncSketch_Window):
         '''
         Load leaf element's using a worker
         '''
+        #Being called directly without the UI interaction
         if not target:
             reviewId = database.read_cache('target_review_id')
             if reviewId:
@@ -179,6 +185,17 @@ class MenuWindow(SyncSketch_Window):
             self.threadpool.start(worker)
 
 
+    def populateTree(self):
+        current_user = user.SyncSketchUser()
+        if not current_user.is_logged_in():
+            return
+
+        self.fetchData(user=current_user)
+        self.populateReviewPanel()
+        self.populateReviewItems()
+        self.asyncLoadLeafs()
+
+
 
     def asyncPopulateTree(self, withItems=False):
         '''
@@ -195,7 +212,7 @@ class MenuWindow(SyncSketch_Window):
         worker.signals.result.connect(self.storeAccountData)
         worker.signals.finished.connect(self.populateReviewPanel)
         #Chain restore_ui_state
-        worker.signals.finished.connect(self.asyncLoadLeafs)
+        #worker.signals.finished.connect(self.asyncLoadLeafs)
         # Execute
         self.threadpool.start(worker)
 
@@ -322,7 +339,7 @@ class MenuWindow(SyncSketch_Window):
         self.ui.ps_directory_toolButton.clicked.connect(self.get_directory_from_browser)
 
         self.ui.target_lineEdit.editingFinished.connect(self.select_item_from_target_input)
-       
+
         # Videos / Playblast Settings
         self.ui.ui_viewport_toolButton.clicked.connect(self.manage_viewport_preset)
 
@@ -671,7 +688,8 @@ class MenuWindow(SyncSketch_Window):
     def refresh(self):
         logging.info("Refresh Clicked, trying to refresh if logged in")
         #self.populate_review_panel(self, force=True)
-        self.asyncPopulateTree(withItems=False)
+        #self.asyncPopulateTree(withItems=False)
+        self.populateTree()
         self.repaint()
 
     def open_target_url(self):
@@ -798,8 +816,7 @@ class MenuWindow(SyncSketch_Window):
     def open_player(self,url):
         OpenPlayer(self,url)
 
-    def select_item_from_target_input(self):
-
+    def select_item_from_target_input(self, event=None):
         link = self.sanitize(self.ui.target_lineEdit.text())
         logging.info("Got Link from lineEdit: {}".format(link))
         if not link:
@@ -807,9 +824,22 @@ class MenuWindow(SyncSketch_Window):
             logger.warning("No link, reading from cache: {} ".format(link))
         #ids = get_ids_from_link(link)
         url_payload = parse_url_data(link)
+        print ("ebenin payload {}".format(url_payload))
         logger.debug("select_item_from_target_input: {} ".format(url_payload))
-        if not get_current_item_from_ids(self.ui.browser_treeWidget, url_payload):
+
+
+        currentItem = get_current_item_from_ids(self.ui.browser_treeWidget, url_payload)
+        print("current Item: {}".format(currentItem))
+        if not currentItem:
             logger.info("Review does not exist: {}".format(url_payload))
+
+            #Try loading it deferred
+            # reviewId = url_payload['id']
+            # if reviewId:
+            #     logging.info("Restoring reviewId section for : {} ".format(reviewId))
+            #     review = getReviewById(self.ui.browser_treeWidget, reviewId=reviewId)
+            #     logging.info("Restoring review section for : {} ".format(review))
+            #     self.asyncLoadLeafs(review)
 
     # ==================================================================
     # Video Tab Functions
