@@ -594,7 +594,7 @@ class installThread(QThread):\n\
 \n\
 \n\
 if __name__ == '__main__':\n\
-    print("running standalone")\n\
+    print('running standalone')\n\
     Installer = SyncSketchInstaller()\n\
     Installer.showit()\n\
 ");
