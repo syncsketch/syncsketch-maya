@@ -51,7 +51,6 @@ class MenuWindow(SyncSketch_Window):
 
         # Load UI state
 
-        
         self.update_login_ui()
 
         #Not logged in or outdated api, token
@@ -142,6 +141,47 @@ class MenuWindow(SyncSketch_Window):
                 logger.info("Nothing to set in the lineedit")
 
 
+    def loadLeafs(self, target=None):
+        '''
+        Load leaf element's using a worker
+        '''
+        #Being called directly without the UI interaction
+        if not target:
+            reviewId = database.read_cache('target_review_id')
+            if reviewId:
+                logging.info("Restoring reviewId section for : {} ".format(reviewId))
+                target = getReviewById(self.ui.browser_treeWidget, reviewId=reviewId)
+                if not target:
+                    logging.info("Couldn't find reviewID in treewidget : {} ".format(reviewId))
+                    return
+                else:
+                    logging.info("Restoring review section for : {} ".format(target))
+            else:
+                return
+
+        logger.info("target type: {}".format(type(target)))
+        logger.info("target: {}".format(target))
+        logger.info("target dir: {}".format(dir(target)))
+
+        selected_item = target
+        review = selected_item.data(1, QtCore.Qt.EditRole)
+        item_type = selected_item.data(2, QtCore.Qt.EditRole)
+        self.reviewParent = target
+
+        if item_type == "review":
+            current_user = user.SyncSketchUser()
+            current_user.auto_login()
+            if not current_user.is_logged_in():
+                return
+
+
+            self.review = review
+            data = self.load_leafs(user=current_user, reviewId=review['id'])
+            #worker = Worker(self.load_leafs, current_user, reviewId=review['id'])
+            self.storeReviewData(data)
+            self.populateReviewItems()
+            # Execute
+            #self.threadpool.start(worker)
 
     def asyncLoadLeafs(self, target=None):
         '''
@@ -193,7 +233,7 @@ class MenuWindow(SyncSketch_Window):
         self.fetchData(user=current_user)
         self.populateReviewPanel()
         self.populateReviewItems()
-        self.asyncLoadLeafs()
+        self.loadLeafs()
 
 
 
