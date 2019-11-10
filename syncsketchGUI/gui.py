@@ -30,10 +30,10 @@ from vendor.Qt import QtWidgets
 
 import logging
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.CRITICAL)
+logger.setLevel(logging.DEBUG)
 
 ch = logging.StreamHandler()
-ch.setLevel(logging.CRITICAL)
+ch.setLevel(logging.DEBUG)
 
 
 
@@ -114,6 +114,7 @@ def set_tree_selection(tree, id):
         item = iterator.value()
         itemData = item.data(1, QtCore.Qt.EditRole)
         if itemData.get('id') == id:
+            print("Setting tree selection {}".format(id))
             tree.setCurrentItem(item, 1)
             tree.scrollToItem(item)
         iterator += 1
@@ -160,6 +161,7 @@ def get_current_item_from_ids(tree, payload=None):
         item = iterator.value()
         item_data = item.data(1, QtCore.Qt.EditRole)
         if item_data.get(searchType) == searchValue:
+            print("setting current Item : {}".format(item))
             tree.setCurrentItem(item, 1)
             tree.scrollToItem(item)
             return item_data
@@ -239,6 +241,7 @@ def update_target_from_tree(self, treeWidget):
     logger.debug("update_target_from_tree")
     selected_item = treeWidget.currentItem()
     if not selected_item:
+        logger.warning("Nothing selected returning")
         return
     else:
         item_data = selected_item.data(1, QtCore.Qt.EditRole)
@@ -258,10 +261,12 @@ def update_target_from_tree(self, treeWidget):
     if item_type == 'project':
         review_url = '{}{}'.format(path.project_url, item_data.get('id'))
         self.ui.thumbnail_itemPreview.clear()
+        logger.info("in  item_type == 'project'")
     elif item_type == 'review': # and not item_data.get('reviewURL'):
         current_data['review_id'] = item_data.get('id')
         current_data['target_url'] = '{0}{1}'.format(review_base_url, item_data.get('uuid'), item_data.get('id'))
         self.ui.thumbnail_itemPreview.clear()
+        logger.info("in  item_type == 'review'")
 
     elif item_type == 'media':
         parent_item = selected_item.parent()
@@ -277,6 +282,7 @@ def update_target_from_tree(self, treeWidget):
 
 
     while selected_item.parent():
+        logger.info("selected_item.parent() {}".format(selected_item))
         current_data['breadcrumb'] = ' > '.join([selected_item.text(0), current_data['upload_to_value']])
         selected_item = selected_item.parent()
 

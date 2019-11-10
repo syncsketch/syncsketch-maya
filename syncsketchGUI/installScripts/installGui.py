@@ -64,8 +64,6 @@ class Icon():
         return pixmap
 
 
-
-
 class InstallOptions(object):
     def __init__(self):
         pass

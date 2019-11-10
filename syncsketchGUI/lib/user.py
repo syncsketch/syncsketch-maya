@@ -13,10 +13,10 @@ from os.path import expanduser
 import logging
 logger = logging.getLogger(__name__)
 
-logger.setLevel(logging.CRITICAL)
+logger.setLevel(logging.DEBUG)
 
 ch = logging.StreamHandler()
-ch.setLevel(logging.CRITICAL)
+ch.setLevel(logging.DEBUG)
 
 # ======================================================================
 # Global Variables

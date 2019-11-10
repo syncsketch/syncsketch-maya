@@ -10,9 +10,9 @@ from pprint import pformat
 from syncsketchGUI.lib import user as user
 
 logger = logging.getLogger('syncsketchGUI')
-logger.setLevel(logging.CRITICAL)
+logger.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
-ch.setLevel(logging.CRITICAL)
+ch.setLevel(logging.DEBUG)
 
 # create formatter
 formatter = logging.Formatter('[%(asctime)s - %(filename)s:%(lineno)s - %(levelname)s - %(message)s]', "%Y-%m-%d %H:%M:%S")

@@ -4,9 +4,9 @@ import time
 import webbrowser
 from syncsketchGUI.vendor.Qt import QtCore, QtGui, QtWidgets
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.CRITICAL)
+logger.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
-ch.setLevel(logging.CRITICAL)
+ch.setLevel(logging.DEBUG)
 
 
 from syncsketchGUI.lib import video, user, database
@@ -50,7 +50,6 @@ class MenuWindow(SyncSketch_Window):
 
 
         # Load UI state
-
         self.update_login_ui()
 
         #Not logged in or outdated api, token
@@ -106,7 +105,7 @@ class MenuWindow(SyncSketch_Window):
         if not self.reviewParent:
             return
         self.reviewParent.takeChildren()
-        print("items: {} ".format(items))
+        logger.info("populating review items: {} ".format(items))
 
         for media in items or []:
             #add UUID of the review container to the media, so we can use it in itemdata
@@ -130,15 +129,17 @@ class MenuWindow(SyncSketch_Window):
 
             media_treeWidgetItem.sizeHint(80)
             # * this is an obsolute call
-            set_tree_selection(self.ui.browser_treeWidget, None)
+            #set_tree_selection(self.ui.browser_treeWidget, None)
 
             #Make sure we select the last uploaded item
-            if database.read_cache("upload_to_value"):
-                logger.info("upload_to_value is set, updating lineEdit")
-                self.ui.target_lineEdit.setText(database.read_cache("upload_to_value"))
-                self.select_item_from_target_input()
-            else:
-                logger.info("Nothing to set in the lineedit")
+        if database.read_cache("upload_to_value"):
+            print("ebenin")
+            logger.info("upload_to_value is set, updating lineEdit")
+            #self.ui.target_lineEdit.setText(database.read_cache("upload_to_value"))
+            #self.select_item_from_target_input()
+        else:
+            logger.info("Nothing to set in the lineedit")
+            print('ananin')
 
 
     def loadLeafs(self, target=None):
@@ -160,6 +161,7 @@ class MenuWindow(SyncSketch_Window):
                 return
 
         logger.info("target type: {}".format(type(target)))
+        logger.info("target name: {}".format(target.text(0)))
         logger.info("target: {}".format(target))
         logger.info("target dir: {}".format(dir(target)))
 
@@ -176,56 +178,57 @@ class MenuWindow(SyncSketch_Window):
 
 
             self.review = review
-            data = self.load_leafs(user=current_user, reviewId=review['id'])
+            self.reviewData = self.load_leafs(user=current_user, reviewId=review['id'])[0]
             #worker = Worker(self.load_leafs, current_user, reviewId=review['id'])
-            self.storeReviewData(data)
+            #self.storeReviewData(data)
             self.populateReviewItems()
             # Execute
             #self.threadpool.start(worker)
 
-    def asyncLoadLeafs(self, target=None):
-        '''
-        Load leaf element's using a worker
-        '''
-        #Being called directly without the UI interaction
-        if not target:
-            reviewId = database.read_cache('target_review_id')
-            if reviewId:
-                logging.info("Restoring reviewId section for : {} ".format(reviewId))
-                target = getReviewById(self.ui.browser_treeWidget, reviewId=reviewId)
-                if not target:
-                    logging.info("Couldn't find reviewID in treewidget : {} ".format(reviewId))
-                    return
-                else:
-                    logging.info("Restoring review section for : {} ".format(target))
-                #self.asyncLoadLeafs(review)
-            else:
-                return
+    # def asyncLoadLeafs(self, target=None):
+    #     '''
+    #     Load leaf element's using a worker
+    #     '''
+    #     #Being called directly without the UI interaction
+    #     if not target:
+    #         reviewId = database.read_cache('target_review_id')
+    #         if reviewId:
+    #             logging.info("Restoring reviewId section for : {} ".format(reviewId))
+    #             target = getReviewById(self.ui.browser_treeWidget, reviewId=reviewId)
+    #             if not target:
+    #                 logging.info("Couldn't find reviewID in treewidget : {} ".format(reviewId))
+    #                 return
+    #             else:
+    #                 logging.info("Restoring review section for : {} ".format(target))
+    #             #self.asyncLoadLeafs(review)
+    #         else:
+    #             return
 
-        logger.info("target type: {}".format(type(target)))
-        logger.info("target: {}".format(target))
-        logger.info("target dir: {}".format(dir(target)))
+    #     logger.info("target type: {}".format(type(target)))
+    #     logger.info("target: {}".format(target))
+    #     logger.info("target dir: {}".format(dir(target)))
 
-        selected_item = target
-        review = selected_item.data(1, QtCore.Qt.EditRole)
-        item_type = selected_item.data(2, QtCore.Qt.EditRole)
-        self.reviewParent = target
+    #     selected_item = target
+    #     review = selected_item.data(1, QtCore.Qt.EditRole)
+    #     item_type = selected_item.data(2, QtCore.Qt.EditRole)
+    #     self.reviewParent = target
 
-        if item_type == "review":
-            current_user = user.SyncSketchUser()
-            current_user.auto_login()
-            if not current_user.is_logged_in():
-                return
+    #     if item_type == "review":
+    #         current_user = user.SyncSketchUser()
+    #         current_user.auto_login()
+    #         if not current_user.is_logged_in():
+    #             return
 
-            self.review = review
-            worker = Worker(self.load_leafs, current_user, reviewId=review['id'])
-            worker.signals.result.connect(self.storeReviewData)
-            worker.signals.finished.connect(self.populateReviewItems)
-            # Execute
-            self.threadpool.start(worker)
+    #         self.review = review
+    #         worker = Worker(self.load_leafs, current_user, reviewId=review['id'])
+    #         worker.signals.result.connect(self.storeReviewData)
+    #         worker.signals.finished.connect(self.populateReviewItems)
+    #         # Execute
+    #         self.threadpool.start(worker)
 
 
     def populateTree(self):
+        #Only called at the beginning of a sessions
         current_user = user.SyncSketchUser()
         if not current_user.is_logged_in():
             return
@@ -237,24 +240,24 @@ class MenuWindow(SyncSketch_Window):
 
 
 
-    def asyncPopulateTree(self, withItems=False):
-        '''
-        Create's async calls to to get user-data from the server
-        Keyword Arguments:
-        bool withItems -- gathers tree with or without leave items
-        '''
-        current_user = user.SyncSketchUser()
-        if not current_user.is_logged_in():
-            return
+    # def asyncPopulateTree(self, withItems=False):
+    #     '''
+    #     Create's async calls to to get user-data from the server
+    #     Keyword Arguments:
+    #     bool withItems -- gathers tree with or without leave items
+    #     '''
+    #     current_user = user.SyncSketchUser()
+    #     if not current_user.is_logged_in():
+    #         return
 
-        worker = Worker(self.fetchData, current_user,
-                        logging=logging, withItems=withItems)
-        worker.signals.result.connect(self.storeAccountData)
-        worker.signals.finished.connect(self.populateReviewPanel)
-        #Chain restore_ui_state
-        #worker.signals.finished.connect(self.asyncLoadLeafs)
-        # Execute
-        self.threadpool.start(worker)
+    #     worker = Worker(self.fetchData, current_user,
+    #                     logging=logging, withItems=withItems)
+    #     worker.signals.result.connect(self.storeAccountData)
+    #     worker.signals.finished.connect(self.populateReviewPanel)
+    #     #Chain restore_ui_state
+    #     #worker.signals.finished.connect(self.asyncLoadLeafs)
+    #     # Execute
+    #     self.threadpool.start(worker)
 
 
     def closeEvent(self, event):
@@ -311,7 +314,7 @@ class MenuWindow(SyncSketch_Window):
             logging.info("Restoring reviewId section for : {} ".format(reviewId))
             review = getReviewById(self.ui.browser_treeWidget, reviewId=reviewId)
             logging.info("Restoring review section for : {} ".format(review))
-            self.asyncLoadLeafs(review)
+            self.loadLeafs(review)
 
 
     def save_ui_state(self):
@@ -366,7 +369,7 @@ class MenuWindow(SyncSketch_Window):
 
         #tree widget functions
         self.ui.browser_treeWidget.currentItemChanged.connect(self.validate_review_url)
-        self.ui.browser_treeWidget.currentItemChanged.connect(self.asyncLoadLeafs)
+        self.ui.browser_treeWidget.currentItemChanged.connect(self.loadLeafs)
         self.ui.browser_treeWidget.doubleClicked.connect(self.open_upload_to_url)
 
         # Videos / Playblast Settings
@@ -708,10 +711,13 @@ class MenuWindow(SyncSketch_Window):
         which triggers the load of items.
         """
         logging.info("Expanding treewidget")
+        logging.info("target: {} - {}".format(target, target.text(0)))
         selected_item = target
         item =  self.ui.browser_treeWidget.itemFromIndex(selected_item)
         item_type = item.data(2, QtCore.Qt.EditRole)
+
         if item_type == "review":
+            print ("expanding a review")
             item.takeChildren()
             self.ui.browser_treeWidget.setCurrentItem(item)
             item.setSelected(True)
