@@ -157,7 +157,7 @@ class SyncSketchUser():
                 self.get_name(), self.get_api_key(), self.api_host,))
             self.host_data = syncsketch.SyncSketchAPI(self.get_name(),
                                                        self.get_api_key(),
-                                                       useExpiringToken=True,
+                                                       useExpiringToken=False,
                                                        host = self.api_host,
                                                        debug=False)
             return self.host_data
