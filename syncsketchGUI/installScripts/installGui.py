@@ -168,6 +168,11 @@ class installerUI(QWidget, UIDesktop):
     def checkBoxChanged(self, state, name):
         if name == 'installShelf':
             InstallOptions.installShelf = state
+        if name == "dontRemindUpgrade":
+            #Called from an upgrade, so we already have SS installed, let's
+            # save this option in our config
+            from syncsketchGUI.lib import database 
+            database.save_cache("dontRemindUpgrade", state)
 
     def createLayout(self):
         outer = QVBoxLayout()
@@ -234,6 +239,8 @@ class installerUI(QWidget, UIDesktop):
         spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Expanding)
         outer.addItem(spacer)
 
+
+
         self.installShelf = QCheckBox('Create Syncsketch Shelf (recommended)', self)
         self.installShelf.setChecked(True)
         self.installShelf.stateChanged.connect(partial(self.checkBoxChanged, 'installShelf'))
@@ -249,6 +256,11 @@ class installerUI(QWidget, UIDesktop):
         ButtonLayout = QHBoxLayout()
         ButtonLayout.setAlignment(Qt.AlignCenter)
         ButtonLayout.addWidget(self.installShelf, 0)
+
+        if InstallOptions.upgrade == 1:
+            self.dontRemindUpgrade = QCheckBox('Don\'t show this ', self)
+            self.dontRemindUpgrade.stateChanged.connect(partial(self.checkBoxChanged, 'dontRemindUpgrade'))
+            ButtonLayout.addWidget(self.dontRemindUpgrade, 0)
 
         ButtonLayout.addStretch()
         outer.addLayout(ButtonLayout)

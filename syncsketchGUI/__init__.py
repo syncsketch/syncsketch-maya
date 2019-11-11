@@ -28,50 +28,6 @@ logger.propagate = 0
 WAIT_TIME = 0.1 # seconds
 #global upgrade = 0
 
-# * Check for Updates and load Upgrade UI if Needed
-if getVersionDifference():
-    logger.info("YOU ARE {} VERSIONS BEHIND".format(getVersionDifference()))
-
-    #Let's first make sure to replace the installerGui with the latest.
-    def getLatestInstallerPyFileFromRepo():
-        import urllib2
-        """Parses latest setup.py's version number"""
-        response = urllib2.urlopen(
-            'https://raw.githubusercontent.com/syncsketch/syncsketch-maya/release/syncsketchGUI/installScripts/installGui.py')
-        data = response.read()
-
-        #Let's get the path of the installer
-        from syncsketchGUI.installScripts import installGui
-        installerPath = installGui.__file__[:-1]
-
-
-        #Replace the module
-        with open(installerPath, "w") as file:
-            file.write(data)
-
-
-
-    getLatestInstallerPyFileFromRepo()
-
-    if not installGui.InstallOptions.upgrade == 1:
-        reload(installGui)
-        #If this is set to 1, it means upgrade was already installed
-        installGui.InstallOptions.upgrade = 1
-
-        #Preserve Credentials
-        current_user = user.SyncSketchUser()
-
-        if current_user.is_logged_in():
-            installGui.InstallOptions.tokenData['username'] = current_user.get_name()
-            installGui.InstallOptions.tokenData['token'] = current_user.get_token()
-            installGui.InstallOptions.tokenData['api_key'] = current_user.get_api_key()
-            print("This is: {}".format(installGui.InstallOptions.tokenData))
-        Installer = installGui.SyncSketchInstaller()
-        Installer.showit()
-
-
-else:
-    logger.info("You are using the latest release of this package")
 
 from syncsketchGUI.lib import user, path
 from syncsketchGUI.lib import video, database

@@ -22,7 +22,7 @@ from syncsketchGUI.gui import parse_url_data, get_current_item_from_ids, set_tre
 from syncsketchGUI.lib.gui.icons import _get_qicon
 from syncsketchGUI.lib.gui.literals import DEFAULT_VIEWPORT_PRESET, PRESET_YAML, VIEWPORT_YAML, DEFAULT_PRESET, uploadPlaceHolderStr, message_is_not_loggedin, message_is_not_connected
 from syncsketchGUI.lib.async import Worker, WorkerSignals
-
+from syncsketchGUI.installScripts.maintenance import getLatestSetupPyFileFromLocal, getVersionDifference
 USER_ACCOUNT_DATA = None
 
 class MenuWindow(SyncSketch_Window):
@@ -63,6 +63,7 @@ class MenuWindow(SyncSketch_Window):
         #Populate Treewidget with all items
         #self.asyncPopulateTree(withItems=True)
         self.restore_ui_state()
+        self.setWindowTitle("Syncsketch - Version: {}".format(getLatestSetupPyFileFromLocal()))
 
 
     def storeReviewData(self, s):
@@ -266,7 +267,11 @@ class MenuWindow(SyncSketch_Window):
         event.accept()
 
 
+
     def restore_ui_state(self):
+
+        self.ui.upgrade_pushButton.hide() if getVersionDifference() else self.ui.upgrade_pushButton.show()
+
         self.ui.ui_record_pushButton.setEnabled(
             True if self.current_user.is_logged_in() else False)
 
@@ -354,6 +359,7 @@ class MenuWindow(SyncSketch_Window):
         # Menu Bar
         self.ui.help_pushButton.clicked.connect(self.open_support)
         self.ui.login_pushButton.clicked.connect(self.connect_account)
+        self.ui.upgrade_pushButton.clicked.connect(self.upgrade_plugin)
         self.ui.logout_pushButton.clicked.connect(self.disconnect_account)
         self.ui.syncsketchGUI_pushButton.clicked.connect(self.open_landing)
         self.ui.signup_pushButton.clicked.connect(self.open_signup)
@@ -677,15 +683,22 @@ class MenuWindow(SyncSketch_Window):
         self.ui.logout_pushButton.setText("Log Out")
         self.ui.login_pushButton = RegularHeaderButton()
         self.ui.login_pushButton.setText("Log In")
+        self.ui.upgrade_pushButton = RegularHeaderButton()
+        self.ui.upgrade_pushButton.setStyleSheet("color: %s"%success_color)
+
+        self.ui.upgrade_pushButton.setText("Upgrade")
+        self.ui.upgrade_pushButton.setToolTip("There is a new version")
         self.ui.help_pushButton = RegularHeaderButton()
         self.ui.help_pushButton.setIcon(help_icon)
 
         self.ui.ui_login_layout.addWidget(self.ui.syncsketchGUI_pushButton)
         self.ui.ui_login_layout.addWidget(self.ui.ui_login_label)
+
         self.ui.ui_login_layout.addWidget(self.ui.login_pushButton)
         self.ui.ui_login_layout.addWidget(self.ui.logout_pushButton)
         self.ui.ui_login_layout.addWidget(self.ui.signup_pushButton)
         self.ui.ui_login_layout.addWidget(self.ui.help_pushButton)
+        self.ui.ui_login_layout.addWidget(self.ui.upgrade_pushButton)
 
         self.ui.ui_status_label = RegularStatusLabel()
         self.ui.ui_status_layout.addWidget(self.ui.ui_status_label)
@@ -711,13 +724,14 @@ class MenuWindow(SyncSketch_Window):
         which triggers the load of items.
         """
         logging.info("Expanding treewidget")
-        logging.info("target: {} - {}".format(target, target.text(0)))
         selected_item = target
+        #convert qmodelindex into a treewidget item
         item =  self.ui.browser_treeWidget.itemFromIndex(selected_item)
+        logging.info("target: {} - {}".format(target, item.text(0)))
         item_type = item.data(2, QtCore.Qt.EditRole)
 
         if item_type == "review":
-            print ("expanding a review")
+            logging.info("expanding a review")
             item.takeChildren()
             self.ui.browser_treeWidget.setCurrentItem(item)
             item.setSelected(True)
@@ -832,6 +846,10 @@ class MenuWindow(SyncSketch_Window):
 
     # ==================================================================
     # Menu Item Functions
+
+    def upgrade_plugin(self):
+        from syncsketchGUI.installScripts.maintenance import handleUpgrade
+        handleUpgrade()
 
     def connect_account(self):
 
