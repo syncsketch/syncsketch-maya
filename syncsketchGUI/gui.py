@@ -161,7 +161,7 @@ def get_current_item_from_ids(tree, payload=None):
         item = iterator.value()
         item_data = item.data(1, QtCore.Qt.EditRole)
         if item_data.get(searchType) == searchValue:
-            print("setting current Item : {}".format(item))
+            print("setting current Item : {} text:{}".format(item, item.text(0)))
             tree.setCurrentItem(item, 1)
             tree.scrollToItem(item)
             return item_data
@@ -262,6 +262,7 @@ def update_target_from_tree(self, treeWidget):
         review_url = '{}{}'.format(path.project_url, item_data.get('id'))
         self.ui.thumbnail_itemPreview.clear()
         logger.info("in  item_type == 'project'")
+
     elif item_type == 'review': # and not item_data.get('reviewURL'):
         current_data['review_id'] = item_data.get('id')
         current_data['target_url'] = '{0}{1}'.format(review_base_url, item_data.get('uuid'), item_data.get('id'))
@@ -278,7 +279,7 @@ def update_target_from_tree(self, treeWidget):
         #https://www.syncsketch.com/sketch/5a8d634c8447#692936/619482
         #current_data['target_url'] = '{}#{}'.format(review_base_url + str(current_data['review_id']), current_data['media_id'])
         current_data['target_url'] = '{0}{1}#{2}'.format(review_base_url, item_data.get('uuid'), item_data.get('id'))
-        logger.info(current_data['target_url'])
+        logger.info("current_data['target_url'] {}".format(current_data['target_url']))
 
 
     while selected_item.parent():

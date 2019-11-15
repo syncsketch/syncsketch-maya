@@ -10,6 +10,7 @@ from pprint import pformat
 from syncsketchGUI.lib import user as user
 
 logger = logging.getLogger('syncsketchGUI')
+print("logger: {}".format(logger))
 logger.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
@@ -137,7 +138,7 @@ def show_success_message(uploaded_item):
     UploadedMediaDialog = infoDialog.InfoDialog(None,
                                           title,
                                           info_message,
-                                          uploaded_item['reviewURL'])
+                                          uploaded_item)
     UploadedMediaDialog.exec_()
 
 
@@ -170,6 +171,7 @@ def upload(open_after_upload = None, show_success_msg = False):
 
 
     if not open_after_upload:
+        logging.info("uploaded_item: {}".format(uploaded_item))
         show_success_message(path.make_url_offlineMode(uploaded_item['reviewURL']))
 
     return uploaded_item
@@ -323,7 +325,7 @@ def _upload(current_user=None, ):
     if item_type == 'review':
         logger.info('Uploading {} to {} with review_id {}'.format(upload_file, upload_to_value, review_id))
         uploaded_item = current_user.upload_media_to_review(review_id, upload_file, noConvertFlag = True, itemParentId = False, data = postData)
-        logger.info("uploaded_item: {0}".format(pformat(uploaded_item)))
+        #logger.info("uploaded_item: {0}".format(pformat(uploaded_item)))
 
     elif item_type == 'media':
         logger.info('Updating item {} with file {}'.format(upload_to_value, upload_file))
