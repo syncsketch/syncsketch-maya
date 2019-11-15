@@ -8,7 +8,7 @@ from syncsketchGUI.lib.maya import scene as maya_scene
 
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("syncsketchGUI")
 class DownloadWindow(SyncSketch_Window):
     """
     UI Frame to handle Download Actions

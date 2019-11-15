@@ -5,7 +5,7 @@ from syncsketchGUI.vendor.Qt import QtWidgets
 from syncsketchGUI.lib.gui.icons import *
 
 import logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("syncsketchGUI")
 
 class InfoDialog(QtWidgets.QDialog):
     """

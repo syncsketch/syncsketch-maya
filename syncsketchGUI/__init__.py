@@ -11,9 +11,9 @@ from syncsketchGUI.lib import user as user
 
 logger = logging.getLogger('syncsketchGUI')
 print("logger: {}".format(logger))
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.CRITICAL)
 ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
+ch.setLevel(logging.CRITICAL)
 
 # create formatter
 formatter = logging.Formatter('[%(asctime)s - %(filename)s:%(lineno)s - %(levelname)s - %(message)s]', "%Y-%m-%d %H:%M:%S")
@@ -171,7 +171,7 @@ def upload(open_after_upload = None, show_success_msg = False):
 
 
     if not open_after_upload:
-        logging.info("uploaded_item: {}".format(uploaded_item))
+        logger.info("uploaded_item: {}".format(uploaded_item))
         show_success_message(path.make_url_offlineMode(uploaded_item['reviewURL']))
 
     return uploaded_item

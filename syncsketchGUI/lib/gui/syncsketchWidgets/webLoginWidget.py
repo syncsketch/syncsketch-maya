@@ -7,7 +7,7 @@ import syncsketchGUI.lib.user as user
 from syncsketchGUI.vendor.Qt import QtCore
 from syncsketchGUI.lib.gui import qt_utils
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("syncsketchGUI")
 
 class WebLoginWindow(QWebView):
     """

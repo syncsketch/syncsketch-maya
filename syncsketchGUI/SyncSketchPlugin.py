@@ -8,7 +8,7 @@ from maya import OpenMayaMPx as ommpx
 from maya import OpenMaya as om
 
 import logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("syncsketchGUI")
 
 # ======================================================================
 # Call Command List

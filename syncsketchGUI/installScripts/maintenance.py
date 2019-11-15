@@ -5,10 +5,8 @@ import urllib2
 import sys
 
 import logging
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
+logger = logging.getLogger("syncsketchGUI")
+
 from syncsketchGUI.installScripts import installGui
 from syncsketchGUI.lib import user as user
 
@@ -60,7 +58,7 @@ def handleUpgrade():
     if getVersionDifference():
         logger.info("YOU ARE {} VERSIONS BEHIND".format(getVersionDifference()))
         if os.getenv("SS_DISABLE_UPGRADE"):
-            logging.info("The environment-Value SS_DISABLE_UPGRADE is set, skipping upgrade")
+            logger.info("The environment-Value SS_DISABLE_UPGRADE is set, skipping upgrade")
             return
         #Let's first make sure to replace the installerGui with the latest.
         # * we might restore old file if not continued from here

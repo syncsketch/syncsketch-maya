@@ -21,7 +21,7 @@ from syncsketchGUI.lib import path
 from syncsketchGUI.vendor.capture import capture
 
 import logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("syncsketchGUI")
 
 # ======================================================================
 # Module Functions
@@ -497,7 +497,7 @@ def screenshot_current_editor(cache_file, presetName, panel=None, camera=None):
         fname = capture.snap(**options)
 
         if not fname:
-            logging.warning("Preview failed")
+            logger.warning("Preview failed")
             return
         return fname
 

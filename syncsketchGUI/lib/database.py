@@ -3,7 +3,7 @@ import os
 import yaml
 import logging
 import logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("syncsketchGUI")
 from syncsketchGUI.lib import path
 
 # ======================================================================

@@ -16,7 +16,7 @@ from syncsketchGUI.lib.maya import scene as maya_scene
 from syncsketchGUI.lib.gui.syncsketchWidgets.mainWidget import DEFAULT_PRESET, VIEWPORT_YAML, PRESET_YAML
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("syncsketchGUI")
 
 
 class FormatPresetWindow(SyncSketch_Window):

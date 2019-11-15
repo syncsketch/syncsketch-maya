@@ -8,7 +8,7 @@ from syncsketchGUI.vendor.Qt.QtWebKitWidgets import QWebView
 from syncsketchGUI.lib import database
 import syncsketchGUI.lib.user as user
 import logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("syncsketchGUI")
 
 
 class WarningDialog(QtWidgets.QMessageBox):

@@ -23,7 +23,7 @@ __version__ = "%s.%s.%s" % version_info
 __license__ = "MIT"
 
 import logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("syncsketchGUI")
 
 def capture(camera=None,
             width=None,

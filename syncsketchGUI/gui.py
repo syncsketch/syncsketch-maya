@@ -29,12 +29,7 @@ from vendor.Qt import QtGui
 from vendor.Qt import QtWidgets
 
 import logging
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
-
+logger = logging.getLogger("syncsketchGUI")
 
 
 from lib.gui.syncsketchWidgets.webLoginWidget import WebLoginWindow
@@ -132,7 +127,7 @@ def getReviewById(tree, reviewId):
 
 
 def get_current_item_from_ids(tree, payload=None):
-    logging.info("payload: {}".format(payload))
+    logger.info("payload: {}".format(payload))
     searchValue = ''
     searchType = ''
 
@@ -151,7 +146,7 @@ def get_current_item_from_ids(tree, payload=None):
 
     #Nothing useful found return
     else:
-        logging.info("No uuid or id in payload, aborting")
+        logger.info("No uuid or id in payload, aborting")
         return
 
 
@@ -238,10 +233,10 @@ def get_ids_from_link(link = database.read_cache('upload_to_value')):
 
 # tree function
 def update_target_from_tree(self, treeWidget):
-    logger.debug("update_target_from_tree")
+    logger.info("update_target_from_tree")
     selected_item = treeWidget.currentItem()
     if not selected_item:
-        logger.warning("Nothing selected returning")
+        logger.info("Nothing selected returning")
         return
     else:
         item_data = selected_item.data(1, QtCore.Qt.EditRole)

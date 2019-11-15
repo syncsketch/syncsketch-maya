@@ -11,12 +11,8 @@ from os.path import expanduser
 
 
 import logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("syncsketchGUI")
 
-logger.setLevel(logging.DEBUG)
-
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
 
 # ======================================================================
 # Global Variables
@@ -49,8 +45,8 @@ def _set_to_yaml_user(key, value):
 
     existing_data = dict()
     user_data = {str(key) : str(value)}
-    logging.info("yamlpath: {} ".format(yaml_path))
-    logging.info("userdata: {} ".format(user_data))
+    logger.info("yamlpath: {} ".format(yaml_path))
+    logger.info("userdata: {} ".format(user_data))
 
     if os.path.isfile(yaml_path):
         existing_data = database._parse_yaml(yaml_path)
@@ -153,7 +149,7 @@ class SyncSketchUser():
         # logger.warning(  " doing autologin: %s"%self.api_host)
 
         if not self.host_data:
-            # logging.info("POP self.get_name(): {} self.get_api_key() {} self.api_host {}".format(
+            #logging.info("POP self.get_name(): {} self.get_api_key() {} self.api_host {}".format(
             #     self.get_name(), self.get_api_key(), self.api_host,))
             self.host_data = syncsketch.SyncSketchAPI(self.get_name(),
                                                        self.get_api_key(),
