@@ -159,6 +159,7 @@ class installerUI(QWidget, UIDesktop):\n\
 \n\
         UIDesktop.__init__(self, name, size, *args, **kwargs)\n\
 \n\
+        #todo: make github action to read version fo app from setup.py\n\
         self.setWindowTitle('Syncsketch Maya Installer')\n\
         self.setWindowModality(Qt.ApplicationModal)\n\
         self.setWindowFlags(Qt.FramelessWindowHint)\n\
@@ -403,7 +404,7 @@ class SyncSketchInstaller(QObject):\n\
         # Add TimeLineMenu's if they doesn't exist\n\
 \n\
     def __syncsketchInstall(self):\n\
-        print("install started")\n\
+        print('Install started')\n\
         self.installer.installButton.hide()\n\
         self.installer.closeButton.hide()\n\
         self.installer.installShelf.hide()\n\
