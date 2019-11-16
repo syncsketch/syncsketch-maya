@@ -109,7 +109,7 @@ def set_tree_selection(tree, id):
         item = iterator.value()
         itemData = item.data(1, QtCore.Qt.EditRole)
         if itemData.get('id') == id:
-            print("Setting tree selection {}".format(id))
+            logger.info("Setting tree selection {} itemData: {}".format(id, itemData))
             tree.setCurrentItem(item, 1)
             tree.scrollToItem(item)
         iterator += 1
@@ -156,7 +156,7 @@ def get_current_item_from_ids(tree, payload=None):
         item = iterator.value()
         item_data = item.data(1, QtCore.Qt.EditRole)
         if item_data.get(searchType) == searchValue:
-            print("setting current Item : {} text:{}".format(item, item.text(0)))
+            logger.info("Setting current Item : {} text:{}".format(item, item.text(0)))
             tree.setCurrentItem(item, 1)
             tree.scrollToItem(item)
             return item_data
@@ -233,14 +233,16 @@ def get_ids_from_link(link = database.read_cache('upload_to_value')):
 
 # tree function
 def update_target_from_tree(self, treeWidget):
-    logger.info("update_target_from_tree")
+    
     selected_item = treeWidget.currentItem()
+    
     if not selected_item:
         logger.info("Nothing selected returning")
         return
     else:
         item_data = selected_item.data(1, QtCore.Qt.EditRole)
         item_type = selected_item.data(2, QtCore.Qt.EditRole)
+    logger.info("update_target_from_tree: item_data {} item_type {}".format(item_data, item_type))
 
     review_base_url = "https://syncsketch.com/sketch/"
     current_data={}
@@ -310,6 +312,7 @@ def update_target_from_tree(self, treeWidget):
 
     # Upload to Value - this is really the 'breadcrumb')
     database.dump_cache({'upload_to_value': current_data['target_url']})
+    logging.info("upload_to_value :{}".format(current_data['upload_to_value']))
 
 
 

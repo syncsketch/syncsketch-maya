@@ -132,13 +132,13 @@ class MenuWindow(SyncSketch_Window):
 
             #Make sure we select the last uploaded item
         if database.read_cache("upload_to_value"):
-            print("monkey")
+            logger.info("true upload_to_value")
             #logger.info("upload_to_value is set, updating lineEdit")
             #self.ui.target_lineEdit.setText(database.read_cache("upload_to_value"))
             #self.select_item_from_target_input()
         else:
             logger.info("Nothing to set in the lineedit")
-            print('panda')
+            logger.info('false upload_to_value')
 
 
     def loadLeafs(self, target=None):
@@ -172,6 +172,7 @@ class MenuWindow(SyncSketch_Window):
             #worker = Worker(self.load_leafs, current_user, reviewId=review['id'])
             #self.storeReviewData(data)
             self.populateReviewItems()
+
             # Execute
             #self.threadpool.start(worker)
 
@@ -736,7 +737,7 @@ class MenuWindow(SyncSketch_Window):
             # * consolidate
 
 
-            item.setSelected(True)
+            #item.setSelected(True)
 
 
     def disconnect_account(self):
@@ -906,10 +907,11 @@ class MenuWindow(SyncSketch_Window):
                 item = iterator.value()
                 item_data = item.data(1, QtCore.Qt.EditRole)
                 if item_data.get('uuid') == url_payload['uuid']:
-                    logger.info("item_data: {}".format(item_data))
+                    logger.info("Found review with item_data: {}".format(item_data))
                     #self.ui.browser_treeWidget.setCurrentItem(item, 1)
                     #self.ui.browser_treeWidget.scrollToItem(item)
                     self.loadLeafs(item)
+
                     break
                 iterator +=1
             currentItem = get_current_item_from_ids(self.ui.browser_treeWidget, url_payload)
@@ -1040,6 +1042,7 @@ class MenuWindow(SyncSketch_Window):
         # To do - do we really have to do this?
         if database.read_cache('ps_upload_after_creation_checkBox') == 'true':
             self.update_target_from_upload(recordData["uploaded_item"]['reviewURL'])
+            logger.info("update_target_from_upload = {}".format(recordData["uploaded_item"]['reviewURL']))
 
         #self.restore_ui_state()
         self.update_last_recorded()
