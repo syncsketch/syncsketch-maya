@@ -516,7 +516,7 @@ class installThread(QThread):
         print('PIP_PATH: {0}'.format(PIP_PATH))
         print('Literals.SYNCSKETCH_INSTALL_PATH: {0}'.format(Literals.SYNCSKETCH_INSTALL_PATH))
 
-        
+
 
         try:
             if not INSTALL_SSGUI_ONLY:
@@ -591,6 +591,12 @@ class installThread(QThread):
                     os.makedirs(PluginInstallPath['Darwin'])
                 shutil.copy(os.path.join(Literals.SYNCSKETCH_INSTALL_PATH, 'SyncSketchPlugin.py'), 
                     os.path.join(PluginInstallPath['Darwin'], 'SyncSketchPlugin.py')
+                    )
+            elif Literals.PLATFORM == 'Windows':
+                if not os.path.isdir(PluginInstallPath['Windows']):
+                    os.makedirs(PluginInstallPath['Windows'])
+                shutil.copy(os.path.join(Literals.SYNCSKETCH_INSTALL_PATH, 'SyncSketchPlugin.py'), 
+                    os.path.join(PluginInstallPath['Windows'], 'SyncSketchPlugin.py')
                     )
 
         except Exception as e:
