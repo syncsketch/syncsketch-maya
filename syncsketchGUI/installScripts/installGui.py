@@ -169,11 +169,6 @@ class installerUI(QWidget, UIDesktop):
     def checkBoxChanged(self, state, name):
         if name == 'installShelf':
             InstallOptions.installShelf = state
-        if name == "dontRemindUpgrade":
-            #Called from an upgrade, so we already have SS installed, let's
-            # save this option in our config
-            from syncsketchGUI.lib import database 
-            database.save_cache("dontRemindUpgrade", state)
 
     def createLayout(self):
         outer = QVBoxLayout()
