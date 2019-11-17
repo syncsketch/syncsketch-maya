@@ -323,6 +323,7 @@ class SyncSketch_Window(QtWidgets.QMainWindow):
         '''
         self.current_user = user.SyncSketchUser()
         if self.current_user.is_logged_in() and is_connected():
+            logger.info("self.current_user.is_logged_in() {} is_connected() {} ".format(self.current_user.is_logged_in(),is_connected() ))
             username = self.current_user.get_name()
             self.ui.ui_login_label.setText("Logged into SyncSketch as \n%s" % username)
             self.ui.ui_login_label.setStyleSheet("color: white; font-size: 11px;")

@@ -312,7 +312,7 @@ def update_target_from_tree(self, treeWidget):
 
     # Upload to Value - this is really the 'breadcrumb')
     database.dump_cache({'upload_to_value': current_data['target_url']})
-    logging.info("upload_to_value :{}".format(current_data['upload_to_value']))
+    logger.info("upload_to_value :{}".format(current_data['upload_to_value']))
 
 
 

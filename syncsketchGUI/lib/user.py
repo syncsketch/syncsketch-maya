@@ -149,8 +149,8 @@ class SyncSketchUser():
         # logger.warning(  " doing autologin: %s"%self.api_host)
 
         if not self.host_data:
-            #logging.info("POP self.get_name(): {} self.get_api_key() {} self.api_host {}".format(
-            #     self.get_name(), self.get_api_key(), self.api_host,))
+            logger.info("self.get_name(): {} self.get_api_key() {} self.api_host {}".format(
+                 self.get_name(), self.get_api_key(), self.api_host,))
             self.host_data = syncsketch.SyncSketchAPI(self.get_name(),
                                                        self.get_api_key(),
                                                        useExpiringToken=True,

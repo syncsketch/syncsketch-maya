@@ -104,7 +104,7 @@ class MenuWindow(SyncSketch_Window):
             logger.info("No review parent, returning")
             return
         self.mediaItemParent.takeChildren()
-        logger.info("populating review items: {} ".format(items))
+        logger.info("takeChildren and populating reviewItems {} ".format(items))
 
         for media in items or []:
             #add UUID of the review container to the media, so we can use it in itemdata
@@ -220,11 +220,13 @@ class MenuWindow(SyncSketch_Window):
 
     def populateTree(self):
         #Only called at the beginning of a sessions
-        current_user = user.SyncSketchUser()
-        if not current_user.is_logged_in():
+        self.current_user = user.SyncSketchUser()
+        if not self.current_user.is_logged_in():
+            logger.info("User not logged in, returning")
             return
 
-        self.fetchData(user=current_user)
+        logger.info("Trying to fetch data and co")
+        self.fetchData(user=self.current_user)
         self.populateReviewPanel()
         self.populateReviewItems()
         self.loadLeafs()
