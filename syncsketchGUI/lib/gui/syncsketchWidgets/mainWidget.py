@@ -677,6 +677,7 @@ class MenuWindow(SyncSketch_Window):
         self.ui.login_pushButton = RegularHeaderButton()
         self.ui.login_pushButton.setText("Log In")
         self.ui.upgrade_pushButton = RegularHeaderButton()
+        self.ui.upgrade_pushButton.hide()
         self.ui.upgrade_pushButton.setStyleSheet("color: %s"%success_color)
 
         self.ui.upgrade_pushButton.setText("Upgrade")
