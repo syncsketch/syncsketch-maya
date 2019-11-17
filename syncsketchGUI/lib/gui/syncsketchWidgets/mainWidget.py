@@ -50,6 +50,7 @@ class MenuWindow(SyncSketch_Window):
         self.update_login_ui()
 
         #Not logged in or outdated api, token
+        self.setWindowTitle("Syncsketch - Version: {}".format(getLatestSetupPyFileFromLocal()))
         if not self.accountData:
             return
 
@@ -60,7 +61,7 @@ class MenuWindow(SyncSketch_Window):
         #Populate Treewidget with all items
         #self.asyncPopulateTree(withItems=True)
         self.restore_ui_state()
-        self.setWindowTitle("Syncsketch - Version: {}".format(getLatestSetupPyFileFromLocal()))
+
 
 
     def storeReviewData(self, s):
@@ -893,7 +894,7 @@ class MenuWindow(SyncSketch_Window):
 
         if not link:
             link = database.read_cache('upload_to_value')
-            logger.warning("No link, reading from cache: {} ".format(link))
+            logger.info("No link, reading from cache: {} ".format(link))
         #ids = get_ids_from_link(link)
         url_payload = parse_url_data(link)
         logger.info("url_payload: {} ".format(url_payload))
@@ -1230,8 +1231,8 @@ class MenuWindow(SyncSketch_Window):
             return
 
         self.current_user = user.SyncSketchUser()
-        logger.warning("CurrentUser: {}".format(self.current_user))
-        logger.warning("isLoggedin: {}".format(self.current_user.is_logged_in()))
+        logger.info("CurrentUser: {}".format(self.current_user))
+        logger.info("isLoggedin: {}".format(self.current_user.is_logged_in()))
         # Always refresh Tree View
         self.ui.browser_treeWidget.clear()
 

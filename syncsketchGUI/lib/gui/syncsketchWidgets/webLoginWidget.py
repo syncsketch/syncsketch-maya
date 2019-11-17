@@ -49,7 +49,7 @@ class WebLoginWindow(QWebView):
                 jsonData = self.page().mainFrame().evaluateJavaScript(command)
                 if isinstance(jsonData, unicode):
                     tokenData = json.loads(jsonData)
-                    logger.warning("tokenData: {0}".format(tokenData))
+                    logger.info("tokenData: {0}".format(tokenData))
                     self.current_user.set_name(tokenData["email"])
                     self.current_user.set_token(tokenData["token"])
                     self.current_user.set_api_key(tokenData["token"])

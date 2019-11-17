@@ -59,7 +59,7 @@ def handleUpgrade():
     if getVersionDifference():
         logger.info("YOU ARE {} VERSIONS BEHIND".format(getVersionDifference()))
         if os.getenv("SS_DISABLE_UPGRADE"):
-            logger.info("The environment-Value SS_DISABLE_UPGRADE is set, skipping upgrade")
+            logger.warning("Upgrades disabled as environment Variable SS_DISABLE_UPGRADE is set, skipping")
             return
         #Let's first make sure to replace the installerGui with the latest.
         # * we might restore old file if not continued from here
