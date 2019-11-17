@@ -226,7 +226,8 @@ class MenuWindow(SyncSketch_Window):
             return
 
         logger.info("Trying to fetch data and co")
-        self.fetchData(user=self.current_user)
+        #self.fetchData(user=self.current_user)
+        self.accountData = self.current_user.get_account_data(withItems=False)
         self.populateReviewPanel()
         self.populateReviewItems()
         self.loadLeafs()
