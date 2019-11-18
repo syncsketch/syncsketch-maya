@@ -309,7 +309,7 @@ class MenuWindow(SyncSketch_Window):
 
 
         reviewId = database.read_cache('target_review_id')
-        if reviewId:
+        if reviewId and self.current_user.is_logged_in() :
             logger.info("Restoring reviewId section for : {} ".format(reviewId))
             review = getReviewById(self.ui.browser_treeWidget, reviewId=reviewId)
             logger.info("Restoring review section for : {} ".format(review))
@@ -826,6 +826,7 @@ class MenuWindow(SyncSketch_Window):
             self.ui.ui_reviewSelection_hBoxLayout
         ]
 
+        #todo remove sideffect
         if (target == "review") or (target == "media") or (target == uploadPlaceHolderStr):
             enable_interface(ui_to_toggle, True)
             self.ui.ui_status_label.update('Valid Review Selected.', color='LightGreen')
