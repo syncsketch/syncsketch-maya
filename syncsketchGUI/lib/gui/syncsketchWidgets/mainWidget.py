@@ -39,6 +39,7 @@ class MenuWindow(SyncSketch_Window):
         self.accountData = None
         self.reviewData = None
         self.mediaItemParent = None
+        self.installer = None
 
         self.setMaximumSize(700, 650)
         self.decorate_ui()
@@ -858,7 +859,8 @@ class MenuWindow(SyncSketch_Window):
 
     def upgrade_plugin(self):
         from syncsketchGUI.installScripts.maintenance import handleUpgrade
-        handleUpgrade()
+        #attach the upgrader to the mainWindow so it doesn't go out of scope
+        self.installer = handleUpgrade()
 
     def connect_account(self):
 

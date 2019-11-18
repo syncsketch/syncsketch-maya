@@ -40,6 +40,7 @@ def getVersionDifference():
 
 def overwriteLatestInstallerFile():
     import urllib2
+    logger.info("Attempting to replace installGui.py with release https://raw.githubusercontent.com/syncsketch/syncsketch-maya/release/syncsketchGUI/installScripts/installGui.py'")
     """Parses latest setup.py's version number"""
     response = urllib2.urlopen(
         'https://raw.githubusercontent.com/syncsketch/syncsketch-maya/release/syncsketchGUI/installScripts/installGui.py')
@@ -55,6 +56,11 @@ def overwriteLatestInstallerFile():
 
 
 def handleUpgrade():
+    """[summary]
+
+    Returns:
+        [SyncSketchInstaller] -- [Instance of the Upgrade UI]
+    """
     # * Check for Updates and load Upgrade UI if Needed
     if getVersionDifference():
         logger.info("YOU ARE {} VERSIONS BEHIND".format(getVersionDifference()))
@@ -63,8 +69,13 @@ def handleUpgrade():
             return
         #Let's first make sure to replace the installerGui with the latest.
         # * we might restore old file if not continued from here
-        overwriteLatestInstallerFile()
+        # ! Caution here, this is replacing infile your local files
+        # ! Always make sure to remove this line when debugging, 
+        # ! It will pull from release github and override changes
+        #overwriteLatestInstallerFile()
 
+
+        logger.info("installGui.InstallOptions.upgrade {}".format(installGui.InstallOptions.upgrade))
         #Make sure we only show this window once per Session
         if not installGui.InstallOptions.upgrade == 1:
             reload(installGui)
@@ -78,9 +89,14 @@ def handleUpgrade():
                 installGui.InstallOptions.tokenData['username'] = current_user.get_name()
                 installGui.InstallOptions.tokenData['token'] = current_user.get_token()
                 installGui.InstallOptions.tokenData['api_key'] = current_user.get_api_key()
-                print("This is: {}".format(installGui.InstallOptions.tokenData))
+                logger.info("This is tokenData: {}".format(installGui.InstallOptions.tokenData))
+            logger.info("Showing installer")
             Installer = installGui.SyncSketchInstaller()
             Installer.showit()
+
+            return Installer
+        else:
+            logger.info("Installer Dismissed, will be activated in the next maya session again")
 
     else:
         logger.info("You are using the latest release of this package")
