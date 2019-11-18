@@ -72,7 +72,7 @@ def handleUpgrade():
         # ! Caution here, this is replacing infile your local files
         # ! Always make sure to remove this line when debugging, 
         # ! It will pull from release github and override changes
-        #overwriteLatestInstallerFile()
+        overwriteLatestInstallerFile()
 
 
         logger.info("installGui.InstallOptions.upgrade {}".format(installGui.InstallOptions.upgrade))
