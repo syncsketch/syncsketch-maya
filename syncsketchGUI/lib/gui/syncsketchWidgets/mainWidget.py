@@ -103,7 +103,7 @@ class MenuWindow(SyncSketch_Window):
     def populateReviewItems(self):
         items = self.reviewData
         if not self.mediaItemParent:
-            logger.info("No review parent, returning")
+            logger.info("No Review Item parent, returning")
             return
         self.mediaItemParent.takeChildren()
         logger.info("takeChildren and populating reviewItems {} ".format(items))
@@ -134,7 +134,7 @@ class MenuWindow(SyncSketch_Window):
 
             #Make sure we select the last uploaded item
         if database.read_cache("upload_to_value"):
-            logger.info("true upload_to_value")
+            logger.info("true upload_to_value: {}".format(database.read_cache("upload_to_value")))
             #logger.info("upload_to_value is set, updating lineEdit")
             #self.ui.target_lineEdit.setText(database.read_cache("upload_to_value"))
             #self.select_item_from_target_input()
@@ -155,7 +155,7 @@ class MenuWindow(SyncSketch_Window):
             else:
                 return
 
-        logger.info("target type: {} target name: {}".format(type(target), target.text(0)))
+        logger.info("target: {} target name: {}".format(type(target), target.text(0)))
 
         selected_item = target
         review = selected_item.data(1, QtCore.Qt.EditRole)
@@ -171,12 +171,10 @@ class MenuWindow(SyncSketch_Window):
 
             self.review = review
             self.reviewData = self.load_leafs(user=current_user, reviewId=review['id'])[0]
-            #worker = Worker(self.load_leafs, current_user, reviewId=review['id'])
-            #self.storeReviewData(data)
+            logger.info("reviewData: {} and review['id']: {}".format(self.reviewData, review['id']))
             self.populateReviewItems()
 
-            # Execute
-            #self.threadpool.start(worker)
+
 
     # def asyncLoadLeafs(self, target=None):
     #     '''
@@ -903,7 +901,7 @@ class MenuWindow(SyncSketch_Window):
         logger.info("url_payload: {} ".format(url_payload))
 
 
-        currentItem = get_current_item_from_ids(self.ui.browser_treeWidget, url_payload)
+        currentItem = get_current_item_from_ids(self.ui.browser_treeWidget, url_payload, setCurrentItem=False)
         logger.info("current Item: {}".format(currentItem))
 
         if not currentItem:
@@ -915,24 +913,15 @@ class MenuWindow(SyncSketch_Window):
                 item = iterator.value()
                 item_data = item.data(1, QtCore.Qt.EditRole)
                 if item_data.get('uuid') == url_payload['uuid']:
-                    logger.info("Found review with item_data: {}".format(item_data))
+                    logger.info("Found review with item_data: {} loading reviewItems ...".format(item_data))
                     #self.ui.browser_treeWidget.setCurrentItem(item, 1)
                     #self.ui.browser_treeWidget.scrollToItem(item)
                     self.loadLeafs(item)
 
                     break
                 iterator +=1
-            currentItem = get_current_item_from_ids(self.ui.browser_treeWidget, url_payload)
-            #review = getReviewById(self.ui.browser_treeWidget, reviewId=url_payload['id'])
-            #self.loadLeafs(review)
+            currentItem = get_current_item_from_ids(self.ui.browser_treeWidget, url_payload, setCurrentItem=True)
 
-            #Try loading it deferred
-            # reviewId = url_payload['id']
-            # if reviewId:
-            #     logger.info("Restoring reviewId section for : {} ".format(reviewId))
-            #     review = getReviewById(self.ui.browser_treeWidget, reviewId=reviewId)
-            #     logger.info("Restoring review section for : {} ".format(review))
-            #     self.asyncLoadLeafs(review)
 
     # ==================================================================
     # Video Tab Functions
@@ -983,7 +972,8 @@ class MenuWindow(SyncSketch_Window):
         data = database._parse_yaml(yaml_file = format_preset_file)
         if data.has_key(val):
             data = data[val]
-            text = "%s | %s | %sx%s " %(data["encoding"], data["format"], data["width"], data["height"])
+            #text = "%s | %s | %sx%s " %(data["encoding"], data["format"], data["width"], data["height"])
+            text = "{} | {} | {}x{}".format(data["encoding"], data["format"], data["width"], data["height"])
         else:
             text = "no valid preset selected"
         self.ui.ps_preset_description.setText(text)
@@ -1335,7 +1325,7 @@ class MenuWindow(SyncSketch_Window):
         logger.info("uploaded_to_value: {}".format(database.read_cache('upload_to_value')))
         url_payload = parse_url_data(database.read_cache('upload_to_value'))
         logger.info("url_payload: {}".format(url_payload))
-        get_current_item_from_ids(self.ui.browser_treeWidget, url_payload)
+        get_current_item_from_ids(self.ui.browser_treeWidget, url_payload, setCurrentItem=True)
 
         USER_ACCOUNT_DATA = account_data
 

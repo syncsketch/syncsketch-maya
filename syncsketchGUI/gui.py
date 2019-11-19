@@ -126,7 +126,7 @@ def getReviewById(tree, reviewId):
         iterator +=1
 
 
-def get_current_item_from_ids(tree, payload=None):
+def get_current_item_from_ids(tree, payload=None, setCurrentItem=True):
     logger.info("payload: {}".format(payload))
     searchValue = ''
     searchType = ''
@@ -158,7 +158,8 @@ def get_current_item_from_ids(tree, payload=None):
         if item_data.get(searchType) == searchValue:
             logger.info("Setting current Item : {} text:{}".format(item, item.text(0)))
             tree.setCurrentItem(item, 1)
-            tree.scrollToItem(item)
+            if setCurrentItem:
+                tree.scrollToItem(item)
             return item_data
         iterator +=1
 

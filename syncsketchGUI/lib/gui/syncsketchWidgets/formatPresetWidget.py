@@ -197,6 +197,7 @@ class FormatPresetWindow(SyncSketch_Window):
         Load the user's current preset from yaml
         """
         presetFile = path.get_config_yaml(PRESET_YAML)
+        logger.info("reading YAML: {}".format(presetFile))
         presetData = database._parse_yaml(presetFile)
         if not presetData:
             return
@@ -225,6 +226,7 @@ class FormatPresetWindow(SyncSketch_Window):
 
         else:
             preset = presetData.get(presetName)
+            logger.info("presetName: {}, preset: {} presetData: {}".format(presetName, preset, presetData))
             if not preset:
                 return
             logger.info(preset)
