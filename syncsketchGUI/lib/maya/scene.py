@@ -303,7 +303,7 @@ def playblast_with_settings( viewport_preset = None, viewport_preset_yaml = None
     viewport_options = viewportArgs.copy()
     viewport_options.update(recArgs)
 
-    logger.info(viewport_options)
+    logger.info("viewport_options: {}".format(viewport_options))
 
     playblast_file = capture.capture(**viewport_options)
 
@@ -322,7 +322,7 @@ def playblast(filepath = None, width = 1280, height = 720, start_frame = 0, end_
     '''
     Playblast with the pre-defined settings based on the user's OS
     '''
-
+    logger.info("Playblast this:")
     if not filepath:
         filepath = path.get_default_playblast_folder()
 
@@ -343,7 +343,7 @@ def playblast(filepath = None, width = 1280, height = 720, start_frame = 0, end_
         "start_frame": start_frame,
         "end_frame": end_frame
     }
-
+    logger.info("recargsplayblast (): {}".format(recArgs))
     # record with OS specific Fallback Settings
     os_settings = {
         "darwin": [
@@ -383,6 +383,7 @@ def playblast(filepath = None, width = 1280, height = 720, start_frame = 0, end_
             for setting in settingsList:
                 recArgs["compression"]  = setting["compression"]
                 try:
+                    logger.info("recArgs playblast(): {}".format(**recArgs))
                     playblast_file = _playblast_with_settings(**recArgs)
                     return playblast_file
 

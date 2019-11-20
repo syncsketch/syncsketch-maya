@@ -276,6 +276,7 @@ def _record():
             "off_screen":
                 True
     }
+    logger.info("recArgs: {}".format(recArgs))
 
     # read from database Settings
     playblast_file = maya_scene.playblast_with_settings(

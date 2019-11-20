@@ -970,6 +970,7 @@ class MenuWindow(SyncSketch_Window):
         database.dump_cache({'current_preset': val})
         format_preset_file = path.get_config_yaml(PRESET_YAML)
         data = database._parse_yaml(yaml_file = format_preset_file)
+        logger.info("data: {}".format(data))
         if data.has_key(val):
             data = data[val]
             #text = "%s | %s | %sx%s " %(data["encoding"], data["format"], data["width"], data["height"])
