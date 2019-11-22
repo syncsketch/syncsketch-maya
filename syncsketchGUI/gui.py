@@ -138,11 +138,13 @@ def get_current_item_from_ids(tree, payload=None, setCurrentItem=True):
     if payload['uuid'] and payload['id']:
         searchType = 'id'
         searchValue = int(payload['id'])
+        logger.info("both payload['uuid'] and payload['id'] set {}".format(payload['id']))
 
     #Got only uuid, it's a review
     elif payload['uuid']:
         searchType = 'uuid'
         searchValue = payload['uuid']
+        logger.info("payload['uuid'] set: {}".format(payload['uuid']))
 
     #Nothing useful found return
     else:
@@ -156,9 +158,9 @@ def get_current_item_from_ids(tree, payload=None, setCurrentItem=True):
         item = iterator.value()
         item_data = item.data(1, QtCore.Qt.EditRole)
         if item_data.get(searchType) == searchValue:
-            logger.info("Setting current Item : {} text:{}".format(item, item.text(0)))
-            tree.setCurrentItem(item, 1)
+            logger.info("Setting current Item : {} text:{} setCurrentItem: {}".format(item, item.text(0), setCurrentItem))
             if setCurrentItem:
+                tree.setCurrentItem(item, 1)
                 tree.scrollToItem(item)
             return item_data
         iterator +=1

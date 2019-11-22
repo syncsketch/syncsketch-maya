@@ -142,12 +142,14 @@ class MenuWindow(SyncSketch_Window):
             logger.info("Nothing to set in the lineedit")
             logger.info('false upload_to_value')
 
+    def currentItemChanged(self):
+        pass
 
     def loadLeafs(self, target=None):
         '''
         '''
-        #Being called directly without the UI interaction
         if not target:
+            logger.info("No Target")
             reviewId = database.read_cache('target_review_id')
             if reviewId:
                 logger.info("Restoring reviewId section for : {} ".format(reviewId))
@@ -160,7 +162,7 @@ class MenuWindow(SyncSketch_Window):
         selected_item = target
         review = selected_item.data(1, QtCore.Qt.EditRole)
         item_type = selected_item.data(2, QtCore.Qt.EditRole)
-        self.mediaItemParent = target
+
 
         if item_type == "review":
             current_user = user.SyncSketchUser()
@@ -168,10 +170,10 @@ class MenuWindow(SyncSketch_Window):
             if not current_user.is_logged_in():
                 return
 
-
             self.review = review
             self.reviewData = self.load_leafs(user=current_user, reviewId=review['id'])[0]
             logger.info("reviewData: {} and review['id']: {}".format(self.reviewData, review['id']))
+            self.mediaItemParent = target
             self.populateReviewItems()
 
 
@@ -368,7 +370,7 @@ class MenuWindow(SyncSketch_Window):
 
         #tree widget functions
         self.ui.browser_treeWidget.currentItemChanged.connect(self.validate_review_url)
-        self.ui.browser_treeWidget.currentItemChanged.connect(self.loadLeafs)
+        self.ui.browser_treeWidget.currentItemChanged.connect(self.currentItemChanged)
         self.ui.browser_treeWidget.doubleClicked.connect(self.open_upload_to_url)
 
         # Videos / Playblast Settings
@@ -723,19 +725,22 @@ class MenuWindow(SyncSketch_Window):
         #convert qmodelindex into a treewidget item
         item =  self.ui.browser_treeWidget.itemFromIndex(selected_item)
         try:
-            logger.info("target: {} item.text {} selected_item {}".format(target, item.text(0)), selected_item.text(0))
+            logger.info("target: {} item.text {} selected_item {}".format(target, item.text(0)))
         except Exception as e:
             print(e)
         item_type = item.data(2, QtCore.Qt.EditRole)
 
         if item_type == "review":
-            #Simulates currentItem change, if it wsan't changed don't do anything
-            currentItem = self.ui.browser_treeWidget.currentItem() 
-            if id(currentItem) == id(item):
-                return
             logger.info("item_type is a review, expanding")
+            #Simulates currentItem change, if it wsan't changed don't do anything
+            # currentItem = self.ui.browser_treeWidget.currentItem() 
+            # if id(currentItem) == id(item):
+            #     return
             item.takeChildren()
-            self.ui.browser_treeWidget.setCurrentItem(item)
+            #self.ui.browser_treeWidget.setCurrentItem(item)
+            self.loadLeafs(item)
+        else:
+            logger.info("Not a review, nothing to expand")
 
             #User keeps pressing expand, so let's reload
             # * consolidate
@@ -905,7 +910,7 @@ class MenuWindow(SyncSketch_Window):
         logger.info("current Item: {}".format(currentItem))
 
         if not currentItem:
-            logger.info("Review does not exist, trying to load parent and it's items{}".format(url_payload))
+            logger.info("Reviewitem does not exist, trying to load review and it's items{}".format(url_payload))
 
             iterator = QtWidgets.QTreeWidgetItemIterator(self.ui.browser_treeWidget, QtWidgets.QTreeWidgetItemIterator.All)
 
@@ -917,7 +922,6 @@ class MenuWindow(SyncSketch_Window):
                     #self.ui.browser_treeWidget.setCurrentItem(item, 1)
                     #self.ui.browser_treeWidget.scrollToItem(item)
                     self.loadLeafs(item)
-
                     break
                 iterator +=1
             currentItem = get_current_item_from_ids(self.ui.browser_treeWidget, url_payload, setCurrentItem=True)
