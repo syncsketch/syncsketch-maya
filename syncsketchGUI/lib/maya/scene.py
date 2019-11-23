@@ -387,7 +387,7 @@ def playblast(filepath = None, width = 1280, height = 720, start_frame = 0, end_
                     playblast_file = _playblast_with_settings(**recArgs)
                     return playblast_file
 
-                except Exception, err:
+                except Exception as err:
                     logger.info(u'%s' %(err))
 
 # save active panel as a preset

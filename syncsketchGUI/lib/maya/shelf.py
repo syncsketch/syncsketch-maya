@@ -641,7 +641,7 @@ def load_all():
         
         try:
             load(shelf)
-            print '[{}] loaded successfully.'.format(shelf_name)
-        except Exception, err:
-            print u'%s' %(err)
+            print('[{}] loaded successfully.'.format(shelf_name))
+        except Exception as err:
+            print (u'%s' %(err))
     

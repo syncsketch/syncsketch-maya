@@ -48,8 +48,8 @@ def probe(filename):
         ffprobe_output = json.loads(ffprobe_output)
         return ffprobe_output
     
-    except Exception, err:
-        print u'%s' %(err)
+    except Exception as err:
+        print (u'%s' %(err))
         return
 
 def get_thumb(filepath = None, output_file = ""):

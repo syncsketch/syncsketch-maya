@@ -9,7 +9,7 @@ def _add_context_menu_item(menu_name = 'TimeSliderMenu'):
     with a checkbox
     '''
     if not cmds.menu(menu_name, query = True, exists = True):
-        print menu_name, 'doesn\'t exist. SyncSketch menuitem is not added.'
+        print(menu_name, 'doesn\'t exist. SyncSketch menuitem is not added.')
         return
 
     # To add menu item into the TimeSliderMenu,

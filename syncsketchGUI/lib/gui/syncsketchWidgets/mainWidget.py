@@ -90,7 +90,7 @@ class MenuWindow(SyncSketch_Window):
             if logging:
                 pass
                 #logging.warning('accountdata: '.format(account_data))
-        except Exception, err:
+        except Exception as err:
             return None
 
         return account_data
@@ -1136,7 +1136,7 @@ class MenuWindow(SyncSketch_Window):
         if 'none' in uploaded_media_url.lower():
             uploaded_media_url = str()
 
-        logger.info('u\Uploaded_media_url: %s'%uploaded_media_url)
+        logger.info('Uploaded_media_url: %s'%uploaded_media_url)
         database.dump_cache({'us_last_upload_url_pushButton' : uploaded_media_url})
         self.ui.target_lineEdit.setText(uploaded_media_url)
         logger.info("target_lineEdit.setText {}".format(uploaded_media_url))
@@ -1246,7 +1246,7 @@ class MenuWindow(SyncSketch_Window):
         try:
             self.account_data = self.current_user.get_account_data()
 
-        except Exception, err:
+        except Exception as err:
             self.account_data = None
             logger.info("err: {}".format(err))
 
