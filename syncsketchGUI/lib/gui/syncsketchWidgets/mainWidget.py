@@ -309,6 +309,10 @@ class MenuWindow(SyncSketch_Window):
             True if value == 'true' else False)
 
 
+        #Set FrameRange from the lider
+        database.dump_cache({"frame_start":self.ui.ui_rangeIn_textEdit.text()})
+        database.dump_cache({"frame_end":self.ui.ui_rangeOut_textEdit.text()})
+
         reviewId = database.read_cache('target_review_id')
         if reviewId and self.current_user.is_logged_in() :
             logger.info("Restoring reviewId section for : {} ".format(reviewId))
