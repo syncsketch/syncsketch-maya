@@ -1,4 +1,3 @@
-![Join the chat at https://gitter.im/syncsketch-maya/community](https://badges.gitter.im/Join%20Chat.svg)]
 ![maya2017](https://img.shields.io/badge/Maya2017-tested-brightgreen.svg)
 ![maya2018](https://img.shields.io/badge/Maya2018-tested-brightgreen.svg)
 
