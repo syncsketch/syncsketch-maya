@@ -481,7 +481,7 @@ class MenuWindow(SyncSketch_Window):
         self.ui.browser_treeWidget.setPalette(highlight_palette)
         self.ui.browser_treeWidget.setHeaderLabel('refresh')
 
-        self.ui.browser_treeWidget.expanded.connect(self.expandedTest)
+        self.ui.browser_treeWidget.itemExpanded.connect(self.expandedTest)
 
 
         self.ui.browser_treeWidget.header().setSectionsClickable(True)
@@ -724,25 +724,22 @@ class MenuWindow(SyncSketch_Window):
         Select the item that is in the expanded hierarchy
         which triggers the load of items.
         """
+
         logger.info("Expanding treewidget: {}".format(target))
         selected_item = target
         #convert qmodelindex into a treewidget item
-        item =  self.ui.browser_treeWidget.itemFromIndex(selected_item)
+        item =  target #self.ui.browser_treeWidget.itemFromIndex(selected_item)
         try:
-            logger.info("target: {} item.text {} selected_item {}".format(target, item.text(0)))
+            logger.info("item.text {} selected_item {}".format(item.data(0, QtCore.Qt.EditRole), item.data(1, QtCore.Qt.EditRole)))
         except Exception as e:
-            print(e)
+            logger.info("Exception: ".format(e))
         item_type = item.data(2, QtCore.Qt.EditRole)
-
         if item_type == "review":
             logger.info("item_type is a review, expanding")
-            #Simulates currentItem change, if it wsan't changed don't do anything
-            # currentItem = self.ui.browser_treeWidget.currentItem() 
-            # if id(currentItem) == id(item):
-            #     return
-            item.takeChildren()
-            #self.ui.browser_treeWidget.setCurrentItem(item)
-            self.loadLeafs(item)
+            if item.childCount() == 1 and not item.child(0).data(0, QtCore.Qt.EditRole):
+                logger.info("Only single empty dummy item, delete and load childs")
+                item.takeChildren()
+                self.loadLeafs(item)
         else:
             logger.info("Not a review, nothing to expand")
 
@@ -910,7 +907,7 @@ class MenuWindow(SyncSketch_Window):
         logger.info("url_payload: {} ".format(url_payload))
 
 
-        currentItem = get_current_item_from_ids(self.ui.browser_treeWidget, url_payload, setCurrentItem=False)
+        currentItem = get_current_item_from_ids(self.ui.browser_treeWidget, url_payload, setCurrentItem=True)
         logger.info("current Item: {}".format(currentItem))
 
         if not currentItem:
@@ -929,6 +926,7 @@ class MenuWindow(SyncSketch_Window):
                     break
                 iterator +=1
             currentItem = get_current_item_from_ids(self.ui.browser_treeWidget, url_payload, setCurrentItem=True)
+
 
 
     # ==================================================================

@@ -138,7 +138,7 @@ def get_current_item_from_ids(tree, payload=None, setCurrentItem=True):
     if payload['uuid'] and payload['id']:
         searchType = 'id'
         searchValue = int(payload['id'])
-        logger.info("both payload['uuid'] and payload['id'] set {}".format(payload['id']))
+        logger.info("both payload['uuid'] and payload['id'] set {}".format(payload['uuid'], payload['id']))
 
     #Got only uuid, it's a review
     elif payload['uuid']:
@@ -236,9 +236,7 @@ def get_ids_from_link(link = database.read_cache('upload_to_value')):
 
 # tree function
 def update_target_from_tree(self, treeWidget):
-    
     selected_item = treeWidget.currentItem()
-    
     if not selected_item:
         logger.info("Nothing selected returning")
         return
