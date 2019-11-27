@@ -270,8 +270,8 @@ class MenuWindow(SyncSketch_Window):
         self.ui.ui_record_pushButton.setEnabled(
             True if self.current_user.is_logged_in() else False)
 
-        self.ui.ps_upload_after_creation_checkBox.setEnabled(
-            True if self.current_user.is_logged_in() else False)
+        # self.ui.ps_upload_after_creation_checkBox.setEnabled(
+        #     True if self.current_user.is_logged_in() else False)
 
         # self.ui.ui_upload_pushButton.setEnabled(
         #     True if self.current_user.is_logged_in() else False)
@@ -296,9 +296,9 @@ class MenuWindow(SyncSketch_Window):
         value = database.read_cache('current_range_type')
         self.ui.ui_range_comboBox.set_combobox_index(selection=value)
 
-        value = database.read_cache('ps_upload_after_creation_checkBox')
-        self.ui.ps_upload_after_creation_checkBox.setChecked(
-            True if value == 'true' and self.current_user.is_logged_in() else False)
+        # value = database.read_cache('ps_upload_after_creation_checkBox')
+        # self.ui.ps_upload_after_creation_checkBox.setChecked(
+        #     True if value == 'true' and self.current_user.is_logged_in() else False)
 
         value = database.read_cache('us_filename_lineEdit')
         self.ui.us_filename_lineEdit.setText(
