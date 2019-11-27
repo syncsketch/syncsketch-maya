@@ -1042,14 +1042,17 @@ class MenuWindow(SyncSketch_Window):
         # self.ui.ps_clipname_lineEdit.setText(playblast_filename)
         self.ui.ui_status_label.update('Playblast file [{}] is created.'.format(playblast_filename))
 
+        if self.ui.ps_upload_after_creation_checkBox.isChecked() and self.ui.ps_upload_after_creation_checkBox.isEnabled() :
+            self.update_target_from_upload(recordData["uploaded_item"]['reviewURL'])
+            logger.info("update_target_from_upload = {}".format(recordData["uploaded_item"]['reviewURL']))
+        else:
+            logger.info("Upload checkbox was not selected, returning here")
+            return
+
         # Update the last recorded file and save the ui state
         # To do - need to update and selc the target url when item is updated
         if recordData.has_key('uploaded_item'):
             logger.info("uploaded_item %s"%recordData["uploaded_item"]["id"])
-        # To do - do we really have to do this?
-        if database.read_cache('ps_upload_after_creation_checkBox') == 'true':
-            self.update_target_from_upload(recordData["uploaded_item"]['reviewURL'])
-            logger.info("update_target_from_upload = {}".format(recordData["uploaded_item"]['reviewURL']))
 
         #self.restore_ui_state()
         self.update_last_recorded()
