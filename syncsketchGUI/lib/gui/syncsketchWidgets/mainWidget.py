@@ -273,8 +273,8 @@ class MenuWindow(SyncSketch_Window):
         self.ui.ps_upload_after_creation_checkBox.setEnabled(
             True if self.current_user.is_logged_in() else False)
 
-        self.ui.ui_upload_pushButton.setEnabled(
-            True if self.current_user.is_logged_in() else False)
+        # self.ui.ui_upload_pushButton.setEnabled(
+        #     True if self.current_user.is_logged_in() else False)
 
         # Playblast Settings
         value = self.sanitize(database.read_cache('ps_directory_lineEdit'))
@@ -827,14 +827,16 @@ class MenuWindow(SyncSketch_Window):
             self.ui.ui_download_pushButton,
             self.ui.ui_upload_pushButton,
             self.ui.ui_open_pushButton,
+            self.ui.ps_upload_after_creation_checkBox,
             self.ui.ui_copyURL_pushButton,
             self.ui.ui_reviewSelection_hBoxLayout
         ]
 
         #todo remove sideffect
-        if (target == "review") or (target == "media") or (target == uploadPlaceHolderStr):
+        if (target == "review") or (target == "media"):
             enable_interface(ui_to_toggle, True)
             self.ui.ui_status_label.update('Valid Review Selected.', color='LightGreen')
+            logger.info("Review or Media, enabling UI")
         else:
             enable_interface(ui_to_toggle, False)
             self.ui.ui_status_label.update('Please select a review to upload to, using the tree widget or by entering a SyncSketch link', color=warning_color)

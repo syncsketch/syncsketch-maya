@@ -5,7 +5,7 @@ from syncsketchGUI.lib.gui.qt_widgets import SyncSketch_Window
 from syncsketchGUI.lib import database, user
 from syncsketchGUI.lib.gui.qt_widgets import RegularThumbnail, RegularComboBox, RegularStatusLabel, RegularLineEdit, RegularButton, RegularToolButton, RegularGridLayout, RegularQSpinBox
 from syncsketchGUI.lib.maya import scene as maya_scene
-
+import maya.cmds as cmds
 
 
 logger = logging.getLogger("syncsketchGUI")

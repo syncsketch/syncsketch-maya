@@ -34,7 +34,6 @@ logger = logging.getLogger("syncsketchGUI")
 
 from lib.gui.syncsketchWidgets.webLoginWidget import WebLoginWindow
 from lib.gui.qt_widgets import OpenPlayer
-import maya.cmds as cmds
 
 
 PALETTE_YAML = 'syncsketch_palette.yaml'
