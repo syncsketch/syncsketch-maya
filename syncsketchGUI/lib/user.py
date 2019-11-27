@@ -293,6 +293,9 @@ class SyncSketchUser():
             return
 
         media = self.host_data.getMedia({'id': itemId})
+
+        logger.info("itemId: {} ".format(itemId))
+        logger.info("media: {} ".format(media))
         videoURL = media['objects'][0]['url']
         fileName = videoURL.split(str(itemId) + '/')[1].split("?token")[0]
 
