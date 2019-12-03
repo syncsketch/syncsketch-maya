@@ -5,7 +5,7 @@ from syncsketchGUI.lib.gui.qt_widgets import SyncSketch_Window
 from syncsketchGUI.lib import database, user
 from syncsketchGUI.lib.gui.qt_widgets import RegularThumbnail, RegularComboBox, RegularStatusLabel, RegularLineEdit, RegularButton, RegularToolButton, RegularGridLayout, RegularQSpinBox
 from syncsketchGUI.lib.maya import scene as maya_scene
-
+import maya.cmds as cmds
 
 
 logger = logging.getLogger("syncsketchGUI")
@@ -47,8 +47,12 @@ class DownloadWindow(SyncSketch_Window):
 
 
         self.ui.review_target_url.setText(target_url)
+        self.ui.review_target_url.editingFinished.connect(self.editingFinished)
         self.ui.thumbnail_pushButton.set_icon_from_url(thumb_url)
         self.ui.review_target_name.setText(self.item_data['name'])
+
+    def editingFinished(self):
+        print ('done')
 
 
     def decorate_ui(self):
