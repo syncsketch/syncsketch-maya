@@ -108,7 +108,7 @@ def set_tree_selection(tree, id):
         item = iterator.value()
         itemData = item.data(1, QtCore.Qt.EditRole)
         if itemData.get('id') == id:
-            logger.info("Setting tree selection {} itemData: {}".format(id, itemData))
+            logger.info("tree.setCurrentItem{} itemData: {}".format(id, itemData))
             tree.setCurrentItem(item, 1)
             tree.scrollToItem(item)
         iterator += 1
@@ -157,12 +157,14 @@ def get_current_item_from_ids(tree, payload=None, setCurrentItem=True):
         item = iterator.value()
         item_data = item.data(1, QtCore.Qt.EditRole)
         if item_data.get(searchType) == searchValue:
-            logger.info("Setting current Item : {} text:{} setCurrentItem: {}".format(item, item.text(0), setCurrentItem))
             if setCurrentItem:
                 tree.setCurrentItem(item, 1)
                 tree.scrollToItem(item)
+                logger.info("Setting current Item : {} text:{} setCurrentItem: {}".format(item, item.text(0), setCurrentItem))
             return item_data
         iterator +=1
+
+    logger.info("Item not found while iterating, no item set, setCurrentItem: {}".format(setCurrentItem))
 
 
 def parse_url_data(link=database.read_cache('upload_to_value')):
@@ -235,6 +237,7 @@ def get_ids_from_link(link = database.read_cache('upload_to_value')):
 
 # tree function
 def update_target_from_tree(self, treeWidget):
+    logger.info("update_target_from_tree")
     selected_item = treeWidget.currentItem()
     if not selected_item:
         logger.info("Nothing selected returning")
@@ -312,9 +315,7 @@ def update_target_from_tree(self, treeWidget):
 
     # Upload to Value - this is really the 'breadcrumb')
     database.dump_cache({'upload_to_value': current_data['target_url']})
-    logger.info("upload_to_value :{}".format(current_data['upload_to_value']))
-
-
+    logger.info("upload_to_value :{} ".format(current_data['upload_to_value']))
 
     return current_data
 

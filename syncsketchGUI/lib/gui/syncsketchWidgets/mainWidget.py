@@ -145,6 +145,7 @@ class MenuWindow(SyncSketch_Window):
     def currentItemChanged(self):
         pass
 
+    # todo: remove last line call to remove sideffect
     def loadLeafs(self, target=None):
         '''
         '''
@@ -172,7 +173,7 @@ class MenuWindow(SyncSketch_Window):
 
             self.review = review
             self.reviewData = self.load_leafs(user=current_user, reviewId=review['id'])[0]
-            logger.info("reviewData: {} and review['id']: {}".format(self.reviewData, review['id']))
+            logger.info("review['id']: {} reviewData: {}".format(review['id'], self.reviewData))
             self.mediaItemParent = target
             self.populateReviewItems()
 
@@ -813,13 +814,14 @@ class MenuWindow(SyncSketch_Window):
     # todo refactor: this function does more than validation
     def validate_review_url(self, target = None):
         # self.populate_upload_settings()
+        logger.info("Current Item changed")
         targetdata = update_target_from_tree(self, self.ui.browser_treeWidget)
         #todo: don't do that, that's very slow put this in the caching at the beginning
         #if target:
         #    logger.warning(self.current_user.get_review_data_from_id(targetdata['review_id']))
         #{'target_url_type': u'media', 'media_id': 692936, 'review_id': 300639, 'breadcrumb': '', 'target_url': 'https://syncsketch.com/sketch/300639#692936', 'upload_to_value': '', 'name': u'playblast'}
         self.ui.target_lineEdit.setText(database.read_cache('upload_to_value'))
-        logger.info("target_lineEdit.setText validate_review_url: {}".format(database.read_cache('upload_to_value')))
+        logger.info("target_lineEdit.setText validate_review_url: upload_to_value {}".format(database.read_cache('upload_to_value')))
         if target or targetdata:
             target = targetdata['target_url_type']
 
@@ -1284,7 +1286,7 @@ class MenuWindow(SyncSketch_Window):
             logger.info("No account_data found")
             return
 
-        logger.info(account_data)
+        logger.info("account_data: {}".format(account_data))
         for account in account_data:
             account_treeWidgetItem = self._build_widget_item(parent = self.ui.browser_treeWidget,
                                                             item_name = account.get('name'),
