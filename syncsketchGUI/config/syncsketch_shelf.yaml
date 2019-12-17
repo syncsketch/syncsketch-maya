@@ -1,6 +1,6 @@
 - shelfButton:
     annotation  : Main Menu
-    command     : import syncsketchGUI;syncsketchGUI.reload_toolkit (); syncsketchGUI.show_menu_window ()
+    command     : import syncsketchGUI; syncsketchGUI.show_menu_window ()
     image       : syncsketch_ui_100.png
     image1      : syncsketch_ui_100.png
     image2      : syncsketch_ui_150.png
