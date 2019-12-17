@@ -179,48 +179,6 @@ class MenuWindow(SyncSketch_Window):
 
 
 
-    # def asyncLoadLeafs(self, target=None):
-    #     '''
-    #     Load leaf element's using a worker
-    #     '''
-    #     #Being called directly without the UI interaction
-    #     if not target:
-    #         reviewId = database.read_cache('target_review_id')
-    #         if reviewId:
-    #             logger.info("Restoring reviewId section for : {} ".format(reviewId))
-    #             target = getReviewById(self.ui.browser_treeWidget, reviewId=reviewId)
-    #             if not target:
-    #                 logger.info("Couldn't find reviewID in treewidget : {} ".format(reviewId))
-    #                 return
-    #             else:
-    #                 logger.info("Restoring review section for : {} ".format(target))
-    #             #self.asyncLoadLeafs(review)
-    #         else:
-    #             return
-
-    #     logger.info("target type: {}".format(type(target)))
-    #     logger.info("target: {}".format(target))
-    #     logger.info("target dir: {}".format(dir(target)))
-
-    #     selected_item = target
-    #     review = selected_item.data(1, QtCore.Qt.EditRole)
-    #     item_type = selected_item.data(2, QtCore.Qt.EditRole)
-    #     self.mediaItemParent = target
-
-    #     if item_type == "review":
-    #         current_user = user.SyncSketchUser()
-    #         current_user.auto_login()
-    #         if not current_user.is_logged_in():
-    #             return
-
-    #         self.review = review
-    #         worker = Worker(self.load_leafs, current_user, reviewId=review['id'])
-    #         worker.signals.result.connect(self.storeReviewData)
-    #         worker.signals.finished.connect(self.populateReviewItems)
-    #         # Execute
-    #         self.threadpool.start(worker)
-
-
     def populateTree(self):
         #Only called at the beginning of a sessions
         self.current_user = user.SyncSketchUser()
@@ -231,37 +189,18 @@ class MenuWindow(SyncSketch_Window):
         logger.info("Trying to fetch data and co")
         #self.fetchData(user=self.current_user)
         self.accountData = self.current_user.get_account_data(withItems=False)
+
         self.populateReviewPanel()
-        self.populateReviewItems()
+        # * those two next commands might be switched
         self.loadLeafs()
+        self.populateReviewItems()
 
-
-
-    # def asyncPopulateTree(self, withItems=False):
-    #     '''
-    #     Create's async calls to to get user-data from the server
-    #     Keyword Arguments:
-    #     bool withItems -- gathers tree with or without leave items
-    #     '''
-    #     current_user = user.SyncSketchUser()
-    #     if not current_user.is_logged_in():
-    #         return
-
-    #     worker = Worker(self.fetchData, current_user,
-    #                     logging=logging, withItems=withItems)
-    #     worker.signals.result.connect(self.storeAccountData)
-    #     worker.signals.finished.connect(self.populateReviewPanel)
-    #     #Chain restore_ui_state
-    #     #worker.signals.finished.connect(self.asyncLoadLeafs)
-    #     # Execute
-    #     self.threadpool.start(worker)
 
 
     def closeEvent(self, event):
         logger.info("Closing Window")
         self.save_ui_state()
         event.accept()
-
 
 
     def restore_ui_state(self):
