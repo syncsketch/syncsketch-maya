@@ -123,7 +123,7 @@ def get_active_editor():
     """
     cmds.currentTime(cmds.currentTime(q=True))     # fixes `cmds.playblast` undo bug
     panel = cmds.playblast(activeEditor=True)
-    logger.info("panel %s" %panel.split('|')[-1])
+    #logger.info("panel %s" %panel.split('|')[-1])
     return panel.split('|')[-1]
 
 
