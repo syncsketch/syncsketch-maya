@@ -136,8 +136,8 @@ class MenuWindow(SyncSketch_Window):
         if database.read_cache("upload_to_value"):
             logger.info("true upload_to_value: {}".format(database.read_cache("upload_to_value")))
             #logger.info("upload_to_value is set, updating lineEdit")
-            #self.ui.target_lineEdit.setText(database.read_cache("upload_to_value"))
-            #self.select_item_from_target_input()
+            self.ui.target_lineEdit.setText(database.read_cache("upload_to_value"))
+            self.select_item_from_target_input()
         else:
             logger.info("Nothing to set in the lineedit")
             logger.info('false upload_to_value')
