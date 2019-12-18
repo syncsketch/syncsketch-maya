@@ -34,7 +34,6 @@ def getVersionDifference():
     local = int(getLatestSetupPyFileFromLocal().replace(".", ""))
     logger.info("Local Version : {} Remote Version {}".format(local, remote))
     if remote > local:
-        logger.info("Local Version : {} Remote Version {}".format(remote, local))
         return remote-local
     else:
          pass
