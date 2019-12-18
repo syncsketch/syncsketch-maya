@@ -32,6 +32,7 @@ def getVersionDifference():
     """Returns the difference between local Package and latest Remote"""
     remote = int(getLatestSetupPyFileFromRepo().replace(".", ""))
     local = int(getLatestSetupPyFileFromLocal().replace(".", ""))
+    logger.info("Local Version : {} Remote Version {}".format(local, remote))
     if remote > local:
         logger.info("Local Version : {} Remote Version {}".format(remote, local))
         return remote-local
