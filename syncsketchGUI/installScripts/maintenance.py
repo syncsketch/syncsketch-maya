@@ -10,10 +10,13 @@ logger = logging.getLogger("syncsketchGUI")
 from syncsketchGUI.installScripts import installGui
 from syncsketchGUI.lib import user as user
 
+class InstallerLiterals(object):
+    setupPyPath = 'https://raw.githubusercontent.com/syncsketch/syncsketch-maya/dev/setup.py'
+    installerPyGuiPath = 'https://raw.githubusercontent.com/syncsketch/syncsketch-maya/dev/syncsketchGUI/installScripts/installGui.py'
+
 def getLatestSetupPyFileFromRepo():
     """Parses latest setup.py's version number"""
-    response = urllib2.urlopen(
-        'https://raw.githubusercontent.com/syncsketch/syncsketch-maya/release/setup.py')
+    response = urllib2.urlopen(InstallerLiterals.setupPyPath)
     html = response.read()
     return html.split("version = '")[1].split("',")[0]
 
@@ -40,10 +43,9 @@ def getVersionDifference():
 
 def overwriteLatestInstallerFile():
     import urllib2
-    logger.info("Attempting to replace installGui.py with release https://raw.githubusercontent.com/syncsketch/syncsketch-maya/release/syncsketchGUI/installScripts/installGui.py'")
+    logger.info("Attempting to replace installGui.py with release {}".format(InstallerLiterals.installerPyGuiPath))
     """Parses latest setup.py's version number"""
-    response = urllib2.urlopen(
-        'https://raw.githubusercontent.com/syncsketch/syncsketch-maya/release/syncsketchGUI/installScripts/installGui.py')
+    response = urllib2.urlopen(InstallerLiterals.installerPyGuiPath)
     data = response.read()
 
     #Let's get the path of the installer
