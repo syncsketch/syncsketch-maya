@@ -32,8 +32,8 @@ if MAYA_API_VERSION >= 2017:\n\
 else:\n\
     from PySide.QtCore import *\n\
     from PySide.QtGui import *\n\
-\n\
-SYNCSKETCH_GUI_RELEASE_PATH = 'https://github.com/syncsketch/syncsketch-maya/archive/release.zip'\n\
+versionTag = os.getenv('SS_DEV') or 'release'\n\
+SYNCSKETCH_GUI_RELEASE_PATH = 'https://github.com/syncsketch/syncsketch-maya/archive/{}.zip'.format(versionTag)\n\
 SYNCSKETCH_API_RELEASE_PATH = 'https://github.com/syncsketch/python-api/archive/v1.0.4.zip'\n\
 \n\
 \n\
