@@ -11,8 +11,9 @@ from syncsketchGUI.installScripts import installGui
 from syncsketchGUI.lib import user as user
 
 class InstallerLiterals(object):
-    setupPyPath = 'https://raw.githubusercontent.com/syncsketch/syncsketch-maya/dev/setup.py'
-    installerPyGuiPath = 'https://raw.githubusercontent.com/syncsketch/syncsketch-maya/dev/syncsketchGUI/installScripts/installGui.py'
+    versionTag = os.getenv("SS_DEV") or "release"
+    setupPyPath = 'https://raw.githubusercontent.com/syncsketch/syncsketch-maya/{}/setup.py'.format(versionTag)
+    installerPyGuiPath = 'https://raw.githubusercontent.com/syncsketch/syncsketch-maya/{}/syncsketchGUI/installScripts/installGui.py'.format(versionTag)
 
 def getLatestSetupPyFileFromRepo():
     """Parses latest setup.py's version number"""

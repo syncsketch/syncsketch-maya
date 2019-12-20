@@ -198,9 +198,8 @@ def parse_url_data(link=database.read_cache('upload_to_value')):
 
     if not link[0:len(baseUrl)] == baseUrl:
         logger.info("URL need's to start with: {}".format(baseUrl))
-        return
+        return data
 
-    data = {"uuid":0, "id":0, "revision_id":0}
 
     #Find UUID
     payload = link[len(baseUrl):].split("/")

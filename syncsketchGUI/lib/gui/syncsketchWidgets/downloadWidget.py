@@ -22,7 +22,7 @@ class DownloadWindow(SyncSketch_Window):
         self.align_to_center(self.parent)
 
         current_user = user.SyncSketchUser()
-
+        self.ui.review_target_url.editingFinished.connect(self.editingFinished)
 
         if not current_user.is_logged_in():
             logger.info("Please Login to syncsketch to Download content")
@@ -47,12 +47,21 @@ class DownloadWindow(SyncSketch_Window):
 
 
         self.ui.review_target_url.setText(target_url)
-        self.ui.review_target_url.editingFinished.connect(self.editingFinished)
         self.ui.thumbnail_pushButton.set_icon_from_url(thumb_url)
         self.ui.review_target_name.setText(self.item_data['name'])
 
     def editingFinished(self):
-        print ('done')
+        text = self.ui.review_target_url.text()
+        current_user = user.SyncSketchUser()
+        from syncsketchGUI.gui import parse_url_data
+        cleanUrl = parse_url_data(text)
+        media_id = cleanUrl.get('id')
+        if media_id:
+            item = current_user.get_item_info(media_id)
+            thumb_url = item['objects'][0]['thumbnail_url']
+            self.ui.thumbnail_pushButton.set_icon_from_url(thumb_url)
+        else:
+            logger.info("The URL is either wrong or reviewurl {} with  id {} doesn't exist".format(text, media_id))
 
 
     def decorate_ui(self):
