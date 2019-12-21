@@ -23,6 +23,7 @@ class DownloadWindow(SyncSketch_Window):
 
         current_user = user.SyncSketchUser()
         self.ui.review_target_url.editingFinished.connect(self.editingFinished)
+        self.media_id = None
 
         if not current_user.is_logged_in():
             logger.info("Please Login to syncsketch to Download content")
@@ -57,11 +58,13 @@ class DownloadWindow(SyncSketch_Window):
         cleanUrl = parse_url_data(text)
         media_id = cleanUrl.get('id')
         if media_id:
+            self.media_id = media_id
             item = current_user.get_item_info(media_id)
-            thumb_url = item['objects'][0]['thumbnail_url']
+            #todo : try except this part if user is not logged in
+            thumb_url = item.get['objects'][0]['thumbnail_url']
             self.ui.thumbnail_pushButton.set_icon_from_url(thumb_url)
         else:
-            logger.info("The URL is either wrong or reviewurl {} with  id {} doesn't exist".format(text, media_id))
+            logger.info("The URL is not accessible {} with  id {} doesn't exist".format(text, media_id))
 
 
     def decorate_ui(self):
@@ -135,7 +138,7 @@ class DownloadWindow(SyncSketch_Window):
 
     def download_video_annotated(self):
         """Downloads the annoated video"""
-        downloaded_item = syncsketchGUI.downloadVideo()
+        downloaded_item = syncsketchGUI.downloadVideo(media_id=self.media_id)
         if downloaded_item:
             logger.info(downloaded_item)
             camera = self.ui.downloadGP_application_comboBox.currentText()
