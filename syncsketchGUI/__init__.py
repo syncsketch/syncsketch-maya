@@ -188,7 +188,7 @@ def download(current_user = None):
     return current_user.download_greasepencil(review_id, media_id )
 
 
-def downloadVideo(current_user = None):
+def downloadVideo(current_user = None, media_id=None):
     if not current_user:
         current_user = user.SyncSketchUser()
     media_id  = media_id or database.read_cache('target_media_id')
