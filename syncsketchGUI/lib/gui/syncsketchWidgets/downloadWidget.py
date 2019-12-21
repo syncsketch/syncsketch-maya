@@ -52,16 +52,22 @@ class DownloadWindow(SyncSketch_Window):
         self.ui.review_target_name.setText(self.item_data['name'])
 
     def editingFinished(self):
+        from syncsketchGUI.gui import parse_url_data
         text = self.ui.review_target_url.text()
         current_user = user.SyncSketchUser()
-        from syncsketchGUI.gui import parse_url_data
+
+        if not current_user.is_logged_in():
+            logger.info("You are not logged in, please use the syncsketchGUI to log in first")
+            return
+
+
         cleanUrl = parse_url_data(text)
         media_id = cleanUrl.get('id')
         if media_id:
             self.media_id = media_id
             item = current_user.get_item_info(media_id)
             #todo : try except this part if user is not logged in
-            thumb_url = item.get['objects'][0]['thumbnail_url']
+            thumb_url = item['objects'][0]['thumbnail_url']
             self.ui.thumbnail_pushButton.set_icon_from_url(thumb_url)
         else:
             logger.info("The URL is not accessible {} with  id {} doesn't exist".format(text, media_id))
