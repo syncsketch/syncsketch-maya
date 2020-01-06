@@ -194,7 +194,7 @@ class installerUI(QWidget, UIDesktop):
         logo.setMargin(15)
         outer.addWidget(logo, 0)
         self.subtext = QLabel(
-            u'Update Available: Would you like to upgrade to the latest?' if InstallOptions.upgrade else 'SyncSketch Integration for Maya')
+            u'Update Available: Would you like to upgrade to the latest?' if InstallOptions.upgrade else 'SyncSketch Integration for Maya [{} cut]'.format(versionTag))
         outer.addWidget(self.subtext)
         self.subtext.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
         self.subtext.setMargin(5)
