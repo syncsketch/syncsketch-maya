@@ -540,7 +540,7 @@ class installThread(QThread):
                 print(subprocess.check_output(cmd))
 
             # Install Dependencies
-            cmd = '{0} install --force-reinstall --user {1} pyyaml requests[security]'.format(PIP_PATH,
+            cmd = '{0} install --force-reinstall --user {1} setuptools pyyaml requests[security]'.format(PIP_PATH,
                                                                                                SYNCSKETCH_API_RELEASE_PATH).split(
                 ' ')
             if not INSTALL_SSGUI_ONLY:
