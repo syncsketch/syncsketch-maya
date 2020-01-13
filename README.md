@@ -16,7 +16,14 @@ See a good use case, demonstrated by Zeina Masri on how to animate from referenc
 
 ### Drag & Drop
 
-The easiest way to install this application is to download the [installCrossPlatform.mel](https://github.com/syncsketch/syncsketch-maya/releases/download/release/installCrossPlatformGUI.mel#install) file and drag it into a maya-viewport. It will automatically install all the dependencies without requiring admin priviliges into your user-directory.
+The easiest way to install this application is to ...
+1. Dowload [installCrossPlatform.mel](https://github.com/syncsketch/syncsketch-maya/releases/download/release/installCrossPlatformGUI.mel#install)
+2. Drag drop it from the browser into a maya-viewport. 
+This will automatically install all the dependencies without requiring admin priviliges into your user-directory.
+3. Hit 'Install' and on Allow this process to run python (hit 'Allow' in the popup)
+4. Start SyncSketch UI
+5. Log-In with your SyncSketch Credentials.
+
 ![redux_maya_install](https://user-images.githubusercontent.com/10859650/72236028-0bec0e80-358a-11ea-92da-9fdc698e50e7.gif)
 
 #### Installing an experimental dev release:
