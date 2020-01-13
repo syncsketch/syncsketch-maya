@@ -5,14 +5,15 @@
 # @Version  : 1.0.0
 # ======================================================================
 import contextlib
+import glob
+import logging
 import os
 import sys
 # ======================================================================
 # Module Utilities
 import tempfile
-import zipfile
 import xml.etree.ElementTree as ET
-import glob
+import zipfile
 
 from maya import cmds
 from maya import mel
@@ -21,14 +22,9 @@ from syncsketchGUI.lib import database
 from syncsketchGUI.lib import path
 from syncsketchGUI.vendor.capture import capture
 
-import logging
-
 logger = logging.getLogger("syncsketchGUI")
 
 GREASE_PENCIL_XML = 'greasePencil.xml'
-
-GREASEPENCIL_XML_NAME = 'greasePencil.xml'
-
 
 
 # ======================================================================
@@ -196,14 +192,14 @@ def _copy_zip_file_images(src_zip_path, dst_zip_path):
         with zipfile.ZipFile(dst_zip_path, 'a') as dst_zip_file:
             dst_zip_file.comment = src_zip_file.comment
             for content in src_zip_file.infolist():
-                if content.filename != GREASEPENCIL_XML_NAME:
+                if content.filename != GREASE_PENCIL_XML:
                     dst_zip_file.writestr(content, src_zip_file.read(content.filename))
 
 
 def _offset_zip_greacepencil_xml(src_zip_path, dst_zip_path, offset):
     with zipfile.ZipFile(src_zip_path, 'r') as src_zip_file:
         with zipfile.ZipFile(dst_zip_path, 'a', compression=zipfile.ZIP_DEFLATED) as dst_zip_file:
-            src_xml_file = src_zip_file.open(GREASEPENCIL_XML_NAME)
+            src_xml_file = src_zip_file.open(GREASE_PENCIL_XML)
             tree = ET.parse(src_xml_file)
             root = tree.getroot()
             for neighbor in root.iter('frame'):
@@ -213,7 +209,7 @@ def _offset_zip_greacepencil_xml(src_zip_path, dst_zip_path, offset):
             tmp_file = tempfile.TemporaryFile()
             tree.write(tmp_file)
             tmp_file.seek(0)
-            dst_zip_file.writestr(GREASEPENCIL_XML_NAME, tmp_file.read())
+            dst_zip_file.writestr(GREASE_PENCIL_XML, tmp_file.read())
             tmp_file.close()
 
 
@@ -221,15 +217,6 @@ def _create_tmp_zip_path():
     tempdir = tempfile.mkdtemp()
     zip_path = os.path.join(tempdir, "tmp.zip")
     return zip_path
-
-
-def modifyXMLData(xmlFile, offsetFrames):
-    tree = ET.parse(xmlFile)
-    root = tree.getroot()
-    for neighbor in root.iter('frame'):
-        current_frame = int(neighbor.attrib.get('time'))
-        neighbor.set('time', str(current_frame + offsetFrames))
-    tree.write(xmlFile)
 
 
 def add_frame_offset_to_grease_pencil_zip(zipname, offset=0):
@@ -247,20 +234,6 @@ def add_frame_offset_to_grease_pencil_zip(zipname, offset=0):
     _add_data_as_greace_pencil_xml_to_zip(zipname, xml_data_with_offset)
 
     return path.sanitize(zipname)
-
-
-def update_zip(zipname, filename, data):
-    # generate a temp file
-    tmpfd, tmpname = tempfile.mkstemp(dir=os.path.dirname(zipname))
-    os.close(tmpfd)
-
-    # create a temp copy of the archive without filename
-    with zipfile.ZipFile(zipname, 'r') as zin:
-        with zipfile.ZipFile(tmpname, 'w') as zout:
-            zout.comment = zin.comment  # preserve the comment
-            for item in zin.infolist():
-                if item.filename != filename:
-                    zout.writestr(item, zin.read(item.filename))
 
 
 def _add_data_as_greace_pencil_xml_to_zip(zipname, data):
@@ -287,12 +260,12 @@ def _remove_greace_pencil_xml_from_zip(zipname):
     os.rename(tmpname, zipname)
 
 
-def _create_xml_data_with_offset(xmlFile, offsetFrames):
-    tree = ET.parse(xmlFile)
+def _create_xml_data_with_offset(xml_file, offset_frames):
+    tree = ET.parse(xml_file)
     root = tree.getroot()
     for neighbor in root.iter('frame'):
         current_frame = int(neighbor.attrib.get('time'))
-        neighbor.set('time', str(current_frame + offsetFrames))
+        neighbor.set('time', str(current_frame + offset_frames))
 
     # Generate temp file name for modified xml file
     tmpname = tempfile.TemporaryFile()

@@ -139,9 +139,11 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
         offset = int(self.ui.ui_downloadGP_rangeIn_textEdit.value())
         if downloaded_greasepencile_path:
             if offset is not 0:
-                logger.info("Offsetting by %s frames"%offset)
-                downloaded_item = maya_scene.add_frame_offset_to_grease_pencil_zip(downloaded_item, offset)
-            maya_scene.apply_greasepencil(downloaded_item, clear_existing_frames = True)
+                logger.info("Offsetting by {} frames".format(offset))
+                downloaded_greasepencile_path = maya_scene.add_frame_offset_to_grease_pencil_zip(
+                    downloaded_greasepencile_path,
+                    offset)
+            maya_scene.apply_greasepencil(downloaded_greasepencile_path, clear_existing_frames=True)
         else:
             logger.info("Error: Could not download grease pencil file...")
 
@@ -167,4 +169,3 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
             return True
         else:
             return False
-
