@@ -41,11 +41,11 @@ if DEV:\n\
     SYNCSKETCH_GUI_RELEASE_PATH = '/Users/chavez/deleteMePls/syncsketchGUI'\n\
 \n\
 def getMayaScriptPath():\n\
-    """Deduce scripts path based on MAYA_SCRIPT_PATH env"""\n\
+    '''Deduce scripts path based on MAYA_SCRIPT_PATH env'''\n\
     paths = os.environ['MAYA_SCRIPT_PATH']\n\
     candidates = []\n\
     for path in paths.split(os.pathsep):\n\
-        if "maya/scripts" in path:\n\
+        if 'maya/scripts' in path:\n\
             candidates.append(path)\n\
     return candidates[0]\n\
 \n\
