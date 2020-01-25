@@ -39,12 +39,25 @@ SYNCSKETCH_API_RELEASE_PATH = 'https://github.com/syncsketch/python-api/archive/
 if DEV:
     SYNCSKETCH_GUI_RELEASE_PATH = '/Users/chavez/deleteMePls/syncsketchGUI'
 
+def getMayaScriptPath():
+    """Deduce scripts path based on MAYA_SCRIPT_PATH env"""
+    paths = os.environ['MAYA_SCRIPT_PATH']
+    candidates = []
+    for path in paths.split(os.pathsep):
+        if "maya/scripts" in path:
+            candidates.append(path)
+    return candidates[0]
+
 
 ScriptInstallPath = {
     'Darwin': '{0}/Library/Preferences/Autodesk/maya/scripts/'.format(expanduser('~')),
     'linux64': '$HOME/maya/scripts/',
-    'Windows': '{0}/maya/scripts/'.format(expanduser('~'))
+    'Windows': getMayaScriptPath()
 }
+
+
+
+
 
 PluginInstallPath = {
     'Darwin': '{0}/Library/Preferences/Autodesk/maya/plug-ins/'.format(expanduser('~')),
