@@ -49,21 +49,28 @@ def getMayaScriptPath():\n\
             candidates.append(path)\n\
     return candidates[0]\n\
 \n\
+def getMayaPlugInPath():\n\
+    '''Deduce scripts path based on MAYA_PLUG_IN_PATH env'''\n\
+    paths = os.environ['MAYA_PLUG_IN_PATH']\n\
+    candidates = []\n\
+    for path in paths.split(os.pathsep):\n\
+        if 'maya/plug-ins' in path:\n\
+            candidates.append(path)\n\
+    return candidates[0]\n\
+\n\
 \n\
 ScriptInstallPath = {\n\
     'Darwin': '{0}/Library/Preferences/Autodesk/maya/scripts/'.format(expanduser('~')),\n\
     'linux64': '$HOME/maya/scripts/',\n\
-    'Windows': getMayaScriptPath()\n\
+    'Windows': '{}/'.format(getMayaScriptPath())\n\
 }\n\
-\n\
-\n\
 \n\
 \n\
 \n\
 PluginInstallPath = {\n\
     'Darwin': '{0}/Library/Preferences/Autodesk/maya/plug-ins/'.format(expanduser('~')),\n\
     'linux64': '$HOME/maya/scripts/',\n\
-    'Windows': '{0}/maya/scripts/'.format(expanduser('~'))\n\
+    'Windows': '{}/'.format(getMayaPlugInPath())\n\
 }\n\
 \n\
 \n\
@@ -547,10 +554,10 @@ class installThread(QThread):\n\
                 filepath, filename = os.path.split(pipInstaller)\n\
                 sys.path.insert(0, filepath)\n\
                 if Literals.PLATFORM == 'Darwin':\n\
-                    cmd = '{0} {1} --user'.format('python2.7', pipInstaller).split(' ')\n\
+                    cmd = '{0} {1} --user pip==19.2.3'.format('python2.7', pipInstaller).split(' ')\n\
                 else:\n\
-                    cmd = '{0} {1} --user'.format(PYTHON_PATH, pipInstaller).split(' ')\n\
-                print('Calling shell command: {0}'.format(cmd))\n\
+                    cmd = '{0} {1} --user  pip==19.2.3'.format(PYTHON_PATH, pipInstaller).split(' ')\n\
+                print('Calling shell command for pip: {0}'.format(cmd))\n\
                 print(subprocess.check_output(cmd))\n\
 \n\
             # Install Dependencies\n\
@@ -586,12 +593,15 @@ class installThread(QThread):\n\
 \n\
 \n\
 \n\
-            if Literals.PLATFORM == 'Darwin':\n\
-                if not os.path.isdir(PluginInstallPath['Darwin']):\n\
-                    os.makedirs(PluginInstallPath['Darwin'])\n\
-                shutil.copy(os.path.join(Literals.SYNCSKETCH_INSTALL_PATH, 'SyncSketchPlugin.py'), \n\
-                    os.path.join(PluginInstallPath['Darwin'], 'SyncSketchPlugin.py')\n\
-                    )\n\
+            if not os.path.isdir(PluginInstallPath[Literals.PLATFORM]):\n\
+                pluginDir = PluginInstallPath[Literals.PLATFORM]\n\
+                print('creating plugin dir: {}'.format(pluginDir))\n\
+                os.makedirs(pluginDir)\n\
+\n\
+            fromSource = os.path.join(Literals.SYNCSKETCH_INSTALL_PATH, 'SyncSketchPlugin.py')\n\
+            toTarget = os.path.join(PluginInstallPath[Literals.PLATFORM], 'SyncSketchPlugin.py')\n\
+            print('Copy From : {} to: {}'.format(fromSource, toTarget))\n\
+            shutil.copy(fromSource, toTarget)\n\
 \n\
         except Exception as e:\n\
             print(e)\n\
