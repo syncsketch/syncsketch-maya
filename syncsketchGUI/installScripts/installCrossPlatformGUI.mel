@@ -531,7 +531,7 @@ class installThread(QThread):\n\
                     # not given one.\n\
                 if tmpdir is None:\n\
                     tmpdir = tempfile.mkdtemp()\n\
-                    delete_tmpdir = True\n\
+                    delete_tmpdir = False\n\
 \n\
                 # Save get-pip.py\n\
                 pipInstaller = os.path.join(tmpdir, 'get-pip.py')\n\
@@ -556,14 +556,14 @@ class installThread(QThread):\n\
                 if Literals.PLATFORM == 'Darwin':\n\
                     cmd = '{0} {1} --user pip==19.2.3'.format('python2.7', pipInstaller).split(' ')\n\
                 else:\n\
-                    cmd = '{0} {1} --user  pip==19.2.3'.format(PYTHON_PATH, pipInstaller).split(' ')\n\
+                    cmd = '{0}&{1}&--user&pip==19.2.3'.format(PYTHON_PATH, pipInstaller).split('&')\n\
                 print('Calling shell command for pip: {0}'.format(cmd))\n\
-                print(subprocess.check_output(cmd))\n\
+                print(subprocess.check_output(cmd, stderr=subprocess.STDOUT))\n\
 \n\
             # Install Dependencies\n\
-            cmd = '{0} install --force-reinstall --user {1} setuptools pyyaml requests[security]'.format(PIP_PATH,\n\
+            cmd = '{0}&install&--force-reinstall&--user&{1}&setuptools&pyyaml&requests[security]'.format(PIP_PATH,\n\
                                                                                                SYNCSKETCH_API_RELEASE_PATH).split(\n\
-                ' ')\n\
+                '&')\n\
             if not INSTALL_SSGUI_ONLY:\n\
                 print('Calling shell command: {0}'.format(cmd))\n\
                 print(subprocess.check_output(cmd))\n\

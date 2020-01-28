@@ -530,7 +530,7 @@ class installThread(QThread):
                     # not given one.
                 if tmpdir is None:
                     tmpdir = tempfile.mkdtemp()
-                    delete_tmpdir = True
+                    delete_tmpdir = False
 
                 # Save get-pip.py
                 pipInstaller = os.path.join(tmpdir, 'get-pip.py')
@@ -555,14 +555,14 @@ class installThread(QThread):
                 if Literals.PLATFORM == 'Darwin':
                     cmd = '{0} {1} --user pip==19.2.3'.format('python2.7', pipInstaller).split(' ')
                 else:
-                    cmd = '{0} {1} --user  pip==19.2.3'.format(PYTHON_PATH, pipInstaller).split(' ')
+                    cmd = '{0}&{1}&--user&pip==19.2.3'.format(PYTHON_PATH, pipInstaller).split('&')
                 print('Calling shell command for pip: {0}'.format(cmd))
-                print(subprocess.check_output(cmd))
+                print(subprocess.check_output(cmd, stderr=subprocess.STDOUT))
 
             # Install Dependencies
-            cmd = '{0} install --force-reinstall --user {1} setuptools pyyaml requests[security]'.format(PIP_PATH,
+            cmd = '{0}&install&--force-reinstall&--user&{1}&setuptools&pyyaml&requests[security]'.format(PIP_PATH,
                                                                                                SYNCSKETCH_API_RELEASE_PATH).split(
-                ' ')
+                '&')
             if not INSTALL_SSGUI_ONLY:
                 print('Calling shell command: {0}'.format(cmd))
                 print(subprocess.check_output(cmd))
