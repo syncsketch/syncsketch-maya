@@ -297,7 +297,7 @@ class SyncSketchUser():
         logger.info("itemId: {} ".format(itemId))
         logger.info("media: {} ".format(media))
         videoURL = media['objects'][0]['url']
-        fileName = videoURL.split(str(itemId) + '/')[1].split("?token")[0]
+        fileName = videoURL.split(str(itemId) + '/')[1].split("?")[0]
 
         #maya supports mov only
         fileName = fileName.replace('mp4', 'mov')
