@@ -748,6 +748,7 @@ class MenuWindow(SyncSketch_Window):
 
         fileName, _ = QtWidgets.QFileDialog.getOpenFileName(self, "QFileDialog.getOpenFileName()", "", file_filters, options=options)
         self.ui.ps_lastfile_line_edit.setText(fileName)
+        database.dump_cache({"last_recorded_selection": fileName})
 
 
     # todo refactor: this function does more than validation

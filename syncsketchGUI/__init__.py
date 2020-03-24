@@ -123,7 +123,7 @@ def get_current_file():
 
     if not os.path.isfile(filename):
         title = 'Not a valid file'
-        message = 'Please provide a falid file'
+        message = 'Please provide a valid file'
         qt_widgets.WarningDialog(None, title, message)
         return
     else:
