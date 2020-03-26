@@ -576,8 +576,8 @@ class installThread(QThread):\n\
                 # todo: delete as well SyncsketchGUI-1.0.0.dist-info\n\
                 print('Deleting previous directory for a clean install {0} '.format(Literals.SYNCSKETCH_INSTALL_PATH))\n\
 \n\
-            cmd = '{0} install --upgrade --target={1} {2}'.format(PIP_PATH, MAYA_SCRIPTS_PATH,\n\
-                                                                           SYNCSKETCH_GUI_RELEASE_PATH).split(' ')\n\
+            cmd = '{0}&install&--upgrade&--target={1}&{2}'.format(PIP_PATH, MAYA_SCRIPTS_PATH,\n\
+                                                                           SYNCSKETCH_GUI_RELEASE_PATH).split('&')\n\
             print('Calling shell command: {0}'.format(cmd))\n\
             print(subprocess.check_output(cmd))\n\
 \n\
