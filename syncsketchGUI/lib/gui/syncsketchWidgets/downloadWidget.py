@@ -92,7 +92,8 @@ class DownloadWindow(SyncSketch_Window):
         self.ui.downloadGP_range_layout = RegularGridLayout(self, label = 'Frame Offset')
         self.ui.ui_downloadGP_rangeIn_textEdit   = RegularQSpinBox()
         self.ui.ui_downloadGP_rangeIn_textEdit.setValue(0)
-        self.ui.ui_downloadGP_rangeIn_textEdit.setMinimum(-10000)
+        self.ui.ui_downloadGP_rangeIn_textEdit.setMinimum(-100000)
+        self.ui.ui_downloadGP_rangeIn_textEdit.setMaximum(100000)
         self.ui.downloadGP_range_layout.addWidget(self.ui.ui_downloadGP_rangeIn_textEdit,  0, 1)
         self.ui.downloadGP_range_layout.setColumnStretch(2,0)
 
