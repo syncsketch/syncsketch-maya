@@ -238,6 +238,7 @@ def _record():
     if not filepath or not filename:
         title = 'Playblast Location'
         message = 'Please specify playblast file name and location.'
+        return
         qt_widgets.WarningDialog(None, title, message)
         filepath = os.path.expanduser('~/Desktop/playblasts/')
         filename = 'playblast'
