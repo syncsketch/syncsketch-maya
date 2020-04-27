@@ -204,7 +204,7 @@ class MenuWindow(SyncSketch_Window):
 
 
     def restore_ui_state(self):
-
+        logger.info("restoring ui state")
         self.ui.upgrade_pushButton.show() if getVersionDifference() else self.ui.upgrade_pushButton.hide()
 
         self.ui.ui_record_pushButton.setEnabled(
