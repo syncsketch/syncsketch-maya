@@ -53,6 +53,7 @@ class MenuWindow(SyncSketch_Window):
         #Not logged in or outdated api, token
         self.setWindowTitle("Syncsketch - Version: {}".format(getLatestSetupPyFileFromLocal()))
         if not self.accountData:
+            self.restore_ui_state()
             return
 
         #Populate Treewidget sparse
