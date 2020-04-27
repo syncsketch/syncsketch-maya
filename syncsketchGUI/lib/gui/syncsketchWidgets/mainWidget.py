@@ -207,8 +207,8 @@ class MenuWindow(SyncSketch_Window):
         logger.info("restoring ui state")
         self.ui.upgrade_pushButton.show() if getVersionDifference() else self.ui.upgrade_pushButton.hide()
 
-        self.ui.ui_record_pushButton.setEnabled(
-            True if self.current_user.is_logged_in() else False)
+        # self.ui.ui_record_pushButton.setEnabled(
+        #     True if self.current_user.is_logged_in() else False)
 
         # self.ui.ps_upload_after_creation_checkBox.setEnabled(
         #     True if self.current_user.is_logged_in() else False)
