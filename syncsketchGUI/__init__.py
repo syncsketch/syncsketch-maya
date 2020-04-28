@@ -202,12 +202,13 @@ def record(upload_after_creation = None, play_after_creation = None,  show_succe
     recordData = {}
     capturedFile = _record()
 
+
     #Reencode to quicktime
-    print("capturedFile: {}".format(capturedFile))
+    logger.info("capturedFile: {}".format(capturedFile))
     recordData["playblast_file"] = video.encodeToH264Mov(
         capturedFile, output_file=capturedFile[:-4] + ".mov")
 
-    print("reencoded File: {}".format(recordData["playblast_file"]))
+    logger.info("reencoded File: {}".format(recordData["playblast_file"]))
     # Post actions
 
     # To Do - post Recording script call

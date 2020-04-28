@@ -5,7 +5,7 @@ import subprocess
 import sys
 from os.path import expanduser
 from syncsketchGUI.lib import path
-
+logger = logging.getLogger("syncsketchGUI")
 
 # ======================================================================
 # Module Functions
@@ -73,7 +73,7 @@ def encodeToH264Mov(filepath = None, output_file = ""):
     ffmpeg_command += '"{}"'.format(output_file)
     subprocess.call(ffmpeg_command, shell = True)
     output_file = path.sanitize(output_file)
-    print('ffmpeg command: {}'.format(ffmpeg_command))
+    logger.info('ffmpeg command: {}'.format(ffmpeg_command))
 
     # print "Creating Thumb for %s >> %s"%(filepath,output_file)
     if not os.path.isfile(output_file):
