@@ -3,7 +3,7 @@
 Playblasting with independent viewport, camera and display options
 
 """
-
+from syncsketchGUI.lib.gui import icons, qt_utils, qt_widgets
 import re
 import sys
 import contextlib
@@ -176,22 +176,30 @@ def capture(camera=None,
              _applied_viewport2_options(viewport2_options),
              _isolated_nodes(isolate, panel),
              _maintained_time()):
-                output = cmds.playblast(
-                    compression=compression,
-                    format=format,
-                    percent=100,
-                    quality=quality,
-                    viewer=viewer,
-                    startTime=start_frame,
-                    endTime=end_frame,
-                    offScreen=off_screen,
-                    showOrnaments=show_ornaments,
-                    forceOverwrite=overwrite,
-                    filename=filename,
-                    widthHeight=[width, height],
-                    rawFrameNumbers=raw_frame_numbers,
-                    framePadding=frame_padding,
-                    **playblast_kwargs)
+                try:
+                    output = cmds.playblast(
+                        compression=compression,
+                        format=format,
+                        percent=100,
+                        quality=quality,
+                        viewer=viewer,
+                        startTime=start_frame,
+                        endTime=end_frame,
+                        offScreen=off_screen,
+                        showOrnaments=show_ornaments,
+                        forceOverwrite=overwrite,
+                        filename=filename,
+                        widthHeight=[width, height],
+                        rawFrameNumbers=raw_frame_numbers,
+                        framePadding=frame_padding,
+                        **playblast_kwargs)
+                except RuntimeError as e:
+                        #This is a naive guess, but usually only happens if Quicktime libraries are missing
+                        title = 'Quicktime not found on this machine,'
+                        message = 'You can choose avi from the presets, which we will automatically convert for you into a mov'
+                        qt_widgets.WarningDialog(None, title, message)
+
+
 
         return output
 
