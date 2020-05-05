@@ -5,6 +5,7 @@ import subprocess
 import sys
 from os.path import expanduser
 from syncsketchGUI.lib import path
+import logging
 logger = logging.getLogger("syncsketchGUI")
 
 # ======================================================================
