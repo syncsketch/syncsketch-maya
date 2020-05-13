@@ -20,7 +20,8 @@ from syncsketchGUI.gui import parse_url_data, get_current_item_from_ids, set_tre
 from syncsketchGUI.lib.gui.icons import _get_qicon
 from syncsketchGUI.lib.gui.literals import DEFAULT_VIEWPORT_PRESET, PRESET_YAML, VIEWPORT_YAML, DEFAULT_PRESET, uploadPlaceHolderStr, message_is_not_loggedin, message_is_not_connected
 from syncsketchGUI.lib.async import Worker, WorkerSignals
-from syncsketchGUI.installScripts.maintenance import getLatestSetupPyFileFromLocal, getVersionDifference
+#todo: version difference fix
+#from syncsketchGUI.installScripts.maintenance import getLatestSetupPyFileFromLocal, getVersionDifference
 USER_ACCOUNT_DATA = None
 
 class MenuWindow(SyncSketch_Window):
@@ -34,6 +35,7 @@ class MenuWindow(SyncSketch_Window):
 
     def __init__(self, parent):
         super(MenuWindow, self).__init__(parent=parent)
+        #self.setStyleSheet("background-color: #444444")
         self.threadpool = QtCore.QThreadPool()
         self.threadpool.setMaxThreadCount(1)
         self.accountData = None
@@ -51,7 +53,7 @@ class MenuWindow(SyncSketch_Window):
         self.update_login_ui()
 
         #Not logged in or outdated api, token
-        self.setWindowTitle("Syncsketch - Version: {}".format(getLatestSetupPyFileFromLocal()))
+        #self.setWindowTitle("Syncsketch - Version: {}".format(getLatestSetupPyFileFromLocal()))
         if not self.accountData:
             self.restore_ui_state()
             return
@@ -63,6 +65,9 @@ class MenuWindow(SyncSketch_Window):
         #Populate Treewidget with all items
         #self.asyncPopulateTree(withItems=True)
         self.restore_ui_state()
+
+    def eventTick(self, delta_seconds):
+        pass
 
 
 
@@ -206,7 +211,7 @@ class MenuWindow(SyncSketch_Window):
 
     def restore_ui_state(self):
         logger.info("restoring ui state")
-        self.ui.upgrade_pushButton.show() if getVersionDifference() else self.ui.upgrade_pushButton.hide()
+        #self.ui.upgrade_pushButton.show() if getVersionDifference() else self.ui.upgrade_pushButton.hide()
 
         # self.ui.ui_record_pushButton.setEnabled(
         #     True if self.current_user.is_logged_in() else False)
@@ -230,12 +235,12 @@ class MenuWindow(SyncSketch_Window):
             True if value == 'true' else False)
 
         value = database.read_cache('current_preset')
-        self.ui.ui_formatPreset_comboBox.set_combobox_index(selection=value)
+        #self.ui.ui_formatPreset_comboBox.set_combobox_index(selection=value)
 
-        self.populate_camera_comboBox()
+        #self.populate_camera_comboBox()
 
         value = database.read_cache('current_range_type')
-        self.ui.ui_range_comboBox.set_combobox_index(selection=value)
+        #self.ui.ui_range_comboBox.set_combobox_index(selection=value)
 
         # value = database.read_cache('ps_upload_after_creation_checkBox')
         # self.ui.ps_upload_after_creation_checkBox.setChecked(
@@ -251,8 +256,8 @@ class MenuWindow(SyncSketch_Window):
 
 
         #Set FrameRange from the lider
-        database.dump_cache({"frame_start":self.ui.ui_rangeIn_textEdit.text()})
-        database.dump_cache({"frame_end":self.ui.ui_rangeOut_textEdit.text()})
+        #database.dump_cache({"frame_start":self.ui.ui_rangeIn_textEdit.text()})
+        #database.dump_cache({"frame_end":self.ui.ui_rangeOut_textEdit.text()})
 
         reviewId = database.read_cache('target_review_id')
         if reviewId and self.current_user.is_logged_in() :
@@ -319,26 +324,26 @@ class MenuWindow(SyncSketch_Window):
         self.ui.browser_treeWidget.doubleClicked.connect(self.open_upload_to_url)
 
         # Videos / Playblast Settings
-        self.ui.ui_formatPreset_comboBox.currentIndexChanged.connect(self.update_current_preset)
-        self.ui.ui_viewportpreset_comboBox.currentIndexChanged.connect(self.update_current_viewport_preset)
-        self.ui.ui_cameraPreset_comboBox.currentIndexChanged.connect(self.update_current_camera)
+        # self.ui.ui_formatPreset_comboBox.currentIndexChanged.connect(self.update_current_preset)
+        # self.ui.ui_viewportpreset_comboBox.currentIndexChanged.connect(self.update_current_viewport_preset)
+        # self.ui.ui_cameraPreset_comboBox.currentIndexChanged.connect(self.update_current_camera)
 
 
-        self.ui.ps_format_toolButton.clicked.connect(self.manage_preset)
+#        self.ui.ps_format_toolButton.clicked.connect(self.manage_preset)
         self.ui.ps_directory_toolButton.clicked.connect(self.get_directory_from_browser)
 
         self.ui.target_lineEdit.editingFinished.connect(self.select_item_from_target_input)
 
         # Videos / Playblast Settings
-        self.ui.ui_viewport_toolButton.clicked.connect(self.manage_viewport_preset)
+        # self.ui.ui_viewport_toolButton.clicked.connect(self.manage_viewport_preset)
 
-        self.ui.ui_range_toolButton.clicked.connect(self.set_in_out)
-        self.ui.ui_camera_toolButton.clicked.connect(self.set_active_camera)
+        # self.ui.ui_range_toolButton.clicked.connect(self.set_in_out)
+        # self.ui.ui_camera_toolButton.clicked.connect(self.set_active_camera)
 
-        self.ui.ui_range_comboBox.currentIndexChanged.connect(self.set_rangeFromComboBox)
+        # self.ui.ui_range_comboBox.currentIndexChanged.connect(self.set_rangeFromComboBox)
 
-        self.ui.ui_rangeIn_textEdit.textChanged.connect(self.store_frame)
-        self.ui.ui_rangeOut_textEdit.textChanged.connect(self.store_frame)
+        # self.ui.ui_rangeIn_textEdit.textChanged.connect(self.store_frame)
+        # self.ui.ui_rangeOut_textEdit.textChanged.connect(self.store_frame)
 
         # Videos / Upload Settings
         self.ui.ui_open_pushButton.clicked.connect(self.open_upload_to_url)
@@ -447,59 +452,59 @@ class MenuWindow(SyncSketch_Window):
         self.ui.target_info_label = QtWidgets.QLabel()
         self.ui.target_info_label2 = QtWidgets.QLabel()
 
-        # upload_layout -  format preset
-        self.ui.upload_formatPreset_layout = RegularGridLayout(self, label='Format Preset')
-        self.ui.ui_record_gridLayout.addLayout(self.ui.upload_formatPreset_layout)
-        self.ui.ui_formatPreset_comboBox = RegularComboBox(self)
-        self.ui.ps_preset_description = QtWidgets.QLabel()
-        self.ui.ps_preset_description.setStyleSheet("font: 9pt")
-        self.ui.ps_preset_description.setIndent(5)
-        self.ui.ps_format_toolButton = RegularToolButton(self, icon = file_icon)
-        self.ui.upload_formatPreset_layout.addWidget(self.ui.ui_formatPreset_comboBox, 0, 1)
-        self.ui.upload_formatPreset_layout.addWidget(self.ui.ps_format_toolButton, 0, 2)
-        self.ui.upload_formatPreset_layout.addWidget(self.ui.ps_preset_description,  1, 1, 1, 2)
+        # # upload_layout -  format preset
+        # self.ui.upload_formatPreset_layout = RegularGridLayout(self, label='Format Preset')
+        # self.ui.ui_record_gridLayout.addLayout(self.ui.upload_formatPreset_layout)
+        # self.ui.ui_formatPreset_comboBox = RegularComboBox(self)
+        # self.ui.ps_preset_description = QtWidgets.QLabel()
+        # self.ui.ps_preset_description.setStyleSheet("font: 9pt")
+        # self.ui.ps_preset_description.setIndent(5)
+        # self.ui.ps_format_toolButton = RegularToolButton(self, icon = file_icon)
+        # self.ui.upload_formatPreset_layout.addWidget(self.ui.ui_formatPreset_comboBox, 0, 1)
+        # self.ui.upload_formatPreset_layout.addWidget(self.ui.ps_format_toolButton, 0, 2)
+        # self.ui.upload_formatPreset_layout.addWidget(self.ui.ps_preset_description,  1, 1, 1, 2)
 
-        # upload_layout - viewport preset
-        self.ui.upload_viewportPreset_layout = RegularGridLayout(self, label='Viewport Preset')
-        self.ui.ui_record_gridLayout.addLayout(self.ui.upload_viewportPreset_layout)
-        self.ui.ui_viewportpreset_comboBox = RegularComboBox(self)
-        self.ui.ui_viewport_toolButton = RegularToolButton(self, icon = preset_icon)
-        self.ui.upload_viewportPreset_layout.addWidget(self.ui.ui_viewportpreset_comboBox, 0, 1)
-        self.ui.upload_viewportPreset_layout.addWidget(self.ui.ui_viewport_toolButton, 0, 2)
+        # # upload_layout - viewport preset
+        # self.ui.upload_viewportPreset_layout = RegularGridLayout(self, label='Viewport Preset')
+        # self.ui.ui_record_gridLayout.addLayout(self.ui.upload_viewportPreset_layout)
+        # self.ui.ui_viewportpreset_comboBox = RegularComboBox(self)
+        # self.ui.ui_viewport_toolButton = RegularToolButton(self, icon = preset_icon)
+        # self.ui.upload_viewportPreset_layout.addWidget(self.ui.ui_viewportpreset_comboBox, 0, 1)
+        # self.ui.upload_viewportPreset_layout.addWidget(self.ui.ui_viewport_toolButton, 0, 2)
 
-        # upload_layout - camera
-        self.ui.upload_cameraPreset_layout = RegularGridLayout(self, label='Camera')
-        self.ui.ui_record_gridLayout.addLayout(self.ui.upload_cameraPreset_layout)
-        self.ui.ui_cameraPreset_comboBox = RegularComboBox(self)
-        self.ui.ui_camera_toolButton = RegularToolButton(self, icon = fill_icon)
-        self.ui.upload_cameraPreset_layout.addWidget(self.ui.ui_cameraPreset_comboBox, 0, 1)
-        self.ui.upload_cameraPreset_layout.addWidget(self.ui.ui_camera_toolButton, 0, 2)
+        # # upload_layout - camera
+        # self.ui.upload_cameraPreset_layout = RegularGridLayout(self, label='Camera')
+        # self.ui.ui_record_gridLayout.addLayout(self.ui.upload_cameraPreset_layout)
+        # self.ui.ui_cameraPreset_comboBox = RegularComboBox(self)
+        # self.ui.ui_camera_toolButton = RegularToolButton(self, icon = fill_icon)
+        # self.ui.upload_cameraPreset_layout.addWidget(self.ui.ui_cameraPreset_comboBox, 0, 1)
+        # self.ui.upload_cameraPreset_layout.addWidget(self.ui.ui_camera_toolButton, 0, 2)
 
-        # upload_layout - range
-        self.ui.upload_range_layout = RegularGridLayout(self, label='Frame Range')
-        self.ui.ui_record_gridLayout.addLayout(self.ui.upload_range_layout)
-        self.ui.ui_range_comboBox = RegularComboBox(self)
-        self.ui.ui_range_comboBox.addItems(["Start / End", "Time Slider","Highlighted","Current Frame"])
-        self.ui.ui_range_toolButton = RegularToolButton(self, icon = fill_icon)
-        self.ui.ui_rangeIn_textEdit  = RegularLineEdit()
-        self.ui.ui_rangeOut_textEdit  = RegularLineEdit()
-        self.ui.upload_range_layout.addWidget(self.ui.ui_range_comboBox, 0, 1)
-        self.ui.upload_range_layout.addWidget(self.ui.ui_rangeIn_textEdit, 0, 2)
-        self.ui.upload_range_layout.setColumnStretch(2,0)
-        self.ui.upload_range_layout.addWidget(self.ui.ui_rangeOut_textEdit, 0, 3)
-        self.ui.upload_range_layout.setColumnStretch(3,0)
-        self.ui.ui_rangeIn_textEdit.setFixedWidth(40)
-        self.ui.ui_rangeOut_textEdit.setFixedWidth(40)
+        # # upload_layout - range
+        # self.ui.upload_range_layout = RegularGridLayout(self, label='Frame Range')
+        # self.ui.ui_record_gridLayout.addLayout(self.ui.upload_range_layout)
+        # self.ui.ui_range_comboBox = RegularComboBox(self)
+        # self.ui.ui_range_comboBox.addItems(["Start / End", "Time Slider","Highlighted","Current Frame"])
+        # self.ui.ui_range_toolButton = RegularToolButton(self, icon = fill_icon)
+        # self.ui.ui_rangeIn_textEdit  = RegularLineEdit()
+        # self.ui.ui_rangeOut_textEdit  = RegularLineEdit()
+        # self.ui.upload_range_layout.addWidget(self.ui.ui_range_comboBox, 0, 1)
+        # self.ui.upload_range_layout.addWidget(self.ui.ui_rangeIn_textEdit, 0, 2)
+        # self.ui.upload_range_layout.setColumnStretch(2,0)
+        # self.ui.upload_range_layout.addWidget(self.ui.ui_rangeOut_textEdit, 0, 3)
+        # self.ui.upload_range_layout.setColumnStretch(3,0)
+        # self.ui.ui_rangeIn_textEdit.setFixedWidth(40)
+        # self.ui.ui_rangeOut_textEdit.setFixedWidth(40)
 
-        self.ui.ui_rangeIn_textEdit.setAlignment(QtCore.Qt.AlignRight)
-        self.ui.ui_rangeOut_textEdit.setAlignment(QtCore.Qt.AlignRight)
-        self.ui.upload_range_layout.addWidget(self.ui.ui_range_toolButton, 0, 4)
+        # self.ui.ui_rangeIn_textEdit.setAlignment(QtCore.Qt.AlignRight)
+        # self.ui.ui_rangeOut_textEdit.setAlignment(QtCore.Qt.AlignRight)
+        # self.ui.upload_range_layout.addWidget(self.ui.ui_range_toolButton, 0, 4)
 
-        self.onlyInt = QtGui.QIntValidator()
-        self.ui.ui_rangeIn_textEdit.setValidator(self.onlyInt)
-        self.ui.ui_rangeIn_textEdit.setPlaceholderText('Start')
-        self.ui.ui_rangeOut_textEdit.setValidator(self.onlyInt)
-        self.ui.ui_rangeOut_textEdit.setPlaceholderText('End')
+        # self.onlyInt = QtGui.QIntValidator()
+        # self.ui.ui_rangeIn_textEdit.setValidator(self.onlyInt)
+        # self.ui.ui_rangeIn_textEdit.setPlaceholderText('Start')
+        # self.ui.ui_rangeOut_textEdit.setValidator(self.onlyInt)
+        # self.ui.ui_rangeOut_textEdit.setPlaceholderText('End')
 
         # upload_layout - Directory
         self.ui.upload_directory_layout = RegularGridLayout(self, label='Directory')
@@ -606,7 +611,7 @@ class MenuWindow(SyncSketch_Window):
         self.ui.ui_download_pushButton = RegularButton(self, icon = download_icon, color=download_color)
         self.ui.ui_download_pushButton.setToolTip('Download from SyncSketch Review Target')
         self.ui.ui_download_pushButton.setText("DOWNLOAD")
-        self.ui.ui_targetSelection_gridLayout.addWidget(self.ui.ui_download_pushButton, 10, 0)
+        self.ui.ui_targetSelection_gridLayout.addWidget(self.ui.ui_download_pushButton, 10)
 
 
         self.ui.ui_login_label = QtWidgets.QLabel()
@@ -650,13 +655,13 @@ class MenuWindow(SyncSketch_Window):
         filepath = path.sanitize(filepath)
         self.ui.ps_directory_lineEdit.setText(filepath)
 
-        self.ui.ui_formatPreset_comboBox.populate_combo_list(PRESET_YAML, DEFAULT_PRESET)
-        self.ui.ui_viewportpreset_comboBox.populate_combo_list(VIEWPORT_YAML, DEFAULT_VIEWPORT_PRESET)
+#        self.ui.ui_formatPreset_comboBox.populate_combo_list(PRESET_YAML, DEFAULT_PRESET)
+ #       self.ui.ui_viewportpreset_comboBox.populate_combo_list(VIEWPORT_YAML, DEFAULT_VIEWPORT_PRESET)
         self.update_last_recorded()
 
-        self.ui.ui_range_comboBox.set_combobox_index(selection='Start / End')
+        #self.ui.ui_range_comboBox.set_combobox_index(selection='Start / End')
 
-        self.set_rangeFromComboBox()
+#        self.set_rangeFromComboBox()
 
     # * double check last item selected, looks like after this func, it stopped
     def expandedTest(self, target):

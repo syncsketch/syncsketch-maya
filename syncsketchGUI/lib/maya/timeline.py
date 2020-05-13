@@ -1,5 +1,8 @@
-from maya import cmds
-from maya import mel
+try:
+    from maya import cmds
+    from maya import mel
+except Exception as e:
+    pass
 
 
 def _add_context_menu_item(menu_name = 'TimeSliderMenu'):

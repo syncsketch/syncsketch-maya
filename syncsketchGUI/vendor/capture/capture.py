@@ -8,14 +8,20 @@ import re
 import sys
 import contextlib
 
-from maya import cmds
-from maya import mel
+try:
+    from maya import cmds
+    from maya import mel
+except Exception as e:
+    pass
 
 try:
     from PySide2 import QtGui, QtWidgets
 except ImportError:
-    from PySide import QtGui
-    QtWidgets = QtGui
+    try:
+        from PySide import QtGui
+        QtWidgets = QtGui
+    except ImportError:
+        from syncsketchGUI.vendor.Qt import QtGui, QtWidgets
 
 version_info =(2, 3, 0)
 
@@ -821,7 +827,13 @@ def _in_standalone():
 #
 # --------------------------------
 
-version = mel.eval("getApplicationVersionAsFloat")
+version = 2018
+try:
+    version = mel.eval("getApplicationVersionAsFloat")
+except Exception as e:
+    pass
+
+
 if version > 2015:
     Viewport2Options.update({
         "hwFogAlpha": 1.0,

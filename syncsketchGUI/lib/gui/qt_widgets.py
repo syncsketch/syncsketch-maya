@@ -4,7 +4,8 @@ from syncsketchGUI.vendor.Qt import QtCore
 from syncsketchGUI.vendor.Qt import QtGui
 from syncsketchGUI.vendor.Qt import QtWidgets
 from syncsketchGUI.lib.connection import is_connected
-from syncsketchGUI.vendor.Qt.QtWebKitWidgets import QWebView
+#from syncsketchGUI.vendor.Qt.QtWebKitWidgets import QWebView
+from syncsketchGUI.vendor.Qt.QtWebEngineWidgets import QWebEngineView as QWebView, QWebEnginePage as QWebPage
 from syncsketchGUI.lib import database
 import syncsketchGUI.lib.user as user
 import logging
@@ -289,7 +290,7 @@ class SyncSketch_Window(QtWidgets.QMainWindow):
         if MAYA:
             self.setProperty('saveWindowPref', True)
 
-        self.align_to_center(self.parent)
+        #self.align_to_center(self.parent)
 
 
 

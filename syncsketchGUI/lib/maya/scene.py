@@ -13,8 +13,11 @@ import tempfile
 import zipfile
 import xml.etree.ElementTree as ET
 
-from maya import cmds
-from maya import mel
+try:
+    from maya import cmds
+    from maya import mel
+except Exception as e:
+    pass    
 
 from syncsketchGUI.lib import database
 from syncsketchGUI.lib import path

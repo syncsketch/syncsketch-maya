@@ -1,8 +1,11 @@
 import uuid
 
-from maya import OpenMaya as om
-from maya import cmds
-from maya import mel
+try:
+    from maya import OpenMaya as om
+    from maya import cmds
+    from maya import mel
+except Exception as e:
+    pass
 from syncsketchGUI.lib import user, path
 
 from syncsketchGUI.lib import database

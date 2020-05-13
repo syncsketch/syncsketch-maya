@@ -169,3 +169,6 @@ class MayaCaptureWidget(QtWidgets.QWidget):
         self.ui_formatPreset_comboBox.populate_combo_list(PRESET_YAML, DEFAULT_PRESET)
         self.ui_viewportpreset_comboBox.populate_combo_list(VIEWPORT_YAML, DEFAULT_VIEWPORT_PRESET)
         #self.update_last_recorded()
+
+    def build_connections(self):
+        pass

@@ -10,9 +10,9 @@ import yaml
 import re
 from functools import partial
 
-from vendor.Qt.QtWebKit import *
-from vendor.Qt.QtWebKitWidgets import *
-from vendor.Qt.QtWidgets import QApplication
+# from vendor.Qt.QtWebKit import *
+# from vendor.Qt.QtWebKitWidgets import *
+# from vendor.Qt.QtWidgets import QApplication
 
 import syncsketchGUI
 
@@ -34,7 +34,10 @@ logger = logging.getLogger("syncsketchGUI")
 
 from lib.gui.syncsketchWidgets.webLoginWidget import WebLoginWindow
 from lib.gui.qt_widgets import OpenPlayer
-import maya.cmds as cmds
+try:
+    import maya.cmds as cmds
+except Exception as e:
+    pass
 
 PALETTE_YAML = 'syncsketch_palette.yaml'
 
@@ -45,6 +48,7 @@ def _maya_delete_ui(ui_name):
     """
     Delete existing UI in Maya
     """
+    return
     if cmds.control(ui_name, exists=True):
         cmds.deleteUI(ui_name)
 

@@ -2,7 +2,8 @@ import time
 import json
 import logging
 
-from syncsketchGUI.vendor.Qt.QtWebKitWidgets import QWebView
+#from syncsketchGUI.vendor.Qt.QtWebKitWidgets import QWebView
+from syncsketchGUI.vendor.Qt.QtWebEngineWidgets import QWebEngineView as QWebView, QWebEnginePage as QWebPage
 import syncsketchGUI.lib.user as user
 from syncsketchGUI.vendor.Qt import QtCore
 from syncsketchGUI.lib.gui import qt_utils

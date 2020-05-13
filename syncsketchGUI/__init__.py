@@ -1,5 +1,5 @@
-from syncsketchGUI.installScripts import installGui
-from syncsketchGUI.installScripts.maintenance import getVersionDifference
+#from syncsketchGUI.installScripts import installGui
+#from syncsketchGUI.installScripts.maintenance import getVersionDifference
 import os
 import time
 import webbrowser

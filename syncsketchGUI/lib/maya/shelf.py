@@ -1,9 +1,10 @@
 import codecs
 import os
-
-from maya import cmds
-from maya import mel
-
+try:
+    from maya import cmds
+    from maya import mel
+except Exception as identifier:
+    pass
 from syncsketchGUI.lib import path
 import yaml
 
