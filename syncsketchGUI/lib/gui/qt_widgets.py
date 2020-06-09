@@ -4,9 +4,9 @@ from syncsketchGUI.vendor.Qt import QtCore
 from syncsketchGUI.vendor.Qt import QtGui
 from syncsketchGUI.vendor.Qt import QtWidgets
 from syncsketchGUI.lib.connection import is_connected
-from syncsketchGUI.vendor.Qt.QtWebKitWidgets import QWebView
+#from syncsketchGUI.vendor.Qt.QtWebKitWidgets import QWebView
 from syncsketchGUI.lib import database
-import syncsketchGUI.lib.user as user
+from syncsketchGUI.lib import user as user
 import logging
 logger = logging.getLogger("syncsketchGUI")
 
