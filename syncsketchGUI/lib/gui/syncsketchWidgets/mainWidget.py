@@ -21,6 +21,9 @@ from syncsketchGUI.lib.gui.icons import _get_qicon
 from syncsketchGUI.lib.gui.literals import DEFAULT_VIEWPORT_PRESET, PRESET_YAML, VIEWPORT_YAML, DEFAULT_PRESET, uploadPlaceHolderStr, message_is_not_loggedin, message_is_not_connected
 from syncsketchGUI.lib.async import Worker, WorkerSignals
 from syncsketchGUI.installScripts.maintenance import getLatestSetupPyFileFromLocal, getVersionDifference
+
+import mayaCaptureWidget
+
 USER_ACCOUNT_DATA = None
 
 class MenuWindow(SyncSketch_Window):
@@ -217,42 +220,9 @@ class MenuWindow(SyncSketch_Window):
         # self.ui.ui_upload_pushButton.setEnabled(
         #     True if self.current_user.is_logged_in() else False)
 
-        # Playblast Settings
-        value = self.sanitize(database.read_cache('ps_directory_lineEdit'))
-        self.ui.ps_directory_lineEdit.setText(
-            value if value else os.path.expanduser('~/Desktop/playblasts'))
-
-        value = self.sanitize(database.read_cache('ps_clipname_lineEdit'))
-        self.ui.ps_clipname_lineEdit.setText(value)
-
-        value = database.read_cache('ps_play_after_creation_checkBox')
-        self.ui.ps_play_after_creation_checkBox.setChecked(
-            True if value == 'true' else False)
-
-        value = database.read_cache('current_preset')
-        self.ui.ui_formatPreset_comboBox.set_combobox_index(selection=value)
-
-        self.populate_camera_comboBox()
-
-        value = database.read_cache('current_range_type')
-        self.ui.ui_range_comboBox.set_combobox_index(selection=value)
-
-        # value = database.read_cache('ps_upload_after_creation_checkBox')
-        # self.ui.ps_upload_after_creation_checkBox.setChecked(
-        #     True if value == 'true' and self.current_user.is_logged_in() else False)
-
-        value = database.read_cache('us_filename_lineEdit')
-        self.ui.us_filename_lineEdit.setText(
-            value if value else 'playblast')
-
         value = database.read_cache('ps_open_afterUpload_checkBox')
         self.ui.ps_open_afterUpload_checkBox.setChecked(
             True if value == 'true' else False)
-
-
-        #Set FrameRange from the lider
-        database.dump_cache({"frame_start":self.ui.ui_rangeIn_textEdit.text()})
-        database.dump_cache({"frame_end":self.ui.ui_rangeOut_textEdit.text()})
 
         reviewId = database.read_cache('target_review_id')
         if reviewId and self.current_user.is_logged_in() :
@@ -264,23 +234,9 @@ class MenuWindow(SyncSketch_Window):
 
     def save_ui_state(self):
         ui_setting = {
-            # Playblast Settings
-            'ps_directory_lineEdit':
-                self.sanitize(self.ui.ps_directory_lineEdit.text()),
-            'ps_clipname_lineEdit':
-                self.sanitize(self.ui.ps_clipname_lineEdit.text()),
-            'current_range_type':
-                self.ui.ui_range_comboBox.currentText(),
-            'ps_play_after_creation_checkBox':
-                self.bool_to_str(self.ui.ps_play_after_creation_checkBox.isChecked()),
-            'ps_upload_after_creation_checkBox':
-                self.bool_to_str(self.ui.ps_upload_after_creation_checkBox.isChecked()),
-            'us_filename_lineEdit':
-                self.ui.us_filename_lineEdit.text(),
             'ps_open_afterUpload_checkBox':
                 self.bool_to_str(self.ui.ps_open_afterUpload_checkBox.isChecked())}
         database.dump_cache(ui_setting)
-
 
     def bool_to_str(self, val):
         strVal='true' if val else 'false'
@@ -306,7 +262,6 @@ class MenuWindow(SyncSketch_Window):
 
 
         # Reviews
-        self.ui.ui_record_pushButton.clicked.connect(self.playblast)
         self.ui.ui_upload_pushButton.clicked.connect(self.upload)
 
         self.ui.ui_download_pushButton.clicked.connect(self.download)
@@ -319,31 +274,15 @@ class MenuWindow(SyncSketch_Window):
         self.ui.browser_treeWidget.doubleClicked.connect(self.open_upload_to_url)
 
         # Videos / Playblast Settings
-        self.ui.ui_formatPreset_comboBox.currentIndexChanged.connect(self.update_current_preset)
-        self.ui.ui_viewportpreset_comboBox.currentIndexChanged.connect(self.update_current_viewport_preset)
-        self.ui.ui_cameraPreset_comboBox.currentIndexChanged.connect(self.update_current_camera)
-
-
-        self.ui.ps_format_toolButton.clicked.connect(self.manage_preset)
-        self.ui.ps_directory_toolButton.clicked.connect(self.get_directory_from_browser)
-
         self.ui.target_lineEdit.editingFinished.connect(self.select_item_from_target_input)
-
-        # Videos / Playblast Settings
-        self.ui.ui_viewport_toolButton.clicked.connect(self.manage_viewport_preset)
-
-        self.ui.ui_range_toolButton.clicked.connect(self.set_in_out)
-        self.ui.ui_camera_toolButton.clicked.connect(self.set_active_camera)
-
-        self.ui.ui_range_comboBox.currentIndexChanged.connect(self.set_rangeFromComboBox)
-
-        self.ui.ui_rangeIn_textEdit.textChanged.connect(self.store_frame)
-        self.ui.ui_rangeOut_textEdit.textChanged.connect(self.store_frame)
 
         # Videos / Upload Settings
         self.ui.ui_open_pushButton.clicked.connect(self.open_upload_to_url)
         self.ui.ui_copyURL_pushButton.clicked.connect(self.copy_to_clipboard)
 
+        # Recorder
+        self.ui.record_app.recorded.connect(self.update_record)
+        self.ui.record_app.uploaded.connect(self.update_upload)
 
     def decorate_ui(self):
         file_icon = self.style().standardIcon(QtWidgets.QStyle.SP_FileIcon)
@@ -386,10 +325,8 @@ class MenuWindow(SyncSketch_Window):
         self.ui.ui_targetSelection_gridLayout = QtWidgets.QVBoxLayout()
         self.ui.ui_targetSelection_gridLayout.setSpacing(3)
 
-        self.ui.ui_record_groupbox = QtWidgets.QGroupBox()
-        self.ui.ui_mainLeft_gridLayout.addWidget(self.ui.ui_record_groupbox)
-        self.ui.ui_record_groupbox.setTitle('RECORD')
-        self.ui.ui_record_groupbox.setLayout(self.ui.ui_record_gridLayout)
+
+        self.ui.record_app = mayaCaptureWidget.MayaCaptureWidget()
 
         self.ui.ui_upload_groupbox = QtWidgets.QGroupBox()
         self.ui.ui_mainLeft_gridLayout.addWidget(self.ui.ui_upload_groupbox)
@@ -401,8 +338,8 @@ class MenuWindow(SyncSketch_Window):
         self.ui.ui_targetSelection_groupbox.setLayout(self.ui.ui_targetSelection_gridLayout)
 
 
-        self.ui.ui_mainLeft_gridLayout.addLayout(self.ui.ui_record_gridLayout, 0, 0)
-        self.ui.ui_mainLeft_gridLayout.addLayout(self.ui.ui_clipSelection_gridLayout, 1, 0)
+        self.ui.ui_mainLeft_gridLayout.addWidget(self.ui.record_app, 0, 0)
+        self.ui.ui_mainLeft_gridLayout.addWidget(self.ui.ui_upload_groupbox, 1, 0)
 
 
 
@@ -447,104 +384,6 @@ class MenuWindow(SyncSketch_Window):
         self.ui.target_info_label = QtWidgets.QLabel()
         self.ui.target_info_label2 = QtWidgets.QLabel()
 
-        # upload_layout -  format preset
-        self.ui.upload_formatPreset_layout = RegularGridLayout(self, label='Format Preset')
-        self.ui.ui_record_gridLayout.addLayout(self.ui.upload_formatPreset_layout)
-        self.ui.ui_formatPreset_comboBox = RegularComboBox(self)
-        self.ui.ps_preset_description = QtWidgets.QLabel()
-        self.ui.ps_preset_description.setStyleSheet("font: 9pt")
-        self.ui.ps_preset_description.setIndent(5)
-        self.ui.ps_format_toolButton = RegularToolButton(self, icon = file_icon)
-        self.ui.upload_formatPreset_layout.addWidget(self.ui.ui_formatPreset_comboBox, 0, 1)
-        self.ui.upload_formatPreset_layout.addWidget(self.ui.ps_format_toolButton, 0, 2)
-        self.ui.upload_formatPreset_layout.addWidget(self.ui.ps_preset_description,  1, 1, 1, 2)
-
-        # upload_layout - viewport preset
-        self.ui.upload_viewportPreset_layout = RegularGridLayout(self, label='Viewport Preset')
-        self.ui.ui_record_gridLayout.addLayout(self.ui.upload_viewportPreset_layout)
-        self.ui.ui_viewportpreset_comboBox = RegularComboBox(self)
-        self.ui.ui_viewport_toolButton = RegularToolButton(self, icon = preset_icon)
-        self.ui.upload_viewportPreset_layout.addWidget(self.ui.ui_viewportpreset_comboBox, 0, 1)
-        self.ui.upload_viewportPreset_layout.addWidget(self.ui.ui_viewport_toolButton, 0, 2)
-
-        # upload_layout - camera
-        self.ui.upload_cameraPreset_layout = RegularGridLayout(self, label='Camera')
-        self.ui.ui_record_gridLayout.addLayout(self.ui.upload_cameraPreset_layout)
-        self.ui.ui_cameraPreset_comboBox = RegularComboBox(self)
-        self.ui.ui_camera_toolButton = RegularToolButton(self, icon = fill_icon)
-        self.ui.upload_cameraPreset_layout.addWidget(self.ui.ui_cameraPreset_comboBox, 0, 1)
-        self.ui.upload_cameraPreset_layout.addWidget(self.ui.ui_camera_toolButton, 0, 2)
-
-        # upload_layout - range
-        self.ui.upload_range_layout = RegularGridLayout(self, label='Frame Range')
-        self.ui.ui_record_gridLayout.addLayout(self.ui.upload_range_layout)
-        self.ui.ui_range_comboBox = RegularComboBox(self)
-        self.ui.ui_range_comboBox.addItems(["Start / End", "Time Slider","Highlighted","Current Frame"])
-        self.ui.ui_range_toolButton = RegularToolButton(self, icon = fill_icon)
-        self.ui.ui_rangeIn_textEdit  = RegularLineEdit()
-        self.ui.ui_rangeOut_textEdit  = RegularLineEdit()
-        self.ui.upload_range_layout.addWidget(self.ui.ui_range_comboBox, 0, 1)
-        self.ui.upload_range_layout.addWidget(self.ui.ui_rangeIn_textEdit, 0, 2)
-        self.ui.upload_range_layout.setColumnStretch(2,0)
-        self.ui.upload_range_layout.addWidget(self.ui.ui_rangeOut_textEdit, 0, 3)
-        self.ui.upload_range_layout.setColumnStretch(3,0)
-        self.ui.ui_rangeIn_textEdit.setFixedWidth(40)
-        self.ui.ui_rangeOut_textEdit.setFixedWidth(40)
-
-        self.ui.ui_rangeIn_textEdit.setAlignment(QtCore.Qt.AlignRight)
-        self.ui.ui_rangeOut_textEdit.setAlignment(QtCore.Qt.AlignRight)
-        self.ui.upload_range_layout.addWidget(self.ui.ui_range_toolButton, 0, 4)
-
-        self.onlyInt = QtGui.QIntValidator()
-        self.ui.ui_rangeIn_textEdit.setValidator(self.onlyInt)
-        self.ui.ui_rangeIn_textEdit.setPlaceholderText('Start')
-        self.ui.ui_rangeOut_textEdit.setValidator(self.onlyInt)
-        self.ui.ui_rangeOut_textEdit.setPlaceholderText('End')
-
-        # upload_layout - Directory
-        self.ui.upload_directory_layout = RegularGridLayout(self, label='Directory')
-        self.ui.ui_record_gridLayout.addLayout(self.ui.upload_directory_layout)
-        self.ui.ps_directory_lineEdit = QtWidgets.QLineEdit()
-        self.ui.ps_directory_lineEdit.setPlaceholderText('Output Directory')
-        self.ui.ps_directory_toolButton = RegularToolButton(self, icon = directory_icon)
-        self.ui.upload_directory_layout.addWidget(self.ui.ps_directory_lineEdit, 0, 1)
-        self.ui.upload_directory_layout.addWidget(self.ui.ps_directory_toolButton, 0, 2)
-
-        # record_layout - filename
-        self.ui.upload_filename_layout = RegularGridLayout(self, label='Clip Name')
-        self.ui.ui_record_gridLayout.addLayout(self.ui.upload_filename_layout)
-        self.ui.us_filename_lineEdit = QtWidgets.QLineEdit()
-        self.ui.us_filename_lineEdit.setPlaceholderText('File Name or Prefix')
-        self.ui.ps_filename_toolButton = RegularToolButton(self)
-
-        self.ui.ps_filename_toolButton.setEnabled(0)
-        self.ui.upload_filename_layout.addWidget(self.ui.us_filename_lineEdit, 0, 1)
-        self.ui.upload_filename_layout.addWidget(self.ui.ps_filename_toolButton, 0, 2)
-
-        # record_layout - clipname
-        self.ui.upload_clipname_layout = RegularGridLayout(self, label='Clip Suffix ')
-        self.ui.ui_record_gridLayout.addLayout(self.ui.upload_clipname_layout)
-        self.ui.ps_clipname_lineEdit = QtWidgets.QLineEdit()
-        self.ui.ps_clipname_lineEdit.setPlaceholderText('Clip Suffix (optional)')
-        self.ui.ps_clipname_toolButton = RegularToolButton(self)
-        self.ui.ps_clipname_toolButton.setEnabled(0)
-        self.ui.upload_clipname_layout.addWidget(self.ui.ps_clipname_lineEdit, 0, 1)
-        self.ui.upload_clipname_layout.addWidget(self.ui.ps_clipname_toolButton, 0, 2)
-
-        # record_layout - after record
-        self.ui.upload_after_layout = RegularGridLayout(self, label='After Record')
-        self.ui.ps_play_after_creation_checkBox = QtWidgets.QCheckBox()
-        self.ui.ps_play_after_creation_checkBox.setChecked(True)
-        self.ui.ps_play_after_creation_checkBox.setText('Play')
-        self.ui.ps_upload_after_creation_checkBox = QtWidgets.QCheckBox()
-        self.ui.ps_upload_after_creation_checkBox.setText('Upload')
-        self.ui.upload_after_layout.addWidget(self.ui.ps_play_after_creation_checkBox, 0, 1)
-        self.ui.upload_after_layout.addWidget(self.ui.ps_upload_after_creation_checkBox, 0, 2)
-        self.ui.ui_record_gridLayout.addLayout(self.ui.upload_after_layout)
-        # record_layout - record button
-        self.ui.ui_record_pushButton = RegularButton(self, icon=record_icon, color=record_color)
-        self.ui.ui_record_pushButton.setText("RECORD")
-        self.ui.ui_record_gridLayout.addWidget(self.ui.ui_record_pushButton)
 
         # CLIP SELECTION
         # - - - - - - - - - -
@@ -646,17 +485,23 @@ class MenuWindow(SyncSketch_Window):
 
 
         # populate UI
-        filepath = os.path.expanduser('~/Desktop/playblasts')
-        filepath = path.sanitize(filepath)
-        self.ui.ps_directory_lineEdit.setText(filepath)
-
-        self.ui.ui_formatPreset_comboBox.populate_combo_list(PRESET_YAML, DEFAULT_PRESET)
-        self.ui.ui_viewportpreset_comboBox.populate_combo_list(VIEWPORT_YAML, DEFAULT_VIEWPORT_PRESET)
         self.update_last_recorded()
 
-        self.ui.ui_range_comboBox.set_combobox_index(selection='Start / End')
+    @QtCore.Slot(str)
+    def update_record(self, file):
+        logger.debug('Update Record Slot triggerd with File [{}]'.format(file))
+        if file:
+            playblast_filename = os.path.split(file)[-1]
+            self.ui.ui_status_label.update('Playblast file [{}] is created.'.format(playblast_filename))
+            self.update_last_recorded() 
+        else:
+            self.ui.ui_status_label.update('Playblast failed. %s'%message_is_not_connected , color=error_color)
 
-        self.set_rangeFromComboBox()
+    @QtCore.Slot(str)
+    def update_upload(self, url):
+        logger.debug('Update Upload Slot triggered with URL [{}]'.format(url))
+        self.update_target_from_upload(url)
+    
 
     # * double check last item selected, looks like after this func, it stopped
     def expandedTest(self, target):
@@ -729,19 +574,6 @@ class MenuWindow(SyncSketch_Window):
         imageWidget.setIconSize(QtCore.QSize(320, 180))
         self.setWindowIcon(logo_icon)
 
-
-    def get_directory_from_browser(self):
-        options = QtWidgets.QFileDialog.Options()
-        options |= QtWidgets.QFileDialog.Directory
-        options |= QtWidgets.QFileDialog.ShowDirsOnly
-        options |= QtWidgets.QFileDialog.DontUseNativeDialog
-
-        filePath = QtWidgets.QFileDialog.getExistingDirectory(self, options=options)
-
-        if filePath:
-            self.ui.ps_directory_lineEdit.setText(filePath)
-            return filePath
-
     def openFileNameDialog(self):
         options = QtWidgets.QFileDialog.Options()
         options |= QtWidgets.QFileDialog.DontUseNativeDialog
@@ -770,7 +602,7 @@ class MenuWindow(SyncSketch_Window):
             self.ui.ui_download_pushButton,
             self.ui.ui_upload_pushButton,
             self.ui.ui_open_pushButton,
-            self.ui.ps_upload_after_creation_checkBox,
+            self.ui.record_app.ps_upload_after_creation_checkBox,
             self.ui.ui_copyURL_pushButton,
             self.ui.ui_reviewSelection_hBoxLayout
         ]
@@ -877,17 +709,6 @@ class MenuWindow(SyncSketch_Window):
     # ==================================================================
     # Video Tab Functions
 
-    def manage_preset(self):
-        from syncsketchGUI.lib.gui.syncsketchWidgets.formatPresetWidget import FormatPresetWindow
-        _maya_delete_ui(FormatPresetWindow.window_name)
-        preset_window = FormatPresetWindow(self)
-        preset_window.show()
-
-    def manage_viewport_preset(self):
-        from syncsketchGUI.lib.gui.syncsketchWidgets.viewportPresetWidget import ViewportPresetWindow
-        _maya_delete_ui(ViewportPresetWindow.window_name)
-        preset_viewport_window = ViewportPresetWindow(self)
-        preset_viewport_window.show()
 
     # to do - should be able to wrap all of this in a single function
     # including synchronization
@@ -904,7 +725,7 @@ class MenuWindow(SyncSketch_Window):
                 self.ui.ps_lastfile_line_edit.setText(database.read_cache('last_recorded')['filename'])
             self.update_clip_info()
 
-
+    ### Not used
     def update_current_clip(self):
         val = self.ui.ps_lastfile_line_edit.text()
         database.dump_cache({'selected_clip': val})
@@ -916,52 +737,6 @@ class MenuWindow(SyncSketch_Window):
         self.ui.ps_preset_description.setText("%s | %s | %sx%s "%(data["encoding"],data["format"],data["width"],data["height"]))
 
 
-    def update_current_preset(self):
-        val = self.ui.ui_formatPreset_comboBox.currentText()
-        database.dump_cache({'current_preset': val})
-        format_preset_file = path.get_config_yaml(PRESET_YAML)
-        data = database._parse_yaml(yaml_file = format_preset_file)
-        logger.info("data: {}".format(data))
-        if data.has_key(val):
-            data = data[val]
-            #text = "%s | %s | %sx%s " %(data["encoding"], data["format"], data["width"], data["height"])
-            text = "{} | {} | {}x{}".format(data["encoding"], data["format"], data["width"], data["height"])
-        else:
-            text = "no valid preset selected"
-        self.ui.ps_preset_description.setText(text)
-
-
-    def update_current_viewport_preset(self):
-        val = self.ui.ui_viewportpreset_comboBox.currentText()
-        database.dump_cache({'current_viewport_preset': val})
-
-
-    def populate_camera_comboBox(self):
-        value = database.read_cache('selected_camera')
-        self.ui.ui_cameraPreset_comboBox.clear()
-        active_cam = r"Active(%s)"%maya_scene.get_current_camera()
-        self.cameras = [active_cam]
-        self.cameras += maya_scene.get_available_cameras()
-        self.ui.ui_cameraPreset_comboBox.addItems(self.cameras)
-        logger.info("maya_scene.get_current_camera(): {}".format(maya_scene.get_current_camera()))
-        self.ui.ui_cameraPreset_comboBox.set_combobox_index(selection=value, default=maya_scene.get_current_camera())
-
-
-    def update_current_camera(self):
-        logger.info("updating Camera")
-        value = self.ui.ui_cameraPreset_comboBox.currentText()
-        if not value or not len(value) or value == 'null':
-            value = database.read_cache('selected_camera')
-        if not value or value.startswith(r"Active"):
-            camera = maya_scene.get_current_camera()
-            database.dump_cache({'selected_camera': camera})
-        else:
-            database.dump_cache({'selected_camera': value})
-
-
-    def store_frame(self):
-        database.dump_cache({'frame_start': self.ui.ui_rangeIn_textEdit.text()})
-        database.dump_cache({'frame_end': self.ui.ui_rangeOut_textEdit.text()})
 
 
     def open_upload_to_url(self):
@@ -970,61 +745,6 @@ class MenuWindow(SyncSketch_Window):
         logger.info("Opening Url: {} ".format(url))
         if url:
             webbrowser.open(url)
-
-    def playblast(self):
-        # store current preset since subsequent calls will use that data exclusively
-        # savedata
-        self.save_ui_state()
-        recordData = syncsketchGUI.record()
-        playblast_file = recordData["playblast_file"]
-        if not playblast_file:
-            self.ui.ui_status_label.update('Playblast failed. %s'%message_is_not_connected , color=error_color)
-            return
-
-        playblast_filename = os.path.split(playblast_file)[-1]
-        # self.ui.ps_clipname_lineEdit.setText(playblast_filename)
-        self.ui.ui_status_label.update('Playblast file [{}] is created.'.format(playblast_filename))
-
-        if self.ui.ps_upload_after_creation_checkBox.isChecked() and self.ui.ps_upload_after_creation_checkBox.isEnabled() :
-            self.update_target_from_upload(recordData["uploaded_item"]['reviewURL'])
-            logger.info("update_target_from_upload = {}".format(recordData["uploaded_item"]['reviewURL']))
-        else:
-            logger.info("Upload checkbox was not selected, returning here")
-            return
-
-        # Update the last recorded file and save the ui state
-        # To do - need to update and selc the target url when item is updated
-        if recordData.has_key('uploaded_item'):
-            logger.info("uploaded_item %s"%recordData["uploaded_item"]["id"])
-
-        #self.restore_ui_state()
-        self.update_last_recorded()
-
-
-    def set_active_camera(self):
-        self.populate_camera_comboBox()
-        self.ui.ui_cameraPreset_comboBox.set_combobox_index(selection=maya_scene.get_current_camera())
-
-    def set_in_out(self, type="Time Slider"):
-        range = maya_scene.get_InOutFrames(type)
-        self.ui.ui_rangeIn_textEdit.setText(str(range[0]))
-        self.ui.ui_rangeOut_textEdit.setText(str(range[1]))
-
-    def manual_set_range(self, show=True):
-        interface = [
-            self.ui.ui_rangeIn_textEdit,
-            self.ui.ui_rangeOut_textEdit,
-            self.ui.ui_range_toolButton
-        ]
-        enable_interface(interface, show)
-
-    def set_rangeFromComboBox(self):
-        sel = self.ui.ui_range_comboBox.currentText()
-        self.set_in_out(sel)
-        if sel == r"Start / End":
-            self.manual_set_range(True)
-        else:
-            self.manual_set_range(False)
 
 
 
