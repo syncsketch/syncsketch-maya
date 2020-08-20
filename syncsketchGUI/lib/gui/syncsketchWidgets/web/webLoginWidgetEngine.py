@@ -82,6 +82,9 @@ class LoginView(QtWebEngineWidgets.QWebEngineView):
         self.setObjectName(self.window_name)
         self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.WindowStaysOnTopHint)
 
+        self.setMaximumSize(650, 600)
+        self.setMinimumSize(650, 600)
+
         page = WebEnginePage(self)
         self.setPage(page)
 
