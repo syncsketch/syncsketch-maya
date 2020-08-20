@@ -1,5 +1,4 @@
 
-from lib.gui.syncsketchWidgets.webLoginWidgetEngine import WebPage
 import codecs
 import json
 import os
@@ -34,8 +33,7 @@ import logging
 logger = logging.getLogger("syncsketchGUI")
 
 
-from lib.gui.syncsketchWidgets.webLoginWidget import WebLoginWindow
-from lib.gui.qt_widgets import OpenPlayer
+from lib.gui.syncsketchWidgets.web import LoginView
 import maya.cmds as cmds
 
 PALETTE_YAML = 'syncsketch_palette.yaml'
@@ -324,10 +322,8 @@ def update_target_from_tree(self, treeWidget):
 
 
 def show_web_login_window():
-    _maya_delete_ui(WebPage.window_name)
-    _call_ui_for_maya(WebPage)
-    # _maya_delete_ui(WebLoginWindow.window_name)
-    # _call_ui_for_maya(WebLoginWindow)
+    _maya_delete_ui(LoginView.window_name)
+    _call_ui_for_maya(LoginView)
 
 
 def show_menu_window():
