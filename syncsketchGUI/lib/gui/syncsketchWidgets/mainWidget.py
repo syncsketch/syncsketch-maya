@@ -606,7 +606,7 @@ class MenuWindow(SyncSketch_Window):
         self.ui.ui_download_pushButton = RegularButton(self, icon = download_icon, color=download_color)
         self.ui.ui_download_pushButton.setToolTip('Download from SyncSketch Review Target')
         self.ui.ui_download_pushButton.setText("DOWNLOAD")
-        self.ui.ui_targetSelection_gridLayout.addWidget(self.ui.ui_download_pushButton, 10, 0)
+        self.ui.ui_targetSelection_gridLayout.addWidget(self.ui.ui_download_pushButton, 10)
 
 
         self.ui.ui_login_label = QtWidgets.QLabel()
