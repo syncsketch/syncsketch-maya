@@ -12,8 +12,6 @@ import yaml
 import re
 from functools import partial
 
-from vendor.Qt.QtWebKit import *
-from vendor.Qt.QtWebKitWidgets import *
 from vendor.Qt.QtWidgets import QApplication
 
 import syncsketchGUI
