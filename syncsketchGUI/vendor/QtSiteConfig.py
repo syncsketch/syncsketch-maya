@@ -7,7 +7,10 @@ _web_members = {
         "QWebEngineView",
         "QWebEnginePage",
         "QWebEngineSettings",
-    ],     
+    ],  
+        "QtWebChannel": [
+        "QWebChannel",
+    ],   
 }
 
 def update_members(common_members):
