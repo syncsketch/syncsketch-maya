@@ -13,7 +13,7 @@ from syncsketchGUI.lib.gui.qt_utils import *
 from syncsketchGUI.lib.maya import scene as maya_scene
 from syncsketchGUI.lib.connection import is_connected, open_url
 from syncsketchGUI.gui import  _maya_delete_ui, show_download_window
-from syncsketchGUI.lib.gui.syncsketchWidgets.web import LoginView, OpenPlayerView
+from syncsketchGUI.lib.gui.syncsketchWidgets.web import LoginView, OpenPlayerView, logout_view
 import syncsketchGUI
 from syncsketchGUI.gui import parse_url_data, get_current_item_from_ids, set_tree_selection, update_target_from_tree, getReviewById
 from syncsketchGUI.lib.gui.icons import _get_qicon
@@ -692,6 +692,7 @@ class MenuWindow(SyncSketch_Window):
 
     def disconnect_account(self):
         self.current_user.logout()
+        logout_view()
         self.isloggedIn(self)
         self.ui.browser_treeWidget.clear()
         self.ui.ui_status_label.update('You have been successfully logged out', color=warning_color)

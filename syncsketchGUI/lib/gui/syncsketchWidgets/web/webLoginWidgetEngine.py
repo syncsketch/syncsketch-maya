@@ -8,6 +8,18 @@ from syncsketchGUI.lib.gui import qt_utils
 
 logger = logging.getLogger("syncsketchGUI")
 
+"""
+Although not ideal, logoutview has to be a global variable in order to be persistent. 
+Otherwise when declared in logout_view function, logoutview will run out of scope before url is fully loaded, since
+load method runs asynchron. 
+ """
+logoutview = QtWebEngineWidgets.QWebEngineView()
+logout_url = "https://syncsketch.com/app/logmeout/"
+
+def logout_view():
+    logger.debug("Logout View with: {}".format(logout_url))
+    logoutview.load(QtCore.QUrl(logout_url))
+
 class Element(QtCore.QObject):
     loaded = QtCore.Signal()
 

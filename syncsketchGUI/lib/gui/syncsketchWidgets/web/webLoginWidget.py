@@ -9,6 +9,10 @@ from syncsketchGUI.lib.gui import qt_utils
 
 logger = logging.getLogger("syncsketchGUI")
 
+# empty methond to complie to web interface
+def logout_view():
+    pass
+
 class WebLoginWindow(QWebView):
     """
     Login Window Class

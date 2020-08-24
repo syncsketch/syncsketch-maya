@@ -3,10 +3,11 @@ logger = logging.getLogger("syncsketchGUI")
 
 
 try:
-    from webLoginWidgetEngine import LoginView as LoginView
+    from webLoginWidgetEngine import LoginView, logout_view
 except ImportError:
     logger.info("Import Deprecated LoginView")
     from webLoginWidget import WebLoginWindow as LoginView
+    from webLoginWidget import logout_view
 else:
     logger.info("Import Latest LoginView")
 
