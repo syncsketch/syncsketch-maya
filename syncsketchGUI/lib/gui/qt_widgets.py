@@ -306,7 +306,7 @@ class SyncSketch_Window(QtWidgets.QMainWindow):
             y_coordinate = align_object_center.y() -(ui_size.height() / 2)
 
         else:
-            desktop_screen = QtGui.QDesktopWidget().screenGeometry()
+            desktop_screen = QtWidgets.QDesktopWidget().screenGeometry()
             x_coordinate =(desktop_screen.width() - ui_size.width()) / 2
             y_coordinate =(desktop_screen.height() - ui_size.height()) / 2
 
