@@ -201,7 +201,7 @@ class RegularComboBox(QtWidgets.QComboBox):
     def set_combobox_index(self, selection=None, default=None):
         if selection:
             index = self.findText(selection)
-            if index:
+            if index != -1:
                 self.setCurrentIndex(index)
         elif default:
             self.set_combobox_index(selection=default)
