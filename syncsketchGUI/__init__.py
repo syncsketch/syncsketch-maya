@@ -11,9 +11,9 @@ from syncsketchGUI.lib import user as user
 
 logger = logging.getLogger('syncsketchGUI')
 print("logger: {}".format(logger))
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.WARNING)
 ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
+ch.setLevel(logging.WARNING)
 
 # create formatter
 formatter = logging.Formatter('[%(asctime)s - %(filename)s:%(lineno)s - %(levelname)s - %(message)s]', "%Y-%m-%d %H:%M:%S")
