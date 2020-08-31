@@ -124,6 +124,7 @@ def get_current_file():
     if not os.path.isfile(filename):
         title = 'Not a valid file'
         message = 'Please provide a valid file'
+        logger.debug("{} is not a valid file".format(filename))
         qt_widgets.WarningDialog(None, title, message)
         return
     else:
@@ -207,8 +208,8 @@ def record(upload_after_creation = None, play_after_creation = None,  show_succe
     logger.info("capturedFile: {}".format(capturedFile))
     recordData["playblast_file"] = video.encodeToH264Mov(
         capturedFile, output_file=capturedFile[:-4] + ".mov")
-
     logger.info("reencoded File: {}".format(recordData["playblast_file"]))
+    database.dump_cache({"last_recorded_selection": recordData["playblast_file"]})
     # Post actions
 
     # To Do - post Recording script call

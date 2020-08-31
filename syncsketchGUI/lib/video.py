@@ -61,10 +61,14 @@ def encodeToH264Mov(filepath = None, output_file = ""):
         ffmpeg_path = path.make_windows_style(ffmpeg_path)
         filepath = path.make_windows_style(filepath)
         ffmpeg_executable = 'ffmpeg.exe'
+        output_file = path.make_windows_style(output_file)
     else:
         ffmpeg_path = path.sanitize(ffmpeg_path)
         filepath = path.sanitize(filepath)
         ffmpeg_executable = 'ffmpeg'
+        output_file = path.sanitize(output_file)
+
+    filepath = filepath.replace("####", r"%04d")
 
     ffmpeg_command = '"{}{}" '.format(ffmpeg_path, ffmpeg_executable)
     ffmpeg_command += '-i "{}" '.format(filepath)
@@ -73,14 +77,15 @@ def encodeToH264Mov(filepath = None, output_file = ""):
     ffmpeg_command += '-y '
     ffmpeg_command += '"{}"'.format(output_file)
     subprocess.call(ffmpeg_command, shell = True)
-    output_file = path.sanitize(output_file)
+    
     logger.info('ffmpeg command: {}'.format(ffmpeg_command))
 
     # print "Creating Thumb for %s >> %s"%(filepath,output_file)
     if not os.path.isfile(output_file):
+        logger.error("FFMPEG conversion from {} to {} not successful".format(filepath, output_file))
         return
     else:
-        return output_file
+        return path.sanitize(output_file)
 
 
 def get_thumb(filepath = None, output_file = ""):
