@@ -252,7 +252,6 @@ class FormatPresetWindow(SyncSketch_Window):
 
     def save(self):
         presetFile = path.get_config_yaml(PRESET_YAML)
-        presetData = database._parse_yaml(presetFile)
 
         presetName = self.ui.ui_formatPreset_comboBox.currentText()
         format = self.ui.format_comboBox.currentText()
@@ -260,24 +259,13 @@ class FormatPresetWindow(SyncSketch_Window):
         width = self.ui.width_spinBox.value()
         height = self.ui.height_spinBox.value()
 
-        newData = dict()
-        if presetName == DEFAULT_PRESET:
-            newData = {'current_preset': presetName}
+        newData = {presetName:
+                    {'encoding': encoding,
+                    'format': format,
+                    'height': height,
+                    'width': width}}
 
-        else:
-            newData = {'current_preset': presetName,
-                        presetName:
-                            {'encoding': encoding,
-                             'format': format,
-                             'height': height,
-                             'width': width}}
-        if presetData:
-            presetData.update(newData)
-        else:
-            presetData = newData
-
-        with codecs.open(presetFile, 'w', encoding='utf-8') as f_out:
-            yaml.safe_dump(presetData, f_out, default_flow_style=False)
+        database.dump_cache(newData, presetFile)
 
         self.parent.ui.ui_formatPreset_comboBox.populate_combo_list( PRESET_YAML, presetName)
         self.close()
