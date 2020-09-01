@@ -54,7 +54,6 @@ def probe(filename):
         return
 
 def encodeToH264Mov(filepath = None, output_file = ""):
-    print("ahey")
     ffmpeg_path = path.get_ffmpeg_bin() + '\\'
 
     if sys.platform == 'win32':
