@@ -155,7 +155,6 @@ class FormatPresetWindow(SyncSketch_Window):
         self.ui.width_spinBox.clear()
         self.ui.height_spinBox.clear()
 
-        self.ui.ui_formatPreset_comboBox.addItems([DEFAULT_PRESET])
 
         self.ui.format_comboBox.addItems(formats)
         self.ui.encoding_comboBox.addItems(encodings)
