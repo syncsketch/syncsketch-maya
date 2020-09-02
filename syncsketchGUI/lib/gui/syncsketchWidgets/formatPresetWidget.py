@@ -346,11 +346,14 @@ class FormatPresetWindow(SyncSketch_Window):
         preset_file = path.get_config_yaml(PRESET_YAML)
         preset_name = self.ui.ui_formatPreset_comboBox.currentText()
         database.delete_key_from_cache(preset_name, preset_file)
+        current_preset = database.read_cache("current_preset")
 
-        if database.read_cache("current_preset") == preset_name:
+        if current_preset == preset_name:
             current_preset_names = database._parse_yaml(preset_file).keys()
             new_preset_name = current_preset_names[0]
             self._update_current_preset(new_preset_name)
+        else:
+            self._update_current_preset(current_preset)
             
         self.populate_ui()
         self.ui.ui_formatPreset_comboBox.set_combobox_index(0)
