@@ -36,6 +36,7 @@ versionTag = os.getenv('SS_DEV') or 'release'\n\
 SYNCSKETCH_GUI_RELEASE_PATH = 'https://github.com/syncsketch/syncsketch-maya/archive/{}.zip'.format(versionTag)\n\
 SYNCSKETCH_API_RELEASE_PATH = 'https://github.com/syncsketch/python-api/archive/v1.0.4.zip'\n\
 \n\
+FFMPEG_API_ENDPOINT = 'https://ffbinaries.com/api/v1/version/4.2'\n\
 \n\
 if DEV:\n\
     SYNCSKETCH_GUI_RELEASE_PATH = '/Users/chavez/deleteMePls/syncsketchGUI'\n\
@@ -449,35 +450,60 @@ def restoreCredentialsFile():\n\
 \n\
 def downloadFFmpegToDisc(platform=None, moveToLocation=None):\n\
     import requests\n\
-    tmpdir = tempfile.mkdtemp()\n\
-    delete_tmpdir = True\n\
 \n\
-    if platform == 'Windows':\n\
-        ffmpegBinaryPath = 'https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-4.1-win64-static.zip'\n\
-    elif platform == 'Darwin':\n\
-        ffmpegBinaryPath = 'https://ffmpeg.zeranoe.com/builds/macos64/static/ffmpeg-4.1-macos64-static.zip'\n\
+    platform_mapping = {\n\
+            'Windows': 'windows-64',\n\
+            'Darwin' : 'osx-64'\n\
+            }\n\
 \n\
-    results = requests.get(ffmpegBinaryPath)\n\
+    _platform = platform_mapping[platform]\n\
 \n\
-    ffmpegzip = os.path.join(tmpdir, 'ffmpeg.zip')\n\
-    ffmpegExtracted = os.path.join(tmpdir, 'extracted')\n\
+    ffmpeg_resp = requests.get(FFMPEG_API_ENDPOINT).json()\n\
 \n\
-    with open(ffmpegzip, 'wb') as f:\n\
-        f.write(results.content)\n\
+    ffmpeg_url = ffmpeg_resp['bin'][_platform]['ffmpeg']\n\
+    ffmpeg_zip_path = _makeTempPath('ffmpeg.zip')\n\
+    ffmpeg_extrated_path = _makeTempPath('ffmpeg_extracted')\n\
+    _downloadToPath(ffmpeg_url, ffmpeg_zip_path)\n\
+    _extractZipFile(ffmpeg_zip_path, ffmpeg_extrated_path)\n\
+    ffmpeg_bin_path = _findBinPath(ffmpeg_extrated_path, 'ffmpeg')\n\
 \n\
-    zip_ref = zipfile.ZipFile(ffmpegzip, 'r')\n\
-    zip_ref.extractall(ffmpegExtracted)\n\
-    zip_ref.close()\n\
 \n\
-    ffmpegBinaryPath = glob.glob(os.path.join(ffmpegExtracted, '*', 'bin', 'ffmpeg*'))[0]\n\
-    ffprobeBinaryPath = glob.glob(os.path.join(ffmpegExtracted, '*', 'bin', 'ffprobe*'))[0]\n\
+    ffprobe_url = ffmpeg_resp['bin'][_platform]['ffprobe']\n\
+    ffprobe_zip_path = _makeTempPath('ffprobe.zip')\n\
+    ffprobe_extrated_path = _makeTempPath('ffprobe_extracted')\n\
+    _downloadToPath(ffprobe_url, ffprobe_zip_path)\n\
+    _extractZipFile(ffprobe_zip_path, ffprobe_extrated_path)\n\
+    ffprobe_bin_path = _findBinPath(ffprobe_extrated_path, 'ffprobe')\n\
+\n\
     print('Moving FFMPEG from to directory: {0}'.format(moveToLocation))\n\
     if not os.path.isdir(moveToLocation):\n\
         os.makedirs(moveToLocation)\n\
-    os.chmod(ffmpegBinaryPath, 0o755)\n\
-    os.chmod(ffprobeBinaryPath, 0o755)\n\
-    shutil.copy(ffmpegBinaryPath, moveToLocation)\n\
-    shutil.copy(ffprobeBinaryPath, moveToLocation)\n\
+    os.chmod(ffmpeg_bin_path, 0o755)\n\
+    os.chmod(ffprobe_bin_path, 0o755)\n\
+    shutil.copy(ffmpeg_bin_path, moveToLocation)\n\
+    shutil.copy(ffprobe_bin_path, moveToLocation)\n\
+\n\
+def _makeTempPath(name):\n\
+    tmpdir = tempfile.mkdtemp()\n\
+    return os.path.join(tmpdir, name)\n\
+\n\
+def _downloadToPath(url, path):\n\
+    import requests\n\
+    print('Download from {} to {}'.format(url, path))\n\
+    resp = requests.get(url)\n\
+    with open(path, 'wb') as f:\n\
+        f.write(resp.content)\n\
+\n\
+def _extractZipFile(zip_path, extracted_path):\n\
+    print('Unzip from {} to {}'.format(zip_path, extracted_path))\n\
+    zip_ref = zipfile.ZipFile(zip_path, 'r')\n\
+    zip_ref.extractall(extracted_path)\n\
+    zip_ref.close()  \n\
+\n\
+def _findBinPath(directory, name):\n\
+    bin_path = glob.glob(os.path.join(directory, '{}*'.format(name)))[0]\n\
+    print('Found binary {} at {}'.format(name, bin_path))\n\
+    return bin_path\n\
 \n\
 \n\
 class installThread(QThread):\n\
@@ -589,7 +615,9 @@ class installThread(QThread):\n\
 \n\
             # Download FFMPeg Binaries\n\
             if not INSTALL_SSGUI_ONLY:\n\
+                print('Install FFMPEG Binaries to {}'.format(FFMPEG_PATH))\n\
                 downloadFFmpegToDisc(platform=Literals.PLATFORM, moveToLocation=FFMPEG_PATH)\n\
+                print('Finished Installing FFMPEG Binaries')\n\
 \n\
 \n\
 \n\
