@@ -18,6 +18,7 @@ import maya.utils
 import maya.cmds
 from functools import partial
 
+import site
 
 DEV = False
 INSTALL_SSGUI_ONLY = False
@@ -592,6 +593,19 @@ class installThread(QThread):
             if not INSTALL_SSGUI_ONLY:
                 print('Calling shell command: {0}'.format(cmd))
                 print(subprocess.check_output(cmd))
+
+
+            # User Site Package Path needs to be in sys.paths, in order to load installed dependencies. 
+            # In case this folder didnt exist before installation, it might not be in system paths.
+            site_package_path = site.getusersitepackages()
+            if not site_package_path:
+                print('Can not find user site package path')
+            elif site_package_path not in sys.path:
+                sys.path.append(site_package_path)
+                print('Add site package path [{}] to system paths'.format(site_package_path))
+            else:
+                print('Site packe path in system paths')
+
 
             # Install SyncsketchGUI
             # * By using target, pip show won't find this package anymore
