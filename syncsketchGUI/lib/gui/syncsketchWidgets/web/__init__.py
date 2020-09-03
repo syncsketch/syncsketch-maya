@@ -2,21 +2,22 @@ import logging
 logger = logging.getLogger("syncsketchGUI")
 
 
-try:
-    from webLoginWidgetEngine import LoginView, logout_view
-except ImportError:
-    logger.info("Import Deprecated LoginView")
+try: 
     from webLoginWidget import WebLoginWindow as LoginView
     from webLoginWidget import logout_view
+except ImportError:
+    logger.debug("Import Latest LoginView")
+    from webLoginWidgetEngine import LoginView, logout_view
 else:
-    logger.info("Import Latest LoginView")
+    logger.debug("Import Deprecated LoginView")
 
 
 try:
-    from webPlayerWidgetEngine import OpenPlayerView as OpenPlayerView
-except ImportError:
-    logger.info("Import Deprecated PlayerView")
     from webPlayerWidget import OpenPlayer as OpenPlayerView
+except ImportError:
+    logger.debug("Import Latest PlayerView")
+    from webPlayerWidgetEngine import OpenPlayerView as OpenPlayerView
 else:
-    logger.info("Import Latest PlayerView")
+    logger.debug("Import Deprecated PlayerView")
+    
 
