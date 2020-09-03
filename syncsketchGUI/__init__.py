@@ -213,7 +213,7 @@ def record(upload_after_creation = None, play_after_creation = None,  show_succe
         database.dump_cache({"last_recorded_selection": recordData["playblast_file"]})
     
     else:
-        recordData["playblast_file"] = recordData
+        recordData["playblast_file"] = capturedFile
     # Post actions
 
     # To Do - post Recording script call
