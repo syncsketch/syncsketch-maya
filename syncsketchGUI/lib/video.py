@@ -67,7 +67,7 @@ def encodeToH264Mov(filepath = None, output_file = ""):
         ffmpeg_executable = 'ffmpeg'
         ffmpeg_path = os.path.join(ffmpeg_path, ffmpeg_executable)
         ffmpeg_path = path.sanitize(ffmpeg_path)
-        output_file = path.make_windows_style(output_file)
+        output_file = path.sanitize(output_file)
     
     if not os.path.isfile(ffmpeg_path):
         logger.error("FFMPEG executable missing. No File at: {}".format(ffmpeg_path))
@@ -75,17 +75,17 @@ def encodeToH264Mov(filepath = None, output_file = ""):
 
     filepath = filepath.replace("####", r"%04d")
 
-    ffmpeg_command = '"{}" '.format(ffmpeg_path)
-    ffmpeg_command += '-i "{}" '.format(filepath)
+    ffmpeg_command = [ffmpeg_path]
+    ffmpeg_command.extend(['-i', filepath])
     # ffmpeg_command += '-filter:v select="eq(n\,0)" -vframes 1'
-    ffmpeg_command += '-c:v libx264 -preset fast -tune animation '
-    ffmpeg_command += '-y '
-    ffmpeg_command += '"{}"'.format(output_file)
-    logger.info('ffmpeg command: {}'.format(ffmpeg_command))
+    ffmpeg_command.extend(['-c:v', 'libx264', '-preset', 'fast', '-tune', 'animation'])
+    ffmpeg_command.extend(['-y'])
+    ffmpeg_command.extend([output_file])
+    logger.info('ffmpeg command: {}'.format(' '.join(ffmpeg_command)))
     try:
-        subprocess.check_output(ffmpeg_command)
+        subprocess.check_output(ffmpeg_command, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as err:
-        logger.error("FFMPEG xonversion non zero exit: {}".format(err.output))
+        logger.error("FFMPEG conversion non zero exit: {}".format(err.output))
         raise err    
 
 
