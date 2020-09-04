@@ -62,7 +62,7 @@ def getMayaPlugInPath():
 
 ScriptInstallPath = {
     'Darwin': '{0}/Library/Preferences/Autodesk/maya/scripts/'.format(expanduser('~')),
-    'linux64': '$HOME/maya/scripts/',
+    'Linux': '{0}/maya/scripts/'.format(expanduser('~')),
     'Windows': '{}/'.format(getMayaScriptPath())
 }
 
@@ -70,7 +70,7 @@ ScriptInstallPath = {
 
 PluginInstallPath = {
     'Darwin': '{0}/Library/Preferences/Autodesk/maya/plug-ins/'.format(expanduser('~')),
-    'linux64': '$HOME/maya/scripts/',
+    'Linux': '{0}/maya/plug-ins/'.format(expanduser('~')),
     'Windows': '{}/'.format(getMayaPlugInPath())
 }
 
@@ -453,7 +453,8 @@ def downloadFFmpegToDisc(platform=None, moveToLocation=None):
 
     platform_mapping = {
             'Windows': 'windows-64',
-            'Darwin' : 'osx-64'
+            'Darwin' : 'osx-64',
+            'Linux'  : 'linux-64'
             }
 
     _platform = platform_mapping[platform]
@@ -540,6 +541,11 @@ class installThread(QThread):
             PYTHON_PATH = '/usr/bin/python'
             MAYA_SCRIPTS_PATH = ScriptInstallPath['Darwin']
             PIP_PATH = os.path.join(expanduser('~'), 'Library', 'Python', '2.7', 'bin', 'pip2.7')
+     
+        elif Literals.PLATFORM == 'Linux':
+            PYTHON_PATH = os.path.join(os.getenv('MAYA_LOCATION'), 'bin', 'mayapy')
+            MAYA_SCRIPTS_PATH = ScriptInstallPath['Linux']
+            PIP_PATH = os.path.join(expanduser('~'), '.local', 'bin', 'pip2.7')
 
         FFMPEG_PATH = os.path.join(MAYA_SCRIPTS_PATH, 'ffmpeg', 'bin')
         Literals.SYNCSKETCH_INSTALL_PATH = '{0}syncsketchGUI'.format(MAYA_SCRIPTS_PATH)
@@ -577,9 +583,11 @@ class installThread(QThread):
                         f.write(data)
 
                 # Install pip
+                # On Linux installing pip with Maya Python creates unwated dependecies to Mayas Python version, so pip might not work 
+                # outside of Maya Python anymore. So lets install pip with the os python version. 
                 filepath, filename = os.path.split(pipInstaller)
                 sys.path.insert(0, filepath)
-                if Literals.PLATFORM == 'Darwin':
+                if Literals.PLATFORM == 'Darwin' or Literals.PLATFORM == 'Linux':
                     cmd = '{0} {1} --user pip==19.2.3'.format('python2.7', pipInstaller).split(' ')
                 else:
                     cmd = '{0}&{1}&--user&pip==19.2.3'.format(PYTHON_PATH, pipInstaller).split('&')
