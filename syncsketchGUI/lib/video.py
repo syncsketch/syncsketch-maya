@@ -153,5 +153,7 @@ def play_in_default_player(filename):
         os.system('start {}'.format(filename))
     elif sys.platform == 'darwin':
         os.system('open {}'.format(filename))
+    elif sys.platform == 'linux2':
+        os.system('xdg-open {}'.format(filename))
     else:
         os.system('open {}'.format(filename))
