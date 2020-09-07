@@ -202,11 +202,10 @@ def record(upload_after_creation = None, play_after_creation = None,  show_succe
     # This a wrapper function and if called individually should mirror all the same effect as hitting 'record' in the UI
     recordData = {}
     capturedFile = _record()
-
+    logger.info("capturedFile: {}".format(capturedFile))
     capturedFileNoExt, ext = os.path.splitext(capturedFile)
     if capturedFileNoExt[-5:] == '.####':
         #Reencode to quicktime
-        logger.info("capturedFile: {}".format(capturedFile))
         recordData["playblast_file"] = video.encodeToH264Mov(
             capturedFile, output_file=capturedFileNoExt[:-5] + ".mov")
         logger.info("reencoded File: {}".format(recordData["playblast_file"]))
