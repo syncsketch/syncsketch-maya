@@ -283,7 +283,9 @@ class SyncSketchUser():
             return
 
         baseDir = "{0}".format(expanduser('~'))
-        return self.host_data.getGreasePencilOverlays(reviewId, itemId, baseDir)
+        file = self.host_data.getGreasePencilOverlays(reviewId, itemId, baseDir)
+        logger.info("Downloaded Greasepencil file to {}".format(file))
+        return file
 
 
     def download_converted_video(self, itemId):
