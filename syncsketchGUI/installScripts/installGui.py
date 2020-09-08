@@ -34,7 +34,7 @@ else:
     from PySide.QtGui import *
 versionTag = os.getenv('SS_DEV') or 'release'
 SYNCSKETCH_GUI_RELEASE_PATH = 'https://github.com/syncsketch/syncsketch-maya/archive/{}.zip'.format(versionTag)
-SYNCSKETCH_API_RELEASE_PATH = 'https://github.com/syncsketch/python-api/archive/v1.0.4.zip'
+SYNCSKETCH_API_RELEASE_PATH = 'https://github.com/syncsketch/python-api/archive/v1.0.7.8.zip'
 
 FFMPEG_API_ENDPOINT = 'https://ffbinaries.com/api/v1/version/4.2'
 
