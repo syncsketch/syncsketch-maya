@@ -213,6 +213,9 @@ def apply_greasepencil(filename, clear_existing_frames=False):
     import pymel.core as pm
     ctxName = 'syncSketchGreasePencil'
 
+    # file path must be unix style otherwise IO Error by Maya Python zip.py
+    filename = path.sanitize(filename)
+
     # create grease pencil if it doesn't exist
     if not pm.greasePencilCtx(ctxName, exists=True):
         ctx = pm.greasePencilCtx(ctxName)
