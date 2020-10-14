@@ -13,9 +13,8 @@ from syncsketchGUI.lib.gui.qt_utils import *
 from syncsketchGUI.lib.maya import scene as maya_scene
 from syncsketchGUI.lib.connection import is_connected, open_url
 from syncsketchGUI.gui import  _maya_delete_ui, show_download_window
-from syncsketchGUI.lib.gui.syncsketchWidgets.webLoginWidget import WebLoginWindow
+from syncsketchGUI.lib.gui.syncsketchWidgets.web import LoginView, OpenPlayerView, logout_view
 import syncsketchGUI
-from syncsketchGUI.gui import OpenPlayer
 from syncsketchGUI.gui import parse_url_data, get_current_item_from_ids, set_tree_selection, update_target_from_tree, getReviewById
 from syncsketchGUI.lib.gui.icons import _get_qicon
 from syncsketchGUI.lib.gui.literals import DEFAULT_VIEWPORT_PRESET, PRESET_YAML, VIEWPORT_YAML, DEFAULT_PRESET, uploadPlaceHolderStr, message_is_not_loggedin, message_is_not_connected
@@ -445,7 +444,7 @@ class MenuWindow(SyncSketch_Window):
         self.ui.ui_download_pushButton = RegularButton(self, icon = download_icon, color=download_color)
         self.ui.ui_download_pushButton.setToolTip('Download from SyncSketch Review Target')
         self.ui.ui_download_pushButton.setText("DOWNLOAD")
-        self.ui.ui_targetSelection_gridLayout.addWidget(self.ui.ui_download_pushButton, 10, 0)
+        self.ui.ui_targetSelection_gridLayout.addWidget(self.ui.ui_download_pushButton, 10)
 
 
         self.ui.ui_login_label = QtWidgets.QLabel()
@@ -538,6 +537,7 @@ class MenuWindow(SyncSketch_Window):
 
     def disconnect_account(self):
         self.current_user.logout()
+        logout_view()
         self.isloggedIn(self)
         self.ui.browser_treeWidget.clear()
         self.ui.ui_status_label.update('You have been successfully logged out', color=warning_color)
@@ -646,8 +646,8 @@ class MenuWindow(SyncSketch_Window):
     def connect_account(self):
 
         if is_connected():
-            _maya_delete_ui(WebLoginWindow.window_name)
-            weblogin_window = WebLoginWindow(self)
+            _maya_delete_ui(LoginView.window_name)
+            weblogin_window = LoginView(self)
 
         else:
             title='Not able to reach SyncSketch'
@@ -670,7 +670,7 @@ class MenuWindow(SyncSketch_Window):
     # ==================================================================
     # Reviews Tab Functions
     def open_player(self,url):
-        OpenPlayer(self,url)
+        PlayerView(self,url)
 
     def select_item_from_target_input(self, event=None):
         link = self.sanitize(self.ui.target_lineEdit.text())

@@ -18,6 +18,7 @@ import maya.utils
 import maya.cmds
 from functools import partial
 
+import site
 
 DEV = False
 INSTALL_SSGUI_ONLY = False
@@ -33,8 +34,9 @@ else:
     from PySide.QtGui import *
 versionTag = os.getenv('SS_DEV') or 'release'
 SYNCSKETCH_GUI_RELEASE_PATH = 'https://github.com/syncsketch/syncsketch-maya/archive/{}.zip'.format(versionTag)
-SYNCSKETCH_API_RELEASE_PATH = 'https://github.com/syncsketch/python-api/archive/v1.0.4.zip'
+SYNCSKETCH_API_RELEASE_PATH = 'https://github.com/syncsketch/python-api/archive/v1.0.7.8.zip'
 
+FFMPEG_API_ENDPOINT = 'https://ffbinaries.com/api/v1/version/4.2'
 
 if DEV:
     SYNCSKETCH_GUI_RELEASE_PATH = '/Users/chavez/deleteMePls/syncsketchGUI'
@@ -60,7 +62,7 @@ def getMayaPlugInPath():
 
 ScriptInstallPath = {
     'Darwin': '{0}/Library/Preferences/Autodesk/maya/scripts/'.format(expanduser('~')),
-    'linux64': '$HOME/maya/scripts/',
+    'Linux': '{0}/maya/scripts/'.format(expanduser('~')),
     'Windows': '{}/'.format(getMayaScriptPath())
 }
 
@@ -68,7 +70,7 @@ ScriptInstallPath = {
 
 PluginInstallPath = {
     'Darwin': '{0}/Library/Preferences/Autodesk/maya/plug-ins/'.format(expanduser('~')),
-    'linux64': '$HOME/maya/scripts/',
+    'Linux': '{0}/maya/plug-ins/'.format(expanduser('~')),
     'Windows': '{}/'.format(getMayaPlugInPath())
 }
 
@@ -448,35 +450,61 @@ def restoreCredentialsFile():
 
 def downloadFFmpegToDisc(platform=None, moveToLocation=None):
     import requests
-    tmpdir = tempfile.mkdtemp()
-    delete_tmpdir = True
 
-    if platform == 'Windows':
-        ffmpegBinaryPath = 'https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-4.1-win64-static.zip'
-    elif platform == 'Darwin':
-        ffmpegBinaryPath = 'https://ffmpeg.zeranoe.com/builds/macos64/static/ffmpeg-4.1-macos64-static.zip'
+    platform_mapping = {
+            'Windows': 'windows-64',
+            'Darwin' : 'osx-64',
+            'Linux'  : 'linux-64'
+            }
 
-    results = requests.get(ffmpegBinaryPath)
+    _platform = platform_mapping[platform]
 
-    ffmpegzip = os.path.join(tmpdir, 'ffmpeg.zip')
-    ffmpegExtracted = os.path.join(tmpdir, 'extracted')
+    ffmpeg_resp = requests.get(FFMPEG_API_ENDPOINT).json()
 
-    with open(ffmpegzip, 'wb') as f:
-        f.write(results.content)
+    ffmpeg_url = ffmpeg_resp['bin'][_platform]['ffmpeg']
+    ffmpeg_zip_path = _makeTempPath('ffmpeg.zip')
+    ffmpeg_extrated_path = _makeTempPath('ffmpeg_extracted')
+    _downloadToPath(ffmpeg_url, ffmpeg_zip_path)
+    _extractZipFile(ffmpeg_zip_path, ffmpeg_extrated_path)
+    ffmpeg_bin_path = _findBinPath(ffmpeg_extrated_path, 'ffmpeg')
 
-    zip_ref = zipfile.ZipFile(ffmpegzip, 'r')
-    zip_ref.extractall(ffmpegExtracted)
-    zip_ref.close()
 
-    ffmpegBinaryPath = glob.glob(os.path.join(ffmpegExtracted, '*', 'bin', 'ffmpeg*'))[0]
-    ffprobeBinaryPath = glob.glob(os.path.join(ffmpegExtracted, '*', 'bin', 'ffprobe*'))[0]
+    ffprobe_url = ffmpeg_resp['bin'][_platform]['ffprobe']
+    ffprobe_zip_path = _makeTempPath('ffprobe.zip')
+    ffprobe_extrated_path = _makeTempPath('ffprobe_extracted')
+    _downloadToPath(ffprobe_url, ffprobe_zip_path)
+    _extractZipFile(ffprobe_zip_path, ffprobe_extrated_path)
+    ffprobe_bin_path = _findBinPath(ffprobe_extrated_path, 'ffprobe')
+
     print('Moving FFMPEG from to directory: {0}'.format(moveToLocation))
     if not os.path.isdir(moveToLocation):
         os.makedirs(moveToLocation)
-    os.chmod(ffmpegBinaryPath, 0o755)
-    os.chmod(ffprobeBinaryPath, 0o755)
-    shutil.copy(ffmpegBinaryPath, moveToLocation)
-    shutil.copy(ffprobeBinaryPath, moveToLocation)
+    os.chmod(ffmpeg_bin_path, 0o755)
+    os.chmod(ffprobe_bin_path, 0o755)
+    shutil.copy(ffmpeg_bin_path, moveToLocation)
+    shutil.copy(ffprobe_bin_path, moveToLocation)
+
+def _makeTempPath(name):
+    tmpdir = tempfile.mkdtemp()
+    return os.path.join(tmpdir, name)
+
+def _downloadToPath(url, path):
+    import requests
+    print('Download from {} to {}'.format(url, path))
+    resp = requests.get(url)
+    with open(path, 'wb') as f:
+        f.write(resp.content)
+
+def _extractZipFile(zip_path, extracted_path):
+    print('Unzip from {} to {}'.format(zip_path, extracted_path))
+    zip_ref = zipfile.ZipFile(zip_path, 'r')
+    zip_ref.extractall(extracted_path)
+    zip_ref.close()  
+
+def _findBinPath(directory, name):
+    bin_path = glob.glob(os.path.join(directory, '{}*'.format(name)))[0]
+    print('Found binary {} at {}'.format(name, bin_path))
+    return bin_path
 
 
 class installThread(QThread):
@@ -513,6 +541,11 @@ class installThread(QThread):
             PYTHON_PATH = '/usr/bin/python'
             MAYA_SCRIPTS_PATH = ScriptInstallPath['Darwin']
             PIP_PATH = os.path.join(expanduser('~'), 'Library', 'Python', '2.7', 'bin', 'pip2.7')
+     
+        elif Literals.PLATFORM == 'Linux':
+            PYTHON_PATH = os.path.join(os.getenv('MAYA_LOCATION'), 'bin', 'mayapy')
+            MAYA_SCRIPTS_PATH = ScriptInstallPath['Linux']
+            PIP_PATH = os.path.join(expanduser('~'), '.local', 'bin', 'pip2.7')
 
         FFMPEG_PATH = os.path.join(MAYA_SCRIPTS_PATH, 'ffmpeg', 'bin')
         Literals.SYNCSKETCH_INSTALL_PATH = '{0}syncsketchGUI'.format(MAYA_SCRIPTS_PATH)
@@ -550,9 +583,11 @@ class installThread(QThread):
                         f.write(data)
 
                 # Install pip
+                # On Linux installing pip with Maya Python creates unwated dependecies to Mayas Python version, so pip might not work 
+                # outside of Maya Python anymore. So lets install pip with the os python version. 
                 filepath, filename = os.path.split(pipInstaller)
                 sys.path.insert(0, filepath)
-                if Literals.PLATFORM == 'Darwin':
+                if Literals.PLATFORM == 'Darwin' or Literals.PLATFORM == 'Linux':
                     cmd = '{0} {1} --user pip==19.2.3'.format('python2.7', pipInstaller).split(' ')
                 else:
                     cmd = '{0}&{1}&--user&pip==19.2.3'.format(PYTHON_PATH, pipInstaller).split('&')
@@ -566,6 +601,19 @@ class installThread(QThread):
             if not INSTALL_SSGUI_ONLY:
                 print('Calling shell command: {0}'.format(cmd))
                 print(subprocess.check_output(cmd))
+
+
+            # User Site Package Path needs to be in sys.paths, in order to load installed dependencies. 
+            # In case this folder didnt exist before installation, it might not be in system paths.
+            site_package_path = site.getusersitepackages()
+            if not site_package_path:
+                print('Can not find user site package path')
+            elif site_package_path not in sys.path:
+                sys.path.append(site_package_path)
+                print('Add site package path [{}] to system paths'.format(site_package_path))
+            else:
+                print('Site packe path in system paths')
+
 
             # Install SyncsketchGUI
             # * By using target, pip show won't find this package anymore
@@ -588,7 +636,9 @@ class installThread(QThread):
 
             # Download FFMPeg Binaries
             if not INSTALL_SSGUI_ONLY:
+                print('Install FFMPEG Binaries to {}'.format(FFMPEG_PATH))
                 downloadFFmpegToDisc(platform=Literals.PLATFORM, moveToLocation=FFMPEG_PATH)
+                print('Finished Installing FFMPEG Binaries')
 
 
 

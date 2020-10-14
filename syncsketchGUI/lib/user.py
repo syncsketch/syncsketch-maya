@@ -149,8 +149,8 @@ class SyncSketchUser():
         # logger.warning(  " doing autologin: %s"%self.api_host)
 
         if not self.host_data:
-            logger.info("self.get_name(): {} self.get_api_key() {} self.api_host {}".format(
-                 self.get_name(), self.get_api_key(), self.api_host,))
+            logger.info("self.get_name(): {} self.get_api_key() #### self.api_host {}".format(
+                 self.get_name(), self.api_host,))
             self.host_data = syncsketch.SyncSketchAPI(self.get_name(),
                                                        self.get_api_key(),
                                                        useExpiringToken=True,
@@ -283,7 +283,9 @@ class SyncSketchUser():
             return
 
         baseDir = "{0}".format(expanduser('~'))
-        return self.host_data.getGreasePencilOverlays(reviewId, itemId, baseDir)
+        file = self.host_data.getGreasePencilOverlays(reviewId, itemId, baseDir)
+        logger.info("Downloaded Greasepencil file to {}".format(file))
+        return file
 
 
     def download_converted_video(self, itemId):

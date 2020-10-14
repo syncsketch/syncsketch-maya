@@ -201,7 +201,7 @@ class RegularComboBox(QtWidgets.QComboBox):
     def set_combobox_index(self, selection=None, default=None):
         if selection:
             index = self.findText(selection)
-            if index:
+            if index != -1:
                 self.setCurrentIndex(index)
         elif default:
             self.set_combobox_index(selection=default)
@@ -306,7 +306,7 @@ class SyncSketch_Window(QtWidgets.QMainWindow):
             y_coordinate = align_object_center.y() -(ui_size.height() / 2)
 
         else:
-            desktop_screen = QtGui.QDesktopWidget().screenGeometry()
+            desktop_screen = QtWidgets.QDesktopWidget().screenGeometry()
             x_coordinate =(desktop_screen.width() - ui_size.width()) / 2
             y_coordinate =(desktop_screen.height() - ui_size.height()) / 2
 
@@ -337,29 +337,3 @@ class SyncSketch_Window(QtWidgets.QMainWindow):
             self.ui.signup_pushButton.show()
             self.ui.logout_pushButton.hide()
 
-
-class OpenPlayer(QWebView):
-    """
-    Login Window Class
-    """
-    window_name = 'Login'
-    window_label = 'Login to SyncSketch'
-
-    def __init__(self, parent, url='https://syncsketch.com/pro'):
-        super(OpenPlayer, self).__init__(parent)
-
-        self.parent = parent
-        self.current_user = user.SyncSketchUser()
-
-        self.setWindowTitle(self.window_label)
-        self.setObjectName(self.window_name)
-        self.setWindowFlags(QtCore.Qt.Window)
-
-        self.load(QtCore.QUrl(url))
-
-        self.show()
-        self.activateWindow()
-        self._myBindingFunction()
-        qt_utils.align_to_center(self, self.parent)
-
-        self.setProperty('saveWindowPref', True)

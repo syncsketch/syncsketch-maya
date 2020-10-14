@@ -6,7 +6,7 @@ import codecs
 
 from syncsketchGUI.lib.gui.qt_widgets import SyncSketch_Window
 from syncsketchGUI.vendor.Qt import QtWidgets, QtCore
-from syncsketchGUI.lib.gui.qt_widgets import RegularComboBox, RegularButton, RegularToolButton, RegularGridLayout, RegularQSpinBox
+from syncsketchGUI.lib.gui.qt_widgets import RegularComboBox, RegularButton, RegularToolButton, RegularGridLayout, RegularQSpinBox, InputDialog, WarningDialog
 from syncsketchGUI.lib.gui.icons import *
 from syncsketchGUI.lib.gui.qt_utils import *
 from syncsketchGUI.lib.gui import qt_utils
@@ -134,6 +134,9 @@ class FormatPresetWindow(SyncSketch_Window):
         self.ui.ui_formatPreset_comboBox.currentIndexChanged.connect(self.load_preset_from_selection)
         self.ui.format_comboBox.currentIndexChanged.connect(self.update_encoding_list)
 
+        self.ui.ps_new_preset_pushButton.clicked.connect(self.new_preset)
+        self.ui.ps_rename_preset_pushButton.clicked.connect(self.rename_preset)
+        self.ui.ps_delete_preset_pushButton.clicked.connect(self.delete_preset)
 
     def populate_ui(self):
         """
@@ -155,7 +158,6 @@ class FormatPresetWindow(SyncSketch_Window):
         self.ui.width_spinBox.clear()
         self.ui.height_spinBox.clear()
 
-        self.ui.ui_formatPreset_comboBox.addItems([DEFAULT_PRESET])
 
         self.ui.format_comboBox.addItems(formats)
         self.ui.encoding_comboBox.addItems(encodings)
@@ -252,7 +254,6 @@ class FormatPresetWindow(SyncSketch_Window):
 
     def save(self):
         presetFile = path.get_config_yaml(PRESET_YAML)
-        presetData = database._parse_yaml(presetFile)
 
         presetName = self.ui.ui_formatPreset_comboBox.currentText()
         format = self.ui.format_comboBox.currentText()
@@ -260,24 +261,104 @@ class FormatPresetWindow(SyncSketch_Window):
         width = self.ui.width_spinBox.value()
         height = self.ui.height_spinBox.value()
 
-        newData = dict()
-        if presetName == DEFAULT_PRESET:
-            newData = {'current_preset': presetName}
+        newData = {presetName:
+                    {'encoding': encoding,
+                    'format': format,
+                    'height': height,
+                    'width': width}}
 
-        else:
-            newData = {'current_preset': presetName,
-                        presetName:
-                            {'encoding': encoding,
-                             'format': format,
-                             'height': height,
-                             'width': width}}
-        if presetData:
-            presetData.update(newData)
-        else:
-            presetData = newData
+        database.dump_cache(newData, presetFile)
 
-        with codecs.open(presetFile, 'w', encoding='utf-8') as f_out:
-            yaml.safe_dump(presetData, f_out, default_flow_style=False)
+        self._update_current_preset(presetName)
 
-        self.parent.ui.ui_formatPreset_comboBox.populate_combo_list( PRESET_YAML, presetName)
         self.close()
+
+    def new_preset(self):
+        """Create a new preset"""
+        title = 'Creating Preset'
+        message = 'Please choose a name for this preset.'
+        user_input = InputDialog(self, title, message)
+        if not user_input.response:
+            return
+        preset_name = user_input.response_text
+
+        if not preset_name:
+            logger.info("No new preset name specified")
+            return
+
+        preset_file = path.get_config_yaml(PRESET_YAML)
+        current_preset_names = database._parse_yaml(preset_file).keys()        
+        if preset_name in current_preset_names:
+            title = 'Error Creating'
+            message = 'It appears this name already exists.'
+            WarningDialog(self, title, message)
+            return
+        
+        width, height = maya_scene.get_render_resolution()
+        encoding = maya_scene.get_playblast_encoding()
+        format = maya_scene.get_playblast_format()
+
+        preset_data = {preset_name:
+                        {'encoding': encoding,
+                        'format': format,
+                        'height': height,
+                        'width': width}}
+
+        logger.info("Create Format Preset from {}".format(preset_name))
+        database.dump_cache(preset_data, preset_file)
+
+        self.populate_ui()
+        self.ui.ui_formatPreset_comboBox.set_combobox_index(selection=preset_name)
+    
+    def rename_preset(self):
+        title = 'Renaming Preset'
+        message = 'Please choose a name for this preset.'
+        old_preset_name = self.ui.ui_formatPreset_comboBox.currentText()
+        new_preset_name, response =  QtWidgets.QInputDialog.getText(self, "Rename this preset",  "Please enter a new Name:", QtWidgets.QLineEdit.Normal, old_preset_name)
+
+        
+
+        if not new_preset_name:
+            logger.info("No new preset name specified")
+            return
+
+        preset_file = path.get_config_yaml(PRESET_YAML)
+        current_preset_names = database._parse_yaml(preset_file).keys()        
+
+        if new_preset_name in current_preset_names:
+            title = 'Error Renaming'
+            message = 'It appears this name already exists.'
+            WarningDialog(self, title, message)
+            return
+        
+        
+        logger.info("Rename Preset from {} to {}".format(old_preset_name, new_preset_name))
+        database.rename_key_in_cache(old_preset_name, new_preset_name, preset_file)
+        
+        if database.read_cache("current_preset") == old_preset_name:
+            self._update_current_preset(new_preset_name)
+
+        self.populate_ui()
+        self.ui.ui_formatPreset_comboBox.set_combobox_index(selection=new_preset_name)
+
+
+    def delete_preset(self):
+        preset_file = path.get_config_yaml(PRESET_YAML)
+        preset_name = self.ui.ui_formatPreset_comboBox.currentText()
+        database.delete_key_from_cache(preset_name, preset_file)
+        current_preset = database.read_cache("current_preset")
+
+        if current_preset == preset_name:
+            current_preset_names = database._parse_yaml(preset_file).keys()
+            new_preset_name = current_preset_names[0]
+            self._update_current_preset(new_preset_name)
+        else:
+            self._update_current_preset(current_preset)
+            
+        self.populate_ui()
+        self.ui.ui_formatPreset_comboBox.set_combobox_index(0)
+
+
+    def _update_current_preset(self, preset_name):
+        database.save_cache("current_preset", preset_name)
+        self.parent.ui.ui_formatPreset_comboBox.populate_combo_list(PRESET_YAML, preset_name)

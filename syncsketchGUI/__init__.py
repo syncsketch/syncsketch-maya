@@ -11,9 +11,9 @@ from syncsketchGUI.lib import user as user
 
 logger = logging.getLogger('syncsketchGUI')
 print("logger: {}".format(logger))
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
+ch.setLevel(logging.INFO)
 
 # create formatter
 formatter = logging.Formatter('[%(asctime)s - %(filename)s:%(lineno)s - %(levelname)s - %(message)s]', "%Y-%m-%d %H:%M:%S")
@@ -124,6 +124,7 @@ def get_current_file():
     if not os.path.isfile(filename):
         title = 'Not a valid file'
         message = 'Please provide a valid file'
+        logger.debug("{} is not a valid file".format(filename))
         qt_widgets.WarningDialog(None, title, message)
         return
     else:
@@ -201,14 +202,17 @@ def record(upload_after_creation = None, play_after_creation = None,  show_succe
     # This a wrapper function and if called individually should mirror all the same effect as hitting 'record' in the UI
     recordData = {}
     capturedFile = _record()
-
-
-    #Reencode to quicktime
     logger.info("capturedFile: {}".format(capturedFile))
-    recordData["playblast_file"] = video.encodeToH264Mov(
-        capturedFile, output_file=capturedFile[:-4] + ".mov")
-
-    logger.info("reencoded File: {}".format(recordData["playblast_file"]))
+    capturedFileNoExt, ext = os.path.splitext(capturedFile)
+    if capturedFileNoExt[-5:] == '.####':
+        #Reencode to quicktime
+        recordData["playblast_file"] = video.encodeToH264Mov(
+            capturedFile, output_file=capturedFileNoExt[:-5] + ".mov")
+        logger.info("reencoded File: {}".format(recordData["playblast_file"]))
+        database.dump_cache({"last_recorded_selection": recordData["playblast_file"]})
+    
+    else:
+        recordData["playblast_file"] = capturedFile
     # Post actions
 
     # To Do - post Recording script call
