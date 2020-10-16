@@ -324,8 +324,10 @@ class MenuWindow(SyncSketch_Window):
         self.ui.ui_targetSelection_gridLayout = QtWidgets.QVBoxLayout()
         self.ui.ui_targetSelection_gridLayout.setSpacing(3)
 
-
+        # Capture Widget
         self.ui.record_app = mayaCaptureWidget.MayaCaptureWidget()
+        self.ui.ui_mainLeft_gridLayout.addWidget(self.ui.record_app, 0, 0)
+        
 
         self.ui.ui_upload_groupbox = QtWidgets.QGroupBox()
         self.ui.ui_mainLeft_gridLayout.addWidget(self.ui.ui_upload_groupbox)
@@ -337,51 +339,8 @@ class MenuWindow(SyncSketch_Window):
         self.ui.ui_targetSelection_groupbox.setLayout(self.ui.ui_targetSelection_gridLayout)
 
 
-        self.ui.ui_mainLeft_gridLayout.addWidget(self.ui.record_app, 0, 0)
+        
         self.ui.ui_mainLeft_gridLayout.addWidget(self.ui.ui_upload_groupbox, 1, 0)
-
-
-
-        # Creating Review Selection Layout
-
-        # - buttons for opening and copying to clipboard
-        # - tree wdget
-        self.ui.ui_treeWidget_layout = QtWidgets.QVBoxLayout()
-
-        self.ui.browser_treeWidget = QtWidgets. QTreeWidget()
-
-
-        self.ui.browser_treeWidget.header().setStyleSheet("color: %s"%success_color)
-
-        highlight_palette = self.ui.browser_treeWidget.palette()
-        highlight_palette.setColor(QtGui.QPalette.Highlight, highlight_color)
-        self.ui.browser_treeWidget.setPalette(highlight_palette)
-        self.ui.browser_treeWidget.setHeaderLabel('refresh')
-
-        self.ui.browser_treeWidget.itemExpanded.connect(self.expandedTest)
-
-
-        self.ui.browser_treeWidget.header().setSectionsClickable(True)
-        self.ui.browser_treeWidget.header().setDefaultAlignment(QtCore.Qt.AlignCenter)
-        self.ui.browser_treeWidget.header().sectionClicked.connect(self.refresh)
-        self.ui.ui_treeWidget_layout.addWidget(self.ui.browser_treeWidget)
-
-
-        self.ui.target_lineEdit = RegularLineEdit()
-        self.ui.ui_open_pushButton = RegularToolButton(self, open_icon)
-        self.ui.ui_copyURL_pushButton = RegularToolButton(self, copy_icon)
-        self.ui.ui_reviewSelection_hBoxLayout.addWidget(self.ui.target_lineEdit)
-        self.ui.ui_reviewSelection_hBoxLayout.addWidget(self.ui.ui_open_pushButton)
-        self.ui.ui_reviewSelection_hBoxLayout.addWidget(self.ui.ui_copyURL_pushButton)
-
-
-        self.ui.thumbnail_itemPreview = RegularThumbnail(width=320, height=180)
-        self.ui.ui_mainRight_gridLayout.addWidget(self.ui.ui_targetSelection_groupbox)
-        self.ui.ui_targetSelection_gridLayout.addLayout(self.ui.ui_treeWidget_layout)
-        self.ui.ui_targetSelection_gridLayout.addLayout(self.ui.ui_reviewSelection_hBoxLayout)
-        self.ui.ui_targetSelection_gridLayout.addWidget(self.ui.thumbnail_itemPreview)
-        self.ui.target_info_label = QtWidgets.QLabel()
-        self.ui.target_info_label2 = QtWidgets.QLabel()
 
 
         # CLIP SELECTION
@@ -438,14 +397,61 @@ class MenuWindow(SyncSketch_Window):
         self.ui.ui_clipSelection_gridLayout.addWidget(self.ui.ui_upload_pushButton)
 
 
-        # RIGHT PANEL
-        # - - - - - - - - - -
-        # download_layout
+
+        # REVIEW TREEs
+
+        # - buttons for opening and copying to clipboard
+        # - tree wdget
+        self.ui.review_ui_treeWidget_layout = QtWidgets.QVBoxLayout()
+
+        self.ui.browser_treeWidget = QtWidgets. QTreeWidget()
+        self.ui.browser_treeWidget.header().setStyleSheet("color: %s"%success_color)
+        highlight_palette = self.ui.browser_treeWidget.palette()
+        highlight_palette.setColor(QtGui.QPalette.Highlight, highlight_color)
+        self.ui.browser_treeWidget.setPalette(highlight_palette)
+        self.ui.browser_treeWidget.setHeaderLabel('refresh')
+        self.ui.browser_treeWidget.header().setSectionsClickable(True)
+        self.ui.browser_treeWidget.header().setDefaultAlignment(QtCore.Qt.AlignCenter)
+
+        self.ui.browser_treeWidget.itemExpanded.connect(self.expandedTest)
+        self.ui.browser_treeWidget.header().sectionClicked.connect(self.refresh)
+
+
+        self.ui.review_ui_treeWidget_layout.addWidget(self.ui.browser_treeWidget)
+
+
+        self.ui.target_lineEdit = RegularLineEdit()
+        self.ui.ui_open_pushButton = RegularToolButton(self, open_icon)
+        self.ui.ui_copyURL_pushButton = RegularToolButton(self, copy_icon)
+        self.ui.ui_reviewSelection_hBoxLayout.addWidget(self.ui.target_lineEdit)
+        self.ui.ui_reviewSelection_hBoxLayout.addWidget(self.ui.ui_open_pushButton)
+        self.ui.ui_reviewSelection_hBoxLayout.addWidget(self.ui.ui_copyURL_pushButton)
+
+
+        self.ui.thumbnail_itemPreview = RegularThumbnail(width=320, height=180)
+        
+        self.ui.ui_targetSelection_gridLayout.addLayout(self.ui.review_ui_treeWidget_layout)
+        self.ui.ui_targetSelection_gridLayout.addLayout(self.ui.ui_reviewSelection_hBoxLayout)
+        self.ui.ui_targetSelection_gridLayout.addWidget(self.ui.thumbnail_itemPreview)
+
+        
+        # Download Button
         self.ui.ui_download_pushButton = RegularButton(self, icon = download_icon, color=download_color)
         self.ui.ui_download_pushButton.setToolTip('Download from SyncSketch Review Target')
         self.ui.ui_download_pushButton.setText("DOWNLOAD")
         self.ui.ui_targetSelection_gridLayout.addWidget(self.ui.ui_download_pushButton, 10)
+        
 
+        self.ui.ui_mainRight_gridLayout.addWidget(self.ui.ui_targetSelection_groupbox)
+
+        # FIXME: Delete if not used
+        # self.ui.target_info_label = QtWidgets.QLabel()
+        # self.ui.target_info_label2 = QtWidgets.QLabel()
+
+
+
+
+        # LOGIN 
 
         self.ui.ui_login_label = QtWidgets.QLabel()
         self.ui.ui_login_label.setText("You are not logged into SyncSketch")
@@ -551,6 +557,7 @@ class MenuWindow(SyncSketch_Window):
         self.populateTree()
         #self.repaint()
 
+    # FIXME: where needed ?
     def open_target_url(self):
         url = self.sanitize(self.ui.target_lineEdit.text())
         if url:
@@ -842,7 +849,7 @@ class MenuWindow(SyncSketch_Window):
         else:
             logger.info("Nothing to set in the lineedit")
 
-    # Upload Settings
+    # Upload Settings FIXME: needed ??
     def download(self):
         logger.info("Download pressed")
         self.validate_review_url()
