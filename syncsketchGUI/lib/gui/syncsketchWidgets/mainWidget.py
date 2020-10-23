@@ -165,136 +165,73 @@ class MenuWindow(SyncSketch_Window):
         file_icon = self.style().standardIcon(QtWidgets.QStyle.SP_FileIcon)
         directory_icon = self.style().standardIcon(QtWidgets.QStyle.SP_DirIcon)
 
-        # Row 1
-        # Setting up Main Layout
-        indent = 9
-        self.ui.master_layout.setSpacing(0)
-        self.ui.ui_login_layout = QtWidgets.QHBoxLayout()
-        self.ui.main_layout = QtWidgets.QGridLayout()
-        self.ui.ui_status_layout = QtWidgets.QHBoxLayout()
-        self.ui.ui_login_layout.setSpacing(0)
-        self.ui.ui_status_layout.setContentsMargins(0, 0, 0, 10)
-        self.ui.master_layout.addLayout(self.ui.ui_login_layout)
-        self.ui.master_layout.addLayout(self.ui.ui_status_layout)
-        self.ui.master_layout.addLayout(self.ui.main_layout)
 
-        self.ui.main_layout.setSpacing(6)
-
-
-        # Adding the two colums to main_layout
-        self.ui.ui_mainLeft_gridLayout = QtWidgets.QGridLayout()
-        self.ui.ui_mainRight_gridLayout = QtWidgets.QVBoxLayout()
-        self.ui.ui_mainLeft_gridLayout.setSpacing(1)
-        self.ui.ui_mainRight_gridLayout.setSpacing(2)
-        
-
-        self.ui.main_layout.addLayout(self.ui.ui_mainLeft_gridLayout, 0, 0)
-        self.ui.main_layout.addLayout(self.ui.ui_mainRight_gridLayout, 0, 1)
-
-        self.ui.main_layout.setColumnMinimumWidth(0, 320)
-        self.ui.main_layout.setColumnMinimumWidth(1, 320)
-        self.ui.main_layout.setColumnStretch(0, 1)
-        self.ui.main_layout.setColumnStretch(1, 0)
-
-        # Adding ui_mainLeft_gridLayout
-        self.ui.ui_record_gridLayout = QtWidgets.QVBoxLayout()
-        self.ui.ui_clipSelection_gridLayout = QtWidgets.QVBoxLayout()
-        self.ui.ui_targetSelection_gridLayout = QtWidgets.QVBoxLayout()
-        self.ui.ui_targetSelection_gridLayout.setSpacing(3)
-
-        # Capture Widget
-        self.ui.record_app = mayaCaptureWidget.MayaCaptureWidget()
-        self.ui.ui_mainLeft_gridLayout.addWidget(self.ui.record_app, 0, 0)
-        
-
-        self.ui.ui_upload_groupbox = QtWidgets.QGroupBox()
-        self.ui.ui_mainLeft_gridLayout.addWidget(self.ui.ui_upload_groupbox)
-        self.ui.ui_upload_groupbox.setTitle('FILE TO UPLOAD')
-        self.ui.ui_upload_groupbox.setLayout(self.ui.ui_clipSelection_gridLayout)
-
-        self.ui.ui_targetSelection_groupbox = QtWidgets.QGroupBox()
-        self.ui.ui_targetSelection_groupbox.setTitle('TARGET FOR UPLOAD')
-        self.ui.ui_targetSelection_groupbox.setLayout(self.ui.ui_targetSelection_gridLayout)
-
-
-        
-        self.ui.ui_mainLeft_gridLayout.addWidget(self.ui.ui_upload_groupbox, 1, 0)
-
-
-        # CLIP SELECTION
-        # - - - - - - - - - -
-
-        # - - -
-        # record_layout - camera
-        self.ui.ps_lastfile_line_edit = RegularLineEdit(self)
-
-        self.ui.ps_lastfile_line_edit.setReadOnly(1)
         self.ui.video_thumb_pushButton = QtWidgets.QPushButton()
-        self.ui.cs_info_label = QtWidgets.QLabel()
-        self.ui.cs_info_label.setStyleSheet("font: 9pt")
         self.ui.video_thumb_pushButton.setContentsMargins(0, 0, 0, 0)
-
-        self.ui.ui_thumb_gridLayout = QtWidgets.QGridLayout()
-        self.ui.ui_thumb_gridLayout.setSpacing(3)
-        self.ui.ui_clipSelection_gridLayout.addLayout(self.ui.ui_thumb_gridLayout)
-        self.ui.video_thumbOverlay_pushButton = HoverButton(icon=play_icon)
-
+        
+        # Used ?
         self.ui.ui_lastfile_layout = QtWidgets.QHBoxLayout()
 
-        self.ui.ui_lastfileSelection_layout = QtWidgets.QHBoxLayout()
+
+        self.ui.cs_info_label = QtWidgets.QLabel()
+        self.ui.cs_info_label.setStyleSheet("font: 9pt")
+
+        self.ui.ps_lastfile_line_edit = RegularLineEdit(self)
+        self.ui.ps_lastfile_line_edit.setReadOnly(1)
+        
         self.ui.ps_filename_toolButton = RegularToolButton(self, icon=file_icon)
         self.ui.ps_filename_toolButton.clicked.connect(self.openFileNameDialog)
+
+        self.ui.ui_lastfileSelection_layout = QtWidgets.QHBoxLayout()
         self.ui.ui_lastfileSelection_layout.addWidget(self.ui.ps_lastfile_line_edit)
         self.ui.ui_lastfileSelection_layout.addWidget(self.ui.ps_filename_toolButton)
 
 
-        self.ui.ui_thumb_gridLayout.addLayout(self.ui.ui_lastfileSelection_layout, 0, 0)
-        self.ui.ui_thumb_gridLayout.addLayout(self.ui.ui_lastfile_layout,  1, 0)
-        self.ui.ui_thumb_gridLayout.addWidget(self.ui.video_thumb_pushButton, 2, 0)
-        self.ui.ui_thumb_gridLayout.addWidget(self.ui.video_thumbOverlay_pushButton, 2, 0)
-        self.ui.ui_thumb_gridLayout.addWidget(self.ui.cs_info_label, 3, 0)
         # To DO should be cleaner
+        self.ui.video_thumbOverlay_pushButton = HoverButton(icon=play_icon)
         self.ui.video_thumbOverlay_pushButton.setIconSize(QtCore.QSize(320, 180))
         self.ui.video_thumbOverlay_pushButton.setToolTip('Play Clip')
         self.ui.video_thumbOverlay_pushButton.clicked.connect(self.play)
 
 
-        self.ui.ui_clipSelection_gridLayout.setAlignment(QtCore.Qt.AlignCenter)
         # upload_layout - after upload
-        self.ui.ps_record_after_layout = RegularGridLayout(self, label='After Upload')
+        
         self.ui.ps_open_afterUpload_checkBox = QtWidgets.QCheckBox()
         self.ui.ps_open_afterUpload_checkBox.setChecked(True)
         self.ui.ps_open_afterUpload_checkBox.setText('Open SyncSketch')
-        self.ui.ps_afterUpload_label = QtWidgets.QLabel("After Upload")
-        self.ui.ps_record_after_layout.addWidget(self.ui.ps_open_afterUpload_checkBox, 0, 1)
-        self.ui.ui_clipSelection_gridLayout.addLayout(self.ui.ps_record_after_layout, 10)
 
-        # ui_record_gridLayout
+        self.ui.ps_afterUpload_label = QtWidgets.QLabel("After Upload")
+
+        self.ui.ps_record_after_layout = RegularGridLayout(self, label='After Upload')
+        self.ui.ps_record_after_layout.addWidget(self.ui.ps_open_afterUpload_checkBox, 0, 1)
+        
         self.ui.ui_upload_pushButton = RegularButton(self, icon = upload_icon, color=upload_color)
         self.ui.ui_upload_pushButton.setToolTip('Upload to SyncSketch Review Target')
-        self.ui.ui_clipSelection_gridLayout.addWidget(self.ui.ui_upload_pushButton)
-
-
-
-        # REVIEW TREEs
-
-        # - buttons for opening and copying to clipboard
-        # - tree wdget
         
-        self.browser_widget = browser_widget.BrowserWidget()
-        self.ui.ui_targetSelection_gridLayout.addWidget(self.browser_widget)
 
+        self.ui.ui_thumb_gridLayout = QtWidgets.QGridLayout()
+        self.ui.ui_thumb_gridLayout.setSpacing(3)
+        self.ui.ui_thumb_gridLayout.addLayout(self.ui.ui_lastfileSelection_layout, 0, 0)
+        self.ui.ui_thumb_gridLayout.addLayout(self.ui.ui_lastfile_layout,  1, 0)
+        self.ui.ui_thumb_gridLayout.addWidget(self.ui.video_thumb_pushButton, 2, 0)
+        self.ui.ui_thumb_gridLayout.addWidget(self.ui.video_thumbOverlay_pushButton, 2, 0)
+        self.ui.ui_thumb_gridLayout.addWidget(self.ui.cs_info_label, 3, 0)
 
-        self.ui.ui_mainRight_gridLayout.addWidget(self.ui.ui_targetSelection_groupbox)
-        # FIXME: Delete if not used
-        # self.ui.target_info_label = QtWidgets.QLabel()
-        # self.ui.target_info_label2 = QtWidgets.QLabel()
+        # Adding ui_mainLeft_gridLayout
+        self.ui.ui_clipSelection_gridLayout = QtWidgets.QVBoxLayout()
+        self.ui.ui_clipSelection_gridLayout.setAlignment(QtCore.Qt.AlignCenter)
+        self.ui.ui_clipSelection_gridLayout.addLayout(self.ui.ui_thumb_gridLayout)
+        self.ui.ui_clipSelection_gridLayout.addWidget(self.ui.ui_upload_pushButton)
+        self.ui.ui_clipSelection_gridLayout.addLayout(self.ui.ps_record_after_layout, 10)
 
+        self.ui.ui_upload_groupbox = QtWidgets.QGroupBox()
+        self.ui.ui_upload_groupbox.setTitle('FILE TO UPLOAD')
+        self.ui.ui_upload_groupbox.setLayout(self.ui.ui_clipSelection_gridLayout)
 
 
 
         # LOGIN 
-
+        indent = 9
         self.ui.ui_login_label = QtWidgets.QLabel()
         self.ui.ui_login_label.setText("You are not logged into SyncSketch")
         self.ui.ui_login_label.setMinimumHeight(header_size)
@@ -318,9 +255,11 @@ class MenuWindow(SyncSketch_Window):
         self.ui.help_pushButton = RegularHeaderButton()
         self.ui.help_pushButton.setIcon(help_icon)
 
+        self.ui.ui_login_layout = QtWidgets.QHBoxLayout()
+        self.ui.ui_login_layout.setSpacing(0)
+
         self.ui.ui_login_layout.addWidget(self.ui.syncsketchGUI_pushButton)
         self.ui.ui_login_layout.addWidget(self.ui.ui_login_label)
-
         self.ui.ui_login_layout.addWidget(self.ui.login_pushButton)
         self.ui.ui_login_layout.addWidget(self.ui.logout_pushButton)
         self.ui.ui_login_layout.addWidget(self.ui.signup_pushButton)
@@ -328,7 +267,48 @@ class MenuWindow(SyncSketch_Window):
         self.ui.ui_login_layout.addWidget(self.ui.upgrade_pushButton)
 
         self.ui.ui_status_label = RegularStatusLabel()
+        
+        self.ui.ui_status_layout = QtWidgets.QHBoxLayout()
         self.ui.ui_status_layout.addWidget(self.ui.ui_status_label)
+        self.ui.ui_status_layout.setContentsMargins(0, 0, 0, 10)
+
+
+        # Capture Widget
+        self.ui.record_app = mayaCaptureWidget.MayaCaptureWidget()
+
+        # REVIEW TREE
+        self.browser_widget = browser_widget.BrowserWidget()
+
+
+        # Adding the two colums to main_layout
+        self.ui.ui_mainLeft_gridLayout = QtWidgets.QGridLayout()
+        self.ui.ui_mainLeft_gridLayout.setSpacing(1)
+
+        self.ui.ui_mainLeft_gridLayout.addWidget(self.ui.record_app, 0, 0)
+        self.ui.ui_mainLeft_gridLayout.addWidget(self.ui.ui_upload_groupbox)
+        self.ui.ui_mainLeft_gridLayout.addWidget(self.ui.ui_upload_groupbox, 1, 0)
+
+        self.ui.ui_mainRight_gridLayout = QtWidgets.QVBoxLayout()
+        self.ui.ui_mainRight_gridLayout.setSpacing(2)
+        self.ui.ui_mainRight_gridLayout.addWidget(self.browser_widget)
+        
+        self.ui.main_layout = QtWidgets.QGridLayout()
+        self.ui.main_layout.setSpacing(6)
+        self.ui.main_layout.setColumnMinimumWidth(0, 320)
+        self.ui.main_layout.setColumnMinimumWidth(1, 320)
+        self.ui.main_layout.setColumnStretch(0, 1)
+        self.ui.main_layout.setColumnStretch(1, 0)
+
+        self.ui.main_layout.addLayout(self.ui.ui_mainLeft_gridLayout, 0, 0)
+        self.ui.main_layout.addLayout(self.ui.ui_mainRight_gridLayout, 0, 1)
+
+
+        self.ui.master_layout.setSpacing(0)
+        self.ui.master_layout.addLayout(self.ui.ui_login_layout)
+        self.ui.master_layout.addLayout(self.ui.ui_status_layout)
+        self.ui.master_layout.addLayout(self.ui.main_layout)
+
+        
 
 
         # populate UI

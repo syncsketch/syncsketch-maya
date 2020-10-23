@@ -38,7 +38,7 @@ class BrowserWidget(QtWidgets.QWidget):
 
     def _decorate_ui(self):
 
-        self.review_ui_treeWidget_layout = QtWidgets.QVBoxLayout()
+        
 
         self.browser_treeWidget = QtWidgets. QTreeWidget()
         self.browser_treeWidget.header().setStyleSheet("color: %s"%success_color)
@@ -50,33 +50,41 @@ class BrowserWidget(QtWidgets.QWidget):
         self.browser_treeWidget.header().setDefaultAlignment(QtCore.Qt.AlignCenter)
 
 
-        self.review_ui_treeWidget_layout.addWidget(self.browser_treeWidget)
-
-
+        
         self.target_lineEdit = RegularLineEdit() #FIXME
         self.ui_open_pushButton = RegularToolButton(self, open_icon) #FIXME
         self.ui_copyURL_pushButton = RegularToolButton(self, copy_icon) #FIXME
+
         self.ui_reviewSelection_hBoxLayout = QtWidgets.QHBoxLayout()
         self.ui_reviewSelection_hBoxLayout.addWidget(self.target_lineEdit)
         self.ui_reviewSelection_hBoxLayout.addWidget(self.ui_open_pushButton)
         self.ui_reviewSelection_hBoxLayout.addWidget(self.ui_copyURL_pushButton)
 
-
         self.thumbnail_itemPreview = RegularThumbnail(width=320, height=180) #FIXME
-        
-
-        self.review_ui_treeWidget_layout.addLayout(self.ui_reviewSelection_hBoxLayout)
-        self.review_ui_treeWidget_layout.addWidget(self.thumbnail_itemPreview)
-
         
         # Download Button
         self.ui_download_pushButton = RegularButton(self, icon = download_icon, color=download_color)
         self.ui_download_pushButton.setToolTip('Download from SyncSketch Review Target')
         self.ui_download_pushButton.setText("DOWNLOAD")
-        self.review_ui_treeWidget_layout.addWidget(self.ui_download_pushButton, 10)
         
+        
+        self.review_ui_treeWidget_layout = QtWidgets.QVBoxLayout()
+        self.review_ui_treeWidget_layout.addWidget(self.browser_treeWidget)
+        self.review_ui_treeWidget_layout.addLayout(self.ui_reviewSelection_hBoxLayout)
+        self.review_ui_treeWidget_layout.addWidget(self.thumbnail_itemPreview)
+        self.review_ui_treeWidget_layout.addWidget(self.ui_download_pushButton, 10)
 
-        self.setLayout(self.review_ui_treeWidget_layout)
+    
+        self.ui_targetSelection_groupbox = QtWidgets.QGroupBox()
+        self.ui_targetSelection_groupbox.setTitle('TARGET FOR UPLOAD')
+        self.ui_targetSelection_groupbox.setLayout(self.review_ui_treeWidget_layout)
+
+
+        self.main_layout = QtWidgets.QVBoxLayout()
+        self.main_layout.setSpacing(3)
+        self.main_layout.addWidget(self.ui_targetSelection_groupbox)
+
+        self.setLayout(self.main_layout)
     
 
     def _build_connections(self):
