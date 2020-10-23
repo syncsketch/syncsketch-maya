@@ -317,10 +317,11 @@ class SyncSketch_Window(QtWidgets.QMainWindow):
         logger.info("Closing Synsketch GUI Window")
         self.close()
 
-    def update_login_ui(self):
+    def update_login_ui(self): # TODO: Evaluate if neccessary here and maybe removed
         '''
         Updates the UI based on whether the user is logged in
         '''
+        logger.warning("This function might become depracted in near future")
         self.current_user = user.SyncSketchUser()
         if self.current_user.is_logged_in() and is_connected():
             logger.info("self.current_user.is_logged_in() {} is_connected() {} ".format(self.current_user.is_logged_in(),is_connected() ))

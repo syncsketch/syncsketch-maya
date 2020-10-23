@@ -23,7 +23,7 @@ from syncsketchGUI.installScripts.maintenance import getLatestSetupPyFileFromLoc
 
 import mayaCaptureWidget
 import browser_widget
-
+import menu_widget
 
 
 class MenuWindow(SyncSketch_Window):
@@ -37,9 +37,9 @@ class MenuWindow(SyncSketch_Window):
 
     def __init__(self, parent):
         super(MenuWindow, self).__init__(parent=parent)
-        self.threadpool = QtCore.QThreadPool()
-        self.threadpool.setMaxThreadCount(1)
-        self.accountData = None
+        #self.threadpool = QtCore.QThreadPool()
+        #self.threadpool.setMaxThreadCount(1)
+        # self.accountData = None
 
 
         self.installer = None
@@ -47,17 +47,17 @@ class MenuWindow(SyncSketch_Window):
         self.setMaximumSize(700, 650)
         self.decorate_ui()
         self.build_connections()
-        self.accountData = self.retrievePanelData()
+        #self.accountData = self.retrievePanelData()
 
 
         # Load UI state
-        self.update_login_ui()
+        #self.update_login_ui()
 
         #Not logged in or outdated api, token
         self.setWindowTitle("Syncsketch - Version: {}".format(getLatestSetupPyFileFromLocal()))
-        if not self.accountData:
-            self.restore_ui_state()
-            return
+        # if not self.accountData:
+        #     self.restore_ui_state()
+        #     return
 
 
         #self.restore_ui_state()
@@ -66,26 +66,26 @@ class MenuWindow(SyncSketch_Window):
         self.restore_ui_state()
 
 
+    # TODO: delete if not needed
+    # def storeAccountData(self, s):
+    #     logger.info(s)
+    #     self.accountData = s
 
-    def storeAccountData(self, s):
-        logger.info(s)
-        self.accountData = s
 
 
+    # def fetchData(self, user, logging=None, withItems=False):
+    #     '''
+    #     Meant to be called from a thread, access only local names
+    #     '''
+    #     try:
+    #         account_data = user.get_account_data(withItems=withItems)
+    #         if logging:
+    #             pass
+    #             #logging.warning('accountdata: '.format(account_data))
+    #     except Exception as err:
+    #         return None
 
-    def fetchData(self, user, logging=None, withItems=False):
-        '''
-        Meant to be called from a thread, access only local names
-        '''
-        try:
-            account_data = user.get_account_data(withItems=withItems)
-            if logging:
-                pass
-                #logging.warning('accountdata: '.format(account_data))
-        except Exception as err:
-            return None
-
-        return account_data
+    #     return account_data
 
     def closeEvent(self, event):
         logger.info("Closing Window")
@@ -95,7 +95,8 @@ class MenuWindow(SyncSketch_Window):
 
     def restore_ui_state(self):
         logger.info("restoring ui state")
-        self.ui.upgrade_pushButton.show() if getVersionDifference() else self.ui.upgrade_pushButton.hide()
+        
+        current_user = user.SyncSketchUser()
 
         # self.ui.ui_record_pushButton.setEnabled(
         #     True if self.current_user.is_logged_in() else False)
@@ -111,7 +112,7 @@ class MenuWindow(SyncSketch_Window):
             True if value == 'true' else False)
 
         reviewId = database.read_cache('target_review_id')
-        if reviewId and self.current_user.is_logged_in() :
+        if reviewId and current_user.is_logged_in() :
             logger.info("Restoring reviewId section for : {} ".format(reviewId))
             review = getReviewById(self.browser_widget.browser_treeWidget, reviewId=reviewId)
             logger.info("Restoring review section for : {} ".format(review))
@@ -139,20 +140,18 @@ class MenuWindow(SyncSketch_Window):
 
     def build_connections(self):
         # Menu Bar
-        self.ui.help_pushButton.clicked.connect(self.open_support)
-        self.ui.login_pushButton.clicked.connect(self.connect_account)
-        self.ui.upgrade_pushButton.clicked.connect(self.upgrade_plugin)
-        self.ui.logout_pushButton.clicked.connect(self.disconnect_account)
-        self.ui.syncsketchGUI_pushButton.clicked.connect(self.open_landing)
-        self.ui.signup_pushButton.clicked.connect(self.open_signup)
 
+        self.menu_widget.logged_out.connect(self.browser_widget.browser_treeWidget.clear)
+        self.menu_widget.logged_out.connect(self.restore_ui_state)
 
         # Reviews
-        self.ui.ui_upload_pushButton.clicked.connect(self.upload)
-
         
 
+        # Upload
         self.ui.video_thumb_pushButton.clicked.connect(self.update_clip_thumb)
+        self.ui.ui_upload_pushButton.clicked.connect(self.upload)
+        self.ui.ps_filename_toolButton.clicked.connect(self.openFileNameDialog)
+        self.ui.video_thumbOverlay_pushButton.clicked.connect(self.play)
 
         # Recorder
         self.ui.record_app.recorded.connect(self.update_record)
@@ -160,6 +159,7 @@ class MenuWindow(SyncSketch_Window):
 
         # Browser
         self.browser_widget.target_changed.emit(self.target_changed)
+        
 
     def decorate_ui(self):
         file_icon = self.style().standardIcon(QtWidgets.QStyle.SP_FileIcon)
@@ -180,7 +180,7 @@ class MenuWindow(SyncSketch_Window):
         self.ui.ps_lastfile_line_edit.setReadOnly(1)
         
         self.ui.ps_filename_toolButton = RegularToolButton(self, icon=file_icon)
-        self.ui.ps_filename_toolButton.clicked.connect(self.openFileNameDialog)
+        
 
         self.ui.ui_lastfileSelection_layout = QtWidgets.QHBoxLayout()
         self.ui.ui_lastfileSelection_layout.addWidget(self.ui.ps_lastfile_line_edit)
@@ -191,11 +191,9 @@ class MenuWindow(SyncSketch_Window):
         self.ui.video_thumbOverlay_pushButton = HoverButton(icon=play_icon)
         self.ui.video_thumbOverlay_pushButton.setIconSize(QtCore.QSize(320, 180))
         self.ui.video_thumbOverlay_pushButton.setToolTip('Play Clip')
-        self.ui.video_thumbOverlay_pushButton.clicked.connect(self.play)
-
+       
 
         # upload_layout - after upload
-        
         self.ui.ps_open_afterUpload_checkBox = QtWidgets.QCheckBox()
         self.ui.ps_open_afterUpload_checkBox.setChecked(True)
         self.ui.ps_open_afterUpload_checkBox.setText('Open SyncSketch')
@@ -231,46 +229,7 @@ class MenuWindow(SyncSketch_Window):
 
 
         # LOGIN 
-        indent = 9
-        self.ui.ui_login_label = QtWidgets.QLabel()
-        self.ui.ui_login_label.setText("You are not logged into SyncSketch")
-        self.ui.ui_login_label.setMinimumHeight(header_size)
-        self.ui.ui_login_label.setIndent(indent)
-        self.ui.ui_login_label.setStyleSheet("background-color: rgba(255,255,255,.1);)")
-
-        self.ui.syncsketchGUI_pushButton = RegularHeaderButton()
-        self.ui.syncsketchGUI_pushButton.setIcon(logo_icon)
-        self.ui.signup_pushButton = RegularHeaderButton()
-        self.ui.signup_pushButton.setText("Sign Up")
-        self.ui.logout_pushButton = RegularHeaderButton()
-        self.ui.logout_pushButton.setText("Log Out")
-        self.ui.login_pushButton = RegularHeaderButton()
-        self.ui.login_pushButton.setText("Log In")
-        self.ui.upgrade_pushButton = RegularHeaderButton()
-        self.ui.upgrade_pushButton.hide()
-        self.ui.upgrade_pushButton.setStyleSheet("color: %s"%success_color)
-
-        self.ui.upgrade_pushButton.setText("Upgrade")
-        self.ui.upgrade_pushButton.setToolTip("There is a new version")
-        self.ui.help_pushButton = RegularHeaderButton()
-        self.ui.help_pushButton.setIcon(help_icon)
-
-        self.ui.ui_login_layout = QtWidgets.QHBoxLayout()
-        self.ui.ui_login_layout.setSpacing(0)
-
-        self.ui.ui_login_layout.addWidget(self.ui.syncsketchGUI_pushButton)
-        self.ui.ui_login_layout.addWidget(self.ui.ui_login_label)
-        self.ui.ui_login_layout.addWidget(self.ui.login_pushButton)
-        self.ui.ui_login_layout.addWidget(self.ui.logout_pushButton)
-        self.ui.ui_login_layout.addWidget(self.ui.signup_pushButton)
-        self.ui.ui_login_layout.addWidget(self.ui.help_pushButton)
-        self.ui.ui_login_layout.addWidget(self.ui.upgrade_pushButton)
-
-        self.ui.ui_status_label = RegularStatusLabel()
-        
-        self.ui.ui_status_layout = QtWidgets.QHBoxLayout()
-        self.ui.ui_status_layout.addWidget(self.ui.ui_status_label)
-        self.ui.ui_status_layout.setContentsMargins(0, 0, 0, 10)
+        self.menu_widget = menu_widget.MenuWidget()
 
 
         # Capture Widget
@@ -304,8 +263,7 @@ class MenuWindow(SyncSketch_Window):
 
 
         self.ui.master_layout.setSpacing(0)
-        self.ui.master_layout.addLayout(self.ui.ui_login_layout)
-        self.ui.master_layout.addLayout(self.ui.ui_status_layout)
+        self.ui.master_layout.addWidget(self.menu_widget)
         self.ui.master_layout.addLayout(self.ui.main_layout)
 
         
@@ -347,16 +305,8 @@ class MenuWindow(SyncSketch_Window):
             
 
 
-    def disconnect_account(self):
-        self.current_user.logout()
-        logout_view()
-        self.isloggedIn(self)
-        self.browser_widget.browser_treeWidget.clear()
-        self.ui.ui_status_label.update('You have been successfully logged out', color=warning_color)
-        self.restore_ui_state()
+
         #self.populate_review_panel(self,  force=True)
-
-
 
 
 
@@ -390,34 +340,12 @@ class MenuWindow(SyncSketch_Window):
     # ==================================================================
     # Menu Item Functions
 
-    def upgrade_plugin(self):
-        from syncsketchGUI.installScripts.maintenance import handleUpgrade
-        #attach the upgrader to the mainWindow so it doesn't go out of scope
-        self.installer = handleUpgrade()
-
-    def connect_account(self):
-
-        if is_connected():
-            _maya_delete_ui(LoginView.window_name)
-            weblogin_window = LoginView(self)
-
-        else:
-            title='Not able to reach SyncSketch'
-            message='Having trouble to connect to SyncSketch.\nMake sure you have an internet connection!'
-            WarningDialog(self, title, message)
-
-    def open_support(self):
-        webbrowser.open(path.support_url)
 
 
-    def open_contact(self):
-        webbrowser.open(path.contact_url)
+    # FIXME: needed ?
+    # def open_contact(self):
+    #     webbrowser.open(path.contact_url)
 
-    def open_landing(self):
-        webbrowser.open(path.home_url)
-
-    def open_signup(self):
-        webbrowser.open(path.signup_url)
 
     # ==================================================================
     # Reviews Tab Functions
@@ -455,8 +383,6 @@ class MenuWindow(SyncSketch_Window):
         format_preset_file = path.get_config_yaml(PRESET_YAML)
         data = database._parse_yaml(yaml_file = format_preset_file)[val]
         self.ui.ps_preset_description.setText("%s | %s | %sx%s "%(data["encoding"],data["format"],data["width"],data["height"]))
-
-
 
 
 
@@ -538,44 +464,23 @@ class MenuWindow(SyncSketch_Window):
     # ==================================================================
     # Tooltip Area Functions
 
-    # loggedin window
-    # todo: this is similar to is_logged_in, we might wan't to move it there
-    def isloggedIn(self,loggedIn=False):
-        if loggedIn:
-            message =  "Successfully logged in as %s"%self.current_user.get_name()
-            self.ui.ui_status_label.update(message, color = success_color)
-        else:
-            message = message_is_not_loggedin
-            self.ui.ui_status_label.update(message, color=error_color)
-        self.update_login_ui()
 
 
-    # Tree Function
+
     def retrievePanelData(self):
         begin = time.time()
-        if not is_connected():
-            self.ui.ui_status_label.update(message_is_not_connected, color=error_color)
-            self.isloggedIn(loggedIn=False)
-            logger.info("\nNot connected to SyncSketch ...")
-            return
 
-        self.current_user = user.SyncSketchUser()
-        logger.info("CurrentUser: {}".format(self.current_user))
-        logger.info("isLoggedin: {}".format(self.current_user.is_logged_in()))
+        logger.warn("Use of deprecated function retrievePanelData")
+        
+        
         # Always refresh Tree View
-        self.browser_widget.browser_treeWidget.clear()
+        #self.browser_widget.browser_treeWidget.clear()
 
-        if self.current_user.is_logged_in():
-            logger.info("User is logged in")
 
-        else:
-            logger.info("User is not logged in")
-            return
-
-        self.isloggedIn(self.current_user.is_logged_in())
+        current_user = user.SyncSketchUser()
 
         try:
-            self.account_data = self.current_user.get_account_data()
+            self.account_data = current_user.get_account_data()
 
         except Exception as err:
             self.account_data = None
@@ -583,19 +488,13 @@ class MenuWindow(SyncSketch_Window):
 
         finally:
             if self.account_data:
-                account_is_connected = True
-                message='Connected and authorized with syncsketchGUI as "{}"'.format(self.current_user.get_name())
+                message='Connected and authorized with syncsketchGUI as "{}"'.format(current_user.get_name())
                 color = success_color
             else:
-                account_is_connected = False
                 message='WARNING: Could not connect to SyncSketch. '
                 message += message_is_not_connected
                 color = error_color
-            try:
-                self.ui.ui_status_label.update(message, color)
-            except:
-                pass
-
+            
         if not self.account_data or type(self.account_data) is dict:
             logger.info("Error: No SyncSketch account data found.")
             return

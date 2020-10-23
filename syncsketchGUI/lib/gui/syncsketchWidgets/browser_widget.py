@@ -88,6 +88,8 @@ class BrowserWidget(QtWidgets.QWidget):
     
 
     def _build_connections(self):
+        
+        
 
         #tree widget functions
         self.browser_treeWidget.currentItemChanged.connect(self.validate_review_url)
