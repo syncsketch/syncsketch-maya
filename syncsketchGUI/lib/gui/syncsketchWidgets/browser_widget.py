@@ -12,7 +12,7 @@ from syncsketchGUI.gui import show_download_window
 from syncsketchGUI.lib.gui.qt_widgets import *
 from syncsketchGUI.lib.gui.qt_utils import *
 
-from syncsketchGUI.gui import parse_url_data, get_current_item_from_ids, set_tree_selection, update_target_from_tree, getReviewById
+from syncsketchGUI.gui import parse_url_data, get_current_item_from_ids, set_tree_selection, getReviewById
 from syncsketchGUI.lib.gui.literals import uploadPlaceHolderStr
 
 
@@ -38,7 +38,6 @@ class BrowserWidget(QtWidgets.QWidget):
 
     def _decorate_ui(self):
 
-        
 
         self.browser_treeWidget = QtWidgets. QTreeWidget()
         self.browser_treeWidget.header().setStyleSheet("color: %s"%success_color)
@@ -442,7 +441,7 @@ class BrowserWidget(QtWidgets.QWidget):
     def validate_review_url(self, target = None):
         # self.populate_upload_settings()
         logger.info("Current Item changed")
-        targetdata = update_target_from_tree(self, self.browser_treeWidget)
+        targetdata = self.update_target_from_tree(self.browser_treeWidget)
         #todo: don't do that, that's very slow put this in the caching at the beginning
         #if target:
         #    logger.warning(self.current_user.get_review_data_from_id(targetdata['review_id']))
@@ -472,3 +471,90 @@ class BrowserWidget(QtWidgets.QWidget):
 
 
         self.target_changed.emit(targetdata)
+    
+
+    # tree function
+    def update_target_from_tree(self, treeWidget):
+        logger.info("update_target_from_tree")
+        selected_item = treeWidget.currentItem()
+        if not selected_item:
+            logger.info("Nothing selected returning")
+            return
+        else:
+            item_data = selected_item.data(1, QtCore.Qt.EditRole)
+            item_type = selected_item.data(2, QtCore.Qt.EditRole)
+        logger.info("update_target_from_tree: item_data {} item_type {}".format(item_data, item_type))
+
+        review_base_url = "https://syncsketch.com/sketch/"
+        current_data={}
+        current_data['upload_to_value'] = str()
+        current_data['breadcrumb'] = str()
+        current_data['target_url_type'] = item_type
+        current_data['review_id'] = str()
+        current_data['media_id'] = str()
+        current_data['target_url'] = None
+        current_data['name'] = item_data.get('name')
+
+
+        if item_type == 'project':
+            review_url = '{}{}'.format(path.project_url, item_data.get('id'))
+            self.thumbnail_itemPreview.clear()
+            logger.info("in  item_type == 'project'")
+
+        elif item_type == 'review': # and not item_data.get('reviewURL'):
+            current_data['review_id'] = item_data.get('id')
+            current_data['target_url'] = '{0}{1}'.format(review_base_url, item_data.get('uuid'), item_data.get('id'))
+            self.thumbnail_itemPreview.clear()
+            logger.info("in  item_type == 'review'")
+
+        elif item_type == 'media':
+            parent_item = selected_item.parent()
+            parent_data = parent_item.data(1, QtCore.Qt.EditRole)
+            current_data['review_id'] = parent_data.get('id')
+            current_data['media_id'] = item_data.get('id')
+            # * Expected url links
+            #https://syncsketch.com/sketch/300639#692936
+            #https://www.syncsketch.com/sketch/5a8d634c8447#692936/619482
+            #current_data['target_url'] = '{}#{}'.format(review_base_url + str(current_data['review_id']), current_data['media_id'])
+            current_data['target_url'] = '{0}{1}#{2}'.format(review_base_url, item_data.get('uuid'), item_data.get('id'))
+            logger.info("current_data['target_url'] {}".format(current_data['target_url']))
+
+
+        while selected_item.parent():
+            logger.info("selected_item.parent() {}".format(selected_item))
+            current_data['breadcrumb'] = ' > '.join([selected_item.text(0), current_data['upload_to_value']])
+            selected_item = selected_item.parent()
+
+        if current_data['breadcrumb'].split(' > ')[-1] == '':
+            current_data['breadcrumb'] = current_data['upload_to_value'].rsplit(' > ', 1)[0]
+
+
+        database.dump_cache({'breadcrumb': current_data['breadcrumb']})
+        database.dump_cache({'upload_to_value': current_data['target_url']})
+        database.dump_cache({'target_url_type': current_data['target_url_type']})
+        # Name
+        item_name = selected_item.text(0)
+        database.dump_cache({'target_url_item_name': item_name})
+
+        # Username
+        # Todo -  this should not be the current user but the creator of the item
+        try:
+            username = self.current_user.get_name()
+        except:
+            username = str()
+
+        database.dump_cache({'target_url_username': username})
+
+        # Description
+        description = item_data.get('description')
+        database.dump_cache({'target_url_description': description})
+        database.dump_cache({'target_review_id': current_data['review_id']})
+        database.dump_cache({'target_media_id': current_data['media_id']})
+
+        # Upload to Value - this is really the 'breadcrumb')
+        database.dump_cache({'upload_to_value': current_data['target_url']})
+        logger.info("upload_to_value :{} ".format(current_data['upload_to_value']))
+
+        return current_data
+
+

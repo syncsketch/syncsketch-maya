@@ -361,4 +361,4 @@ class FormatPresetWindow(SyncSketch_Window):
 
     def _update_current_preset(self, preset_name):
         database.save_cache("current_preset", preset_name)
-        self.parent.ui.ui_formatPreset_comboBox.populate_combo_list(PRESET_YAML, preset_name)
+        self.parent.ui_formatPreset_comboBox.populate_combo_list(PRESET_YAML, preset_name) #FIXME: Dont call parent

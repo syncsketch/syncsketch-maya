@@ -103,7 +103,10 @@ class MenuWidget(QtWidgets.QWidget):
             message='Having trouble to connect to SyncSketch.\nMake sure you have an internet connection!'
             WarningDialog(self, title, message)
 
-    
+    def set_status(self, message, **kwargs):
+       self.ui_status_label.update(message, kwargs)
+        
+
     def upgrade_plugin(self):
         from syncsketchGUI.installScripts.maintenance import handleUpgrade
         #attach the upgrader to the mainWindow so it doesn't go out of scope
