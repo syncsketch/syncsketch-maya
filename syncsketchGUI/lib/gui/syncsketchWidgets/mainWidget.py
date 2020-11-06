@@ -15,7 +15,7 @@ from syncsketchGUI.lib.connection import is_connected, open_url
 from syncsketchGUI.gui import  _maya_delete_ui, show_download_window
 from syncsketchGUI.lib.gui.syncsketchWidgets.web import LoginView, OpenPlayerView, logout_view
 import syncsketchGUI
-from syncsketchGUI.gui import parse_url_data, get_current_item_from_ids, set_tree_selection, getReviewById
+from syncsketchGUI.gui import parse_url_data, set_tree_selection, getReviewById
 from syncsketchGUI.lib.gui.icons import _get_qicon
 from syncsketchGUI.lib.gui.literals import DEFAULT_VIEWPORT_PRESET, PRESET_YAML, VIEWPORT_YAML, DEFAULT_PRESET, uploadPlaceHolderStr, message_is_not_loggedin, message_is_not_connected
 from syncsketchGUI.lib.async import Worker, WorkerSignals
@@ -99,8 +99,9 @@ class MenuWindow(SyncSketch_Window):
     def build_connections(self):
         # Menu Bar
 
-        self.menu_widget.logged_out.connect(self.browser_widget.browser_treeWidget.clear)
-        self.menu_widget.logged_out.connect(self.restore_ui_state)
+        self.menu_widget.logged_out.connect(self.browser_widget.clear)
+        self.menu_widget.logged_in.connect(self.browser_widget.refresh)
+        #self.menu_widget.logged_out.connect(self.restore_ui_state)
 
         # Reviews
         
@@ -110,7 +111,7 @@ class MenuWindow(SyncSketch_Window):
 
         # Recorder
         self.ui.record_app.recorded.connect(self.update_record)
-        self.ui.record_app.uploaded.connect(self.browser_widget.update_upload)
+        self.ui.record_app.uploaded.connect(self.browser_widget.update_target_from_url)
 
         # Browser
         self.browser_widget.target_changed.emit(self.target_changed)
@@ -191,15 +192,15 @@ class MenuWindow(SyncSketch_Window):
             self.menu_widget.set_status('Upload Failed, please check log', color=error_color)
             return
 
-        self.browser_widget.update_target_from_upload(uploaded_item['reviewURL'])
+        self.browser_widget.update_target_from_url(uploaded_item['reviewURL'])
 
         #Upload done let's set url from that
-        if database.read_cache("us_last_upload_url_pushButton"):
-            logger.info("target_lineEdit.setText: {}".format(database.read_cache("us_last_upload_url_pushButton")))
-            self.browser_widget.target_lineEdit.setText(database.read_cache("us_last_upload_url_pushButton"))
-            self.browser_widget.select_item_from_target_input()
-        else:
-            logger.info("Nothing to set in the lineedit")
+        # if database.read_cache("us_last_upload_url_pushButton"):
+        #     logger.info("target_lineEdit.setText: {}".format(database.read_cache("us_last_upload_url_pushButton")))
+        #     self.browser_widget.target_lineEdit.setText(database.read_cache("us_last_upload_url_pushButton"))
+        #     self.browser_widget.select_item_from_target_input()
+        # else:
+        #     logger.info("Nothing to set in the lineedit")
 
         #self.populate_review_panel(self,  force=True)
 
@@ -207,7 +208,7 @@ class MenuWindow(SyncSketch_Window):
     def restore_ui_state(self):
         logger.info("restoring ui state")
         
-        current_user = user.SyncSketchUser()
+        #self.browser_widget.restore_ui_state()
 
         # self.ui.ui_record_pushButton.setEnabled(
         #     True if self.current_user.is_logged_in() else False)
@@ -218,12 +219,7 @@ class MenuWindow(SyncSketch_Window):
         # self.ui.ui_upload_pushButton.setEnabled(
         #     True if self.current_user.is_logged_in() else False)
 
-        reviewId = database.read_cache('target_review_id')
-        if reviewId and current_user.is_logged_in() :
-            logger.info("Restoring reviewId section for : {} ".format(reviewId))
-            review = getReviewById(self.browser_widget.browser_treeWidget, reviewId=reviewId)
-            logger.info("Restoring review section for : {} ".format(review))
-            self.browser_widget.loadLeafs(review)
+        
 
     # TODO: Delete if not needed
     # def update_current_clip(self):

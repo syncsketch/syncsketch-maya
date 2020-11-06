@@ -159,7 +159,7 @@ def get_current_item_from_ids(tree, payload=None, setCurrentItem=True):
                 tree.setCurrentItem(item, 1)
                 tree.scrollToItem(item)
                 logger.info("Setting current Item : {} text:{} setCurrentItem: {}".format(item, item.text(0), setCurrentItem))
-            return item_data
+            return item
         iterator +=1
 
     logger.info("Item not found while iterating, no item set, setCurrentItem: {}".format(setCurrentItem))
