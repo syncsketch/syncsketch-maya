@@ -113,12 +113,12 @@ class LoginView(QtWebEngineWidgets.QWebEngineView):
     
     def update_login(self):
         self.close()
-        self.parent.update_login_ui()
+        #self.parent.update_login_ui()
+        self.parent.logged_in.emit()
         #todo: turn this into a signal
         #self.parent.asyncPopulateTree(withItems=False)
-        self.parent.browser_widget.populateTree()  # FIXME
         #self.parent.asyncPopulateTree(withItems=True)
-        self.parent.restore_ui_state()
+        #self.parent.restore_ui_state()
 
     @QtCore.Slot()
     def login(self):

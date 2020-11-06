@@ -16,6 +16,7 @@ from syncsketchGUI.installScripts.maintenance import getVersionDifference
 class MenuWidget(QtWidgets.QWidget):
 
     logged_out = QtCore.Signal()
+    logged_in = QtCore.Signal()
 
     def __init__(self, *args, **kwargs):
         super(MenuWidget, self).__init__(*args, **kwargs)
@@ -84,6 +85,7 @@ class MenuWidget(QtWidgets.QWidget):
         self.logout_pushButton.clicked.connect(self.disconnect_account)
         self.syncsketchGUI_pushButton.clicked.connect(self.open_landing)
         self.signup_pushButton.clicked.connect(self.open_signup)
+        self.logged_in.connect(self.update_login_ui)
 
 
     def _restore_ui_state(self):
