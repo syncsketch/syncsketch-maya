@@ -46,7 +46,7 @@ def _set_to_yaml_user(key, value):
     existing_data = dict()
     user_data = {str(key) : str(value)}
     logger.info("yamlpath: {} ".format(yaml_path))
-    logger.info("userdata: {} ".format(user_data))
+    #logger.info("userdata: {} ".format(user_data)) # Dont do this! Or sensible Data in the Output
 
     if os.path.isfile(yaml_path):
         existing_data = database._parse_yaml(yaml_path)
