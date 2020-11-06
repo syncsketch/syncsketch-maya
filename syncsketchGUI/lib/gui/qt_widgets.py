@@ -79,7 +79,7 @@ class RegularThumbnail(QtWidgets.QPushButton):
         return
 
     def clear(self):
-        self.setIcon(QtGui.QIcon())
+        self.setIcon(logo_icon)
 
 class HoverButton(QtWidgets.QPushButton):
 
