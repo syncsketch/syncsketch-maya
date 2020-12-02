@@ -281,6 +281,7 @@ def add_extension(file, rec_args):
         "yuv":      "yuv",
         "tga":      "tga",
         "bmp":      "bmp",
+        "png":      "png",  
         "psd":      "psd",
         "dds":      "dds",
         "psdLayered": "psd",
