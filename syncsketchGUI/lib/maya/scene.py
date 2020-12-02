@@ -247,29 +247,41 @@ def apply_imageplane(filename, camera=None):
 
 
 
-def add_extension(file):
-    '''
-    Find out the file extension manually because maya wouldn't
-    return the extension if the the viewer is turned off
-    '''
-    extension = None
-    #Assumptions that might not hold up, we should maybe consider setting
-    #mov as a default for all
-    if '.' in file:
-        extension = file.rsplit('.', 1)[-1]
+def add_extension(file, rec_args):
+    """
+    Use the recording arguments provided to playblast to add appropriate extension to file path.
+    Replaces extension if the file path has already an extenison.
+    The mehtod assumes that image sequences will be converted later on to a video format with the extension mov. 
+    Therefore it uses mov as extension for format "image". 
 
-    if not extension:
-        if sys.platform == 'darwin':
-            extension = 'mov'
-        elif sys.platform == 'linux2':
-            extension = 'mov'
-        elif sys.platform == 'win32':
-            extension = 'mov'
-        else:
-            extension = 'mov'
+    Args:
+        file (string): file path without extension
+        rec_args (dict): recording arguments used to playblast
 
-    file = '{}.{}'.format(file.rsplit('.', 1)[0], extension)
-    return path.sanitize(file)
+    Returns:
+        string: file path with extension
+    """
+
+    default_extension = "mov" # Just a guess, to provide at least an extension 
+    format_extensions = {
+        "avi": "avi", 
+        "qt" : "mov",
+        "image": "mov"
+    }
+
+    file_format = rec_args["format"]
+
+    try:
+        extension = format_extensions[file_format]
+    except KeyError:
+        logger.warning("No extension known for format: {} using default extension {}".format(
+            file_format, default_extension))
+        extension = default_extension 
+        
+    file_with_ext = '{}.{}'.format(file.rsplit('.', 1)[0], extension)
+    logger.info("Added extension {} to file {} -> {} ".format(extension, file, file_with_ext))
+    return path.sanitize(file_with_ext)
+
 
 
 def playblast_with_settings( viewport_preset = None, viewport_preset_yaml = None, **recArgs):
@@ -288,13 +300,13 @@ def playblast_with_settings( viewport_preset = None, viewport_preset_yaml = None
 
     # process filenames
     filepath = recArgs["filename"]
-
     if not filepath:
         filepath = path.get_default_playblast_folder()
 
     filepath = path.sanitize(filepath)
-    if os.path.isfile(filepath) and not recArgs["force_overwrite"]:
-        filename = os.path.split(filepath)[-1]
+    filepath_with_ext = add_extension(filepath, recArgs)
+    if os.path.isfile(filepath_with_ext) and not recArgs.get("force_overwrite"):
+        filename = os.path.split(filepath_with_ext)[-1]
         message = '[{}] already exists.\nDo you want to replace it?'.format(filename)
         if not confirm_overwrite_dialogue(message) == 'yes':
             return
@@ -311,7 +323,7 @@ def playblast_with_settings( viewport_preset = None, viewport_preset_yaml = None
     playblast_file = capture.capture(**viewport_options)
 
     if playblast_file:
-        playblast_file = add_extension(playblast_file)
+        playblast_file = add_extension(playblast_file, recArgs)
         recArgs["filename"] = playblast_file
         database.save_last_recorded(recArgs)
         database.dump_cache({"last_recorded_selection": playblast_file})

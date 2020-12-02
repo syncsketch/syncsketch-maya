@@ -978,7 +978,7 @@ class MenuWindow(SyncSketch_Window):
         recordData = syncsketchGUI.record()
         playblast_file = recordData["playblast_file"]
         if not playblast_file:
-            self.ui.ui_status_label.update('Playblast failed. %s'%message_is_not_connected , color=error_color)
+            self.ui.ui_status_label.update('Playblast failed.' , color=error_color)
             return
 
         playblast_filename = os.path.split(playblast_file)[-1]
