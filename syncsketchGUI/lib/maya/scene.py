@@ -250,7 +250,6 @@ def apply_imageplane(filename, camera=None):
 def add_extension(file, rec_args):
     """
     Use the recording arguments provided to playblast to add appropriate extension to file path.
-    Replaces extension if the file path has already an extenison.
     The mehtod assumes that image sequences will be converted later on to a video format with the extension mov. 
     Therefore it uses mov as extension for format "image". 
 
@@ -278,7 +277,7 @@ def add_extension(file, rec_args):
             file_format, default_extension))
         extension = default_extension 
         
-    file_with_ext = '{}.{}'.format(file.rsplit('.', 1)[0], extension)
+    file_with_ext = '{}.{}'.format(file, extension)
     logger.info("Added extension {} to file {} -> {} ".format(extension, file, file_with_ext))
     return path.sanitize(file_with_ext)
 
@@ -323,7 +322,7 @@ def playblast_with_settings( viewport_preset = None, viewport_preset_yaml = None
     playblast_file = capture.capture(**viewport_options)
 
     if playblast_file:
-        playblast_file = add_extension(playblast_file, recArgs)
+        #playblast_file = add_extension(playblast_file, recArgs) # Dont do this, since file returned from capture already has an extension
         recArgs["filename"] = playblast_file
         database.save_last_recorded(recArgs)
         database.dump_cache({"last_recorded_selection": playblast_file})
