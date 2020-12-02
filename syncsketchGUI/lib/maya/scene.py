@@ -12,6 +12,7 @@ import sys
 import tempfile
 import zipfile
 import xml.etree.ElementTree as ET
+import glob
 
 from maya import cmds
 from maya import mel
@@ -250,8 +251,7 @@ def apply_imageplane(filename, camera=None):
 def add_extension(file, rec_args):
     """
     Use the recording arguments provided to playblast to add appropriate extension to file path.
-    The mehtod assumes that image sequences will be converted later on to a video format with the extension mov. 
-    Therefore it uses mov as extension for format "image". 
+    In case the file already ends with the computed extension, the provided file path will not be changed.
 
     Args:
         file (string): file path without extension
@@ -261,26 +261,76 @@ def add_extension(file, rec_args):
         string: file path with extension
     """
 
-    default_extension = "mov" # Just a guess, to provide at least an extension 
-    format_extensions = {
-        "avi": "avi", 
-        "qt" : "mov",
-        "image": "mov"
+    file_format = rec_args["format"]
+    compression = rec_args["compression"]
+
+    # Extension outputed by maya when following keys are used as expressions
+    # Tested with Maya2020 on Win10
+    image_extensions = {
+        "gif":      "gif",
+        "si" :      "pic", 
+        "rla":      "rla",
+        "tif":      "tif",
+        "tifu":     "tif",
+        "sgi":      "sgi",
+        "als":      "als",
+        "maya":     "iff",
+        "jpg":      "jpg",
+        "eps":      "eps",
+        "cin":      "cin",
+        "yuv":      "yuv",
+        "tga":      "tga",
+        "bmp":      "bmp",
+        "psd":      "psd",
+        "dds":      "dds",
+        "psdLayered": "psd",
     }
 
-    file_format = rec_args["format"]
+    if file_format == "avi":
+        extension = "avi"
+    elif file_format == "qt":
+        extension = "mov"
+    elif file_format == "image":
+        try:
+            image_extension = image_extensions[compression]
+        except KeyError as e:
+            logger.error("No extension known for image sequence with compression {}".format(compression))
+            raise e
+        extension = "####.{}".format(image_extension) #TODO: assumption frame padding 4 might fail
 
-    try:
-        extension = format_extensions[file_format]
-    except KeyError:
-        logger.warning("No extension known for format: {} using default extension {}".format(
-            file_format, default_extension))
-        extension = default_extension 
-        
+    else:
+        logger.error("No extension known for format {}".format(file_format))
+        raise KeyError
+
+
+    if file.endswith(extension):
+        logger.info("File {} already ends with {}. No Extension added. ".format(file, extension))
+        return file
+
     file_with_ext = '{}.{}'.format(file, extension)
     logger.info("Added extension {} to file {} -> {} ".format(extension, file, file_with_ext))
     return path.sanitize(file_with_ext)
 
+def is_file_on_disk(file_path):
+    """
+    Extended version of os.path.isFile, since it also checks for frames specified with #### pattern. 
+
+    Args:
+        file_path (string): file path 
+    Returns:
+        bool: if file exists already on disk
+    """
+
+    # TODO: Assumes padding in format ####, use regex to match # before file extension
+    # Replacing #### then only a single # is safer in case # is used in file path.
+    file_path_glob = file_path.replace("####", "[0-9][0-9][0-9][0-9]") 
+    
+    files_on_disk = glob.glob(file_path_glob)
+
+    is_file = True if files_on_disk else False
+    logger.info("{} on disk {}".format(file_path_glob, is_file))
+
+    return is_file
 
 
 def playblast_with_settings( viewport_preset = None, viewport_preset_yaml = None, **recArgs):
@@ -304,7 +354,7 @@ def playblast_with_settings( viewport_preset = None, viewport_preset_yaml = None
 
     filepath = path.sanitize(filepath)
     filepath_with_ext = add_extension(filepath, recArgs)
-    if os.path.isfile(filepath_with_ext) and not recArgs.get("force_overwrite"):
+    if is_file_on_disk(filepath_with_ext) and not recArgs.get("force_overwrite"):
         filename = os.path.split(filepath_with_ext)[-1]
         message = '[{}] already exists.\nDo you want to replace it?'.format(filename)
         if not confirm_overwrite_dialogue(message) == 'yes':
@@ -322,7 +372,7 @@ def playblast_with_settings( viewport_preset = None, viewport_preset_yaml = None
     playblast_file = capture.capture(**viewport_options)
 
     if playblast_file:
-        #playblast_file = add_extension(playblast_file, recArgs) # Dont do this, since file returned from capture already has an extension
+        playblast_file = add_extension(playblast_file, recArgs)
         recArgs["filename"] = playblast_file
         database.save_last_recorded(recArgs)
         database.dump_cache({"last_recorded_selection": playblast_file})
