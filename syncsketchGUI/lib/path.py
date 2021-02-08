@@ -142,7 +142,7 @@ def get_ffmpeg_bin():
     '''
     ffmpeg_folder = get_ffmpeg_folder()
     ffmpeg_bin = os.path.join(ffmpeg_folder, 'bin')
-    ffmpeg_bin = make_windows_style(ffmpeg_bin)
+    ffmpeg_bin = sanitize(ffmpeg_bin)
     return ffmpeg_bin
 
 def get_default_playblast_folder():
