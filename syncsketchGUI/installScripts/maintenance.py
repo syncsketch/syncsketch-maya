@@ -92,7 +92,6 @@ def handleUpgrade():
                 installGui.InstallOptions.tokenData['username'] = current_user.get_name()
                 installGui.InstallOptions.tokenData['token'] = current_user.get_token()
                 installGui.InstallOptions.tokenData['api_key'] = current_user.get_api_key()
-                logger.info("This is tokenData: {}".format(installGui.InstallOptions.tokenData))
             logger.info("Showing installer")
             Installer = installGui.SyncSketchInstaller()
             Installer.showit()
