@@ -569,7 +569,7 @@ class installThread(QThread):
                 pipInstaller = os.path.join(tmpdir, 'get-pip.py')
 
                 if Literals.PLATFORM == 'Darwin':
-                    cmd = 'curl https://bootstrap.pypa.io/get-pip.py -o {0}'.format(pipInstaller).split(' ')
+                    cmd = 'curl https://bootstrap.pypa.io/2.7/get-pip.py -o {0}'.format(pipInstaller).split(' ')
                     if not INSTALL_SSGUI_ONLY:
                         print('Calling shell command: {0}'.format(cmd))
                         print(subprocess.check_output(cmd))
@@ -577,7 +577,7 @@ class installThread(QThread):
                 else:
                     # this should be using secure https, but we shoul dbe fine for now
                     # as we are only reading data, but might be a possible mid attack
-                    response = urllib2.urlopen('https://bootstrap.pypa.io/get-pip.py')
+                    response = urllib2.urlopen('https://bootstrap.pypa.io/2.7/get-pip.py')
                     data = response.read()
                     with open(pipInstaller, 'w') as f:
                         f.write(data)
