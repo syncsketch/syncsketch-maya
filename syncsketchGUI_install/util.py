@@ -45,7 +45,7 @@ def extract_zip_file_to_destination(zip_file, destination):
     zip_ref = zipfile.ZipFile(zip_file, 'r')
     zip_ref.extractall(destination)
     zip_ref.close()  
-
+    
 def make_temp_path(name):
     tmpdir = tempfile.mkdtemp()
     return os.path.join(tmpdir, name)

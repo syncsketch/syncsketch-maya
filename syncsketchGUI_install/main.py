@@ -1,72 +1,115 @@
+import os
 import sys
-import subprocess
+import functools
+import webbrowser
 import platform
-import re
-import os 
-import urllib2
 import tempfile
+import urllib2
+import shutil
+import zipfile 
 
+
+import ffmpeg
+import site_packages
+import util
 
 import logging
-
 logger = logging.getLogger('syncsketchGUI_install')
-logger.setLevel(logging.DEBUG)
 
-ch = logging.StreamHandler()
-formatter = logging.Formatter('[%(asctime)s - %(filename)s:%(lineno)s - %(levelname)s - %(message)s]', "%Y-%m-%d %H:%M:%S")
-ch.setFormatter(formatter)
-logger.addHandler(ch)
-
-
-GET_PIP_URL = "https://bootstrap.pypa.io/2.7/get-pip.py"
-FFMPEG_API_ENDPOINT = 'https://ffbinaries.com/api/v1/version/4.2'
-
-
-class Environment():
-    python_path = None
-    pip_path    = None
-
-    def __new__(cls): 
-        os_name = platform.system()
-        if  os_name == "Windows":
-            return WindowsEnvironment()
-        elif os_name == "Linux":
-            return LinuxEnvironment()
-        elif os_name == "Darwin":
-            return OSXEnvironment()
-        else:
-            raise Exception("No Environment available for {}".format(os_name))
-
-class LinuxEnvironment():
-    python_path = '/usr/bin/python'
-    pip_path    = os.path.join(_get_user_path(), '.local', 'bin', 'pip2.7')
-
-class OSXEnvironment():
-    python_path = '/usr/bin/python'
-    pip_path    = os.path.join(_get_user_path(), 'Library', 'Python', '2.7', 'bin', 'pip2.7')
-
-class WindowsEnvironment():
-    python_path = os.path.join(os.getenv('MAYA_LOCATION'), 'bin', 'mayapy.exe')
-    pip_path    = os.path.join(os.getenv('APPDATA'), 'Python', 'Scripts', 'pip2.7.exe')
-
-
-environment = Environment()
-
-
-def install_pip():
-    pip_installer_path = _make_temp_path("get-pip.py")
-    _download_from_url_to_destionation(GET_PIP_URL, pip_installer_path)
-
-
-def is_pip_installed():
-    return os.path.exists(environment.pip_path)
+class MayaContext():
+    def get_maya_int_version(self):
+        return int(str(cmds.about(apiVersion=True))[:4])
+    
+    def get_script_path(self):
+        paths = os.environ['MAYA_SCRIPT_PATH']
+        candidates = []
+        for path in paths.split(os.pathsep):
+            if 'maya/scripts' in path:
+                candidates.append(path)
+        return candidates[0]
+    
+    def get_plugin_path(self):
+        paths = os.environ['MAYA_PLUG_IN_PATH']
+        candidates = []
+        for path in paths.split(os.pathsep):
+            if 'maya/plug-ins' in path:
+                candidates.append(path)
+        return candidates[0]
 
 
 
+class StandaloneContext():
+    def get_maya_int_version(self):
+        return 2020
 
-###########################################################################################
-################### User Interface ########################################################
-###########################################################################################
+    def get_script_path(self):
+        return os.path.join(os.curdir, "maya_env", "scripts")
+    
+    def get_plugin_path(self):
+        return os.path.join(os.curdir, "maya_env", "plugins")
+
+
+try:
+    import maya.cmds
+    context = MayaContext()
+except ImportError:
+    context = StandaloneContext()
+
+
+
+MAYA_API_VERSION = context.get_maya_int_version()
+
+if MAYA_API_VERSION >= 2017:
+    from PySide2.QtCore import *
+    from PySide2.QtWidgets import *
+    from PySide2.QtGui import *
+
+else:
+    from PySide.QtCore import *
+    from PySide.QtGui import *
+
+
+versionTag = os.getenv('SS_DEV') or 'release'
+SYNCSKETCH_GUI_RELEASE_PATH = 'https://github.com/syncsketch/syncsketch-maya/archive/{}.zip'.format(versionTag)
+SYNCSKETCH_GUI_BRANCH_REPO = "syncsketch-maya-{}".format(versionTag)
+
+
+ScriptInstallPath = {
+    'Darwin': '{0}/Library/Preferences/Autodesk/maya/scripts/'.format(os.path.expanduser('~')),
+    'Linux': '{0}/maya/scripts/'.format(os.path.expanduser('~')),
+    'Windows': '{}/'.format(context.get_script_path())
+}
+
+PluginInstallPath = {
+    'Darwin': '{0}/Library/Preferences/Autodesk/maya/plug-ins/'.format(os.path.expanduser('~')),
+    'Linux': '{0}/maya/plug-ins/'.format(os.path.expanduser('~')),
+    'Windows': '{}/'.format(context.get_plugin_path())
+}
+
+
+syncsketchURL = 'http://www.syncsketch.com'
+syncsketchMayaPluginRepoURL  = 'https://github.com/syncsketch/syncsketch-maya'
+syncsketchMayaPluginVideoURL = 'https://vimeo.com/syncsketch/integrationmaya'
+syncsketchMayaPluginDocsURL = 'https://support.syncsketch.com/article/62-maya-syncsketch-integration'
+
+
+class Literals(object):
+    def __init__(self):
+        pass
+
+    SYNCSKETCH_INSTALL_PATH = ''
+    PLATFORM = ''
+
+
+class InstallOptions(object):
+    def __init__(self):
+        pass
+    installShelf = 1
+    upgrade = 0
+    tokenData = {}
+
+TMPDIR = os.getenv('TMPDIR')
+MAYA_APP_DIR = os.getenv('MAYA_APP_DIR')
 
 class UIDesktop(object):
     def __init__(self, name, size=[300, 300], *args, **kwargs):
@@ -82,6 +125,7 @@ class UIDesktop(object):
         self.setMinimumSize(QSize(*size))
         self.setGeometry(QRect(widthCenter, heightCenter, width, height))
         self.setWindowIcon(Ressources.olaf())
+
 
 class InstallDialog(QWidget, UIDesktop):
 
@@ -132,6 +176,7 @@ class InstallDialog(QWidget, UIDesktop):
     def _init_ui(self):
 
         self.launchButton.hide()
+
         self._cb_install_ffmpeg.setChecked(True)
         self._cb_install_sitepackages.setChecked(True)
 
@@ -139,6 +184,7 @@ class InstallDialog(QWidget, UIDesktop):
         palette = self.palette()
         palette.setColor(self.backgroundRole(), '#2b353b')
         self.setPalette(palette)
+
 
     def _create_main_layout(self):
 
@@ -257,6 +303,7 @@ class InstallDialog(QWidget, UIDesktop):
         movie.start()
         return animated_gif
 
+
 class LinkButton(QPushButton):
     def __init__(self, text, link, *args, **kwargs):
         super(LinkButton, self).__init__(text, *args, **kwargs)
@@ -265,6 +312,7 @@ class LinkButton(QPushButton):
         self.setMaximumHeight(20)
         self.setStyleSheet('QPushButton {text-decoration: underline; color: #00c899}')
         self.clicked.connect(lambda: webbrowser.open(link, new=0, autoraise=True))
+
 
 class IconButton(QPushButton):
     def __init__(self, text, highlight=False, icon=None, success=False, *args, **kwargs):
@@ -306,6 +354,120 @@ class IconButton(QPushButton):
         else:
             return QPixmap(self.icon)
 
+
+class SyncSketchInstaller(QObject):
+    def showit(self):
+        self.installer = InstallDialog()
+        self.installer.installButton.clicked.connect(self.__syncsketchInstall)
+        self.installer.closeButton.clicked.connect(self.__closeButton)
+        self.installer.launchButton.clicked.connect(self.__launchButton)
+        self.installer.show()
+
+    def done(self):
+        self.installer.launchButton.show()
+        self.installer.closeButton.hide()
+        self.installer.animated_gif.hide()
+        self.installer.wait_label.hide()
+
+    def __syncsketchInstall(self):
+        self.installer.installButton.hide()
+        self.installer.closeButton.hide()
+        self.installer.animated_gif.show()
+        self.installer.wait_label.show()
+        self.myThread = InstallThread(
+            self.installer.get_install_directory(),
+            self.installer._cb_install_ffmpeg.isEnabled(),
+            self.installer._cb_install_sitepackages.isEnabled()
+        )
+        self.connect(self.myThread, SIGNAL('finished()'), self.done)
+        self.myThread.start()
+ 
+    def __closeButton(self):
+        self.installer.clean()
+        self.installer.close()
+
+    def __launchButton(self):
+        self.installer.clean()
+        self.installer.close()
+        # Open UI
+        from syncsketchGUI import standalone
+        reload(standalone)
+
+
+
+class InstallThread(QThread):
+    '''Main Process that drives all installation'''
+
+    def __init__(self, install_dir, install_ffmpeg_enabled, install_site_packages_enabled):
+        QThread.__init__(self)
+        self._install_dir = install_dir
+        self._install_ffmpeg_enabled = install_ffmpeg_enabled
+        self._install_site_packages_enabled = install_site_packages_enabled
+
+    def __del__(self):
+        self.wait()
+
+    def run(self):
+        self.startInstallationProcess()
+
+    def startInstallationProcess(self):
+             
+        synsketch_install_path = '{0}syncsketchGUI'.format(self._install_dir)
+
+        print('Syncsketch Install Path: {0}'.format(synsketch_install_path))
+
+        if os.path.isdir(synsketch_install_path):
+            shutil.rmtree(synsketch_install_path, ignore_errors=True)
+            print('Deleting previous directory for a clean install {0} '.format(synsketch_install_path))
+
+        sysnketchGUI_source_path = _get_syncsketchGUI_source_path()
+        _copy_directory_to_destination(sysnketchGUI_source_path, synsketch_install_path)
+
+        if self._install_ffmpeg_enabled:
+            ffmpeg_install_path = os.path.join(synsketch_install_path, "third_party")
+            ffmpeg.install(ffmpeg_install_path)
+        
+        if self._install_site_packages_enabled:
+            site_packages_install_path = os.path.join(synsketch_install_path, "third_party", "site_packages")
+            site_packages.install(site_packages_install_path)
+
+
+    
+def _get_syncsketchGUI_source_path():
+
+    """
+    Assumes the syncsketchGUI package is in the same directory as syncsketchGUI_install
+    """
+
+    this_package_dir = util.get_this_package_directory()
+    parent_dir = os.path.dirname(this_package_dir)
+    syncsketchGUI_path = os.path.join(parent_dir, "syncsketchGUI")
+    return syncsketchGUI_path
+
+
+
+def _copy_directory_to_destination(source, destination):
+
+    logger.debug("Copy {} to {}".format(source, destination))
+    shutil.copytree(source, destination)
+
+class Icon():
+    def __init__(self, base64Image):
+        self.base64Image = base64Image
+
+    def base64ToQPixmap(self):
+        pixmap = QPixmap()
+        pixmap.loadFromData(QByteArray.fromBase64(str(self.base64Image)))
+        return pixmap
+
+
+def _create_qpixmap_getter(image_string):
+
+    def _create_qpixmap():
+        return QPixmap(Icon(image_string).base64ToQPixmap())
+    return staticmethod(_create_qpixmap)
+
+
 class Ressources(object):
     def __init__(self):
         pass
@@ -331,25 +493,15 @@ class Ressources(object):
     byteArraseGif = QByteArray.fromBase64(str(preloaderAnimBase64))
     GIFDEVICE = QBuffer(byteArraseGif)
 
-###########################################################################################
-################### Util ##################################################################
-###########################################################################################
 
-def _get_user_path():
-    return os.path.expanduser('~')
+def main():
+    app  = QApplication(sys.argv)
+    Installer = InstallDialog()
+    Installer.show()
+    sys.exit(app.exec_())
+    print("done")
 
-def _make_temp_path(name):
-    tmpdir = tempfile.mkdtemp()
-    return os.path.join(tmpdir, name)
 
-def _download_from_url_to_destionation(url, destination):
-    response = _get_response_from_url(url)
-    with open(destination, 'wb') as f:
-        f.write(response.read())
-    logger.info("Downloading from {} to {}"
-        .format(url, destination))
-
-def _get_response_from_url(url):
-    req = urllib2.Request(url, headers = {"User-Agent": "Mozilla/5.0"})
-    response = urllib2.urlopen(req)
-    return response
+if __name__ == '__main__':
+    print('running standalone')
+    main()

@@ -30,9 +30,9 @@ def install(destination=None):
 def _install_package(package, destination=None):
     file_path = _download_package(package)
     extracted_package_path = util.extract_tar_file(file_path)
-    
+    package_source_path = os.path.join(extracted_package_path, package["name"])
     install_path = _make_install_path(package["name"], destination=destination)
-    util.move_directory_content_to_destination(extracted_package_path, install_path)
+    util.move_directory_content_to_destination(package_source_path, install_path)
 
 def _download_package(package, path=None):
     url =_get_package_tarball_download_url(package["name"], package["version"])
@@ -75,7 +75,7 @@ def _make_install_path(name, destination=None):
 
 def _find_requirements_file_path():
     search_dirs = [
-        _get_this_files_directory(),
+        util.get_this_package_directory(),
         ]
     requirements_file_path = _find_requirements_file_path_in_dirs(search_dirs) 
     if not requirements_file_path:
