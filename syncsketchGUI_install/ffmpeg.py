@@ -12,24 +12,20 @@ FFMPEG_API_ENDPOINT = 'https://ffbinaries.com/api/v1/version/4.2'
 
 FFMPEG_BINARIES = ["ffmpeg", "ffprobe"]
     
-platform_mapping = {
-        'Windows': 'windows-64',
-        'Darwin' : 'osx-64',
-        'Linux'  : 'linux-64'
-                }       
+    
 
-def install():
+def install(destination=None):
     for binary in FFMPEG_BINARIES:
-        _install_ffbinary(binary)
+        _install_ffbinary(binary, destination)
 
 
-def _install_ffbinary(binary_name):
+def _install_ffbinary(binary_name, destination=None):
 
     donwloaded_file = _download_ffbinary(binary_name)
     extract_directory = util.extract_zip_file(donwloaded_file)
     downloaded_binary_file = _find_binary_in_dir(binary_name, extract_directory)
     _set_permission(downloaded_binary_file)
-    install_directory = _make_install_path("ffmpeg")
+    install_directory = _make_install_path("ffmpeg", destination)
     util.move_file_to_directory(downloaded_binary_file, install_directory)
 
 
@@ -59,6 +55,13 @@ def _set_permission(file_path):
     os.chmod(file_path, 0o755)
 
 def _get_os_specific_download_url_for(binary_name):
+
+    platform_mapping = {
+        'Windows': 'windows-64',
+        'Darwin' : 'osx-64',
+        'Linux'  : 'linux-64'
+                }   
+
     platform_id = platform_mapping[platform.system()]
     ffmpeg_resp = util.get_json_response_from_url(FFMPEG_API_ENDPOINT)
     return ffmpeg_resp['bin'][platform_id][binary_name]
