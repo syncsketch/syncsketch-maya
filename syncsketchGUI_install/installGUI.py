@@ -6,6 +6,7 @@ import os
 import urllib2
 import tempfile
 
+import webbrowser
 
 import logging
 
@@ -21,36 +22,102 @@ logger.addHandler(ch)
 GET_PIP_URL = "https://bootstrap.pypa.io/2.7/get-pip.py"
 FFMPEG_API_ENDPOINT = 'https://ffbinaries.com/api/v1/version/4.2'
 
+syncsketchURL = 'http://www.syncsketch.com'
+syncsketchMayaPluginRepoURL  = 'https://github.com/syncsketch/syncsketch-maya'
+syncsketchMayaPluginVideoURL = 'https://vimeo.com/syncsketch/integrationmaya'
+syncsketchMayaPluginDocsURL = 'https://support.syncsketch.com/article/62-maya-syncsketch-integration'
+
+versionTag = os.getenv('SS_DEV') or 'release'
+
+def _get_user_path():
+    return os.path.expanduser('~')
 
 class Environment():
-    python_path = None
-    pip_path    = None
+    @property
+    def python_path(self):
+         raise NotImplementedError
+    @property
+    def pip_path(self):
+        raise NotImplementedError
 
-    def __new__(cls): 
-        os_name = platform.system()
-        if  os_name == "Windows":
+    @staticmethod
+    def get_system_default():
+        system_name = platform.system()
+        if system_name == "Windows":
             return WindowsEnvironment()
-        elif os_name == "Linux":
-            return LinuxEnvironment()
-        elif os_name == "Darwin":
+        elif system_name == "Darwin":
             return OSXEnvironment()
+        elif system_name == "Linux":
+            return LinuxEnvironment()
         else:
-            raise Exception("No Environment available for {}".format(os_name))
+            raise NotImplementedError(
+        "No Environment availabe for system: {}"
+            .format(system_name))
 
-class LinuxEnvironment():
-    python_path = '/usr/bin/python'
-    pip_path    = os.path.join(_get_user_path(), '.local', 'bin', 'pip2.7')
+class LinuxEnvironment(Environment):  
+    @property
+    def python_path(self):
+         return '/usr/bin/python'
+    @property
+    def pip_path(self):
+        return os.path.join(_get_user_path(), '.local', 'bin', 'pip2.7')
 
-class OSXEnvironment():
-    python_path = '/usr/bin/python'
-    pip_path    = os.path.join(_get_user_path(), 'Library', 'Python', '2.7', 'bin', 'pip2.7')
+class OSXEnvironment(Environment):
+    @property
+    def python_path(self):
+         return '/usr/bin/python'
+    @property
+    def pip_path(self):
+        return os.path.join(_get_user_path(), 'Library', 'Python', '2.7', 'bin', 'pip2.7')
 
-class WindowsEnvironment():
-    python_path = os.path.join(os.getenv('MAYA_LOCATION'), 'bin', 'mayapy.exe')
-    pip_path    = os.path.join(os.getenv('APPDATA'), 'Python', 'Scripts', 'pip2.7.exe')
+class WindowsEnvironment(Environment):
+    @property
+    def python_path(self):
+         return os.path.join(os.getenv('MAYA_LOCATION'), 'bin', 'mayapy.exe')
+    @property
+    def pip_path(self):
+        return os.path.join(os.getenv('APPDATA'), 'Python', 'Scripts', 'pip2.7.exe')
 
 
-environment = Environment()
+environment = Environment.get_system_default()
+
+class MayaDCC():
+    @staticmethod
+    def get_int_version():
+        return int(str(maya.cmds.about(apiVersion=True))[:4])
+    
+class StandaloneDCC():
+    @staticmethod
+    def get_int_version():
+        return 2020
+
+try:
+    import maya.cmds
+    dcc_app = MayaDCC()
+except ImportError:
+    dcc_app = StandaloneDCC()
+
+
+MAYA_API_VERSION = dcc_app.get_int_version()
+
+if MAYA_API_VERSION >= 2017:
+    from PySide2.QtCore import *
+    from PySide2.QtWidgets import *
+    from PySide2.QtGui import *
+
+else:
+    from PySide.QtCore import *
+    from PySide.QtGui import *
+
+
+
+#TODO: remove this global state
+class InstallOptions(object):
+    def __init__(self):
+        pass
+    installShelf = 1
+    upgrade = 0
+    tokenData = {}
 
 
 def install_pip():
@@ -117,23 +184,43 @@ class InstallDialog(QWidget, UIDesktop):
     
     def _create_ui(self):
 
-        self.installButton = IconButton('Upgrade' if InstallOptions.upgrade else 'Install', highlight=True)
+        self.pb_install = IconButton('Upgrade' if InstallOptions.upgrade else 'Install', highlight=True)
+        self.pb_install.clicked.connect(self._install_callback)
+
         self.launchButton = IconButton('Launch Syncsketch UI', highlight=True, success=True)
         
-        self.closeButton = IconButton(' Close', icon=Ressources.closeIcon())
+        self.pb_close = IconButton(' Close', icon=Ressources.closeIcon())
+        self.pb_close.clicked.connect(self._close_callblack)
+
+
         self.animated_gif = self._create_animated_gif()
         self.wait_label = self._create_wait_label()
 
-        self._cb_install_sitepackages = QCheckBox("Install Python Site Packages")
-        self._cb_install_ffmpeg = QCheckBox("Install FFMPEG")
+        self.cb_install_sitepackages = QCheckBox("Install Python Site Packages")
+        self.cb_install_ffmpeg = QCheckBox("Install FFMPEG")
 
         self.setLayout(self._create_main_layout())
+    
+    def _close_callblack(self):
+        self.clean()
+        self.close()
+    
+    def _install_callback(self):
+        self._set_ui_to_install()
+        print("Install")
 
     def _init_ui(self):
-
         self.launchButton.hide()
-        self._cb_install_ffmpeg.setChecked(True)
-        self._cb_install_sitepackages.setChecked(True)
+        self.cb_install_ffmpeg.setChecked(True)
+        self.cb_install_sitepackages.setChecked(True)
+    
+    def _set_ui_to_install(self):
+        self.pb_install.hide()
+        self.pb_close.hide()
+        self.animated_gif.show()
+        self.wait_label.show()
+        self.cb_install_ffmpeg.hide()
+        self.cb_install_sitepackages.hide()
 
     def _adjust_palette(self):
         palette = self.palette()
@@ -175,8 +262,8 @@ class InstallDialog(QWidget, UIDesktop):
 
     def _create_option_layout(self):
         option_layout = QVBoxLayout()
-        option_layout.addWidget(self._cb_install_sitepackages)
-        option_layout.addWidget(self._cb_install_ffmpeg)
+        option_layout.addWidget(self.cb_install_sitepackages)
+        option_layout.addWidget(self.cb_install_ffmpeg)
         return option_layout
     
     def _create_company_logo(self):
@@ -199,8 +286,8 @@ class InstallDialog(QWidget, UIDesktop):
         ButtonLayout.setAlignment(Qt.AlignCenter)
         ButtonLayout.addStretch()
         ButtonLayout.addWidget(self.launchButton)
-        ButtonLayout.addWidget(self.closeButton)
-        ButtonLayout.addWidget(self.installButton)
+        ButtonLayout.addWidget(self.pb_close)
+        ButtonLayout.addWidget(self.pb_install)
         ButtonLayout.setAlignment(Qt.AlignCenter)
         return ButtonLayout
 
@@ -306,6 +393,20 @@ class IconButton(QPushButton):
         else:
             return QPixmap(self.icon)
 
+class Icon():
+    def __init__(self, base64Image):
+        self.base64Image = base64Image
+
+    def base64ToQPixmap(self):
+        pixmap = QPixmap()
+        pixmap.loadFromData(QByteArray.fromBase64(str(self.base64Image)))
+        return pixmap
+
+def _create_qpixmap_getter(image_string):
+    def _create_qpixmap():
+        return QPixmap(Icon(image_string).base64ToQPixmap())
+    return staticmethod(_create_qpixmap)
+
 class Ressources(object):
     def __init__(self):
         pass
@@ -335,8 +436,6 @@ class Ressources(object):
 ################### Util ##################################################################
 ###########################################################################################
 
-def _get_user_path():
-    return os.path.expanduser('~')
 
 def _make_temp_path(name):
     tmpdir = tempfile.mkdtemp()
@@ -353,3 +452,14 @@ def _get_response_from_url(url):
     req = urllib2.Request(url, headers = {"User-Agent": "Mozilla/5.0"})
     response = urllib2.urlopen(req)
     return response
+
+
+def main():
+    app  = QApplication(sys.argv)
+    installer = InstallDialog()
+    installer.show()
+    sys.exit(app.exec_())
+
+
+if __name__ == "__main__":
+    main()
