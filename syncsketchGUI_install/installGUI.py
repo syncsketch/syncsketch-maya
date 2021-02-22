@@ -5,6 +5,7 @@ import re
 import os 
 import urllib2
 import tempfile
+import traceback
 
 import webbrowser
 
@@ -39,6 +40,19 @@ class Environment():
     @property
     def pip_path(self):
         raise NotImplementedError
+    @property
+    def maya_user_path(self):
+       raise NotImplementedError 
+    @property
+    def maya_script_path(self):
+        return os.path.join(self.maya_user_path, "scripts")
+    @property
+    def maya_plugins_path(self):
+        return os.path.join(self.maya_user_path, "plug-ins")
+    
+    @property
+    def maya_module_path(self):
+        return os.path.join(self.maya_user_path, "modules")
 
     @staticmethod
     def get_system_default():
@@ -61,6 +75,9 @@ class LinuxEnvironment(Environment):
     @property
     def pip_path(self):
         return os.path.join(_get_user_path(), '.local', 'bin', 'pip2.7')
+    @property
+    def maya_user_path(self):
+        return os.path.join(_get_user_path, "maya")
 
 class OSXEnvironment(Environment):
     @property
@@ -69,6 +86,9 @@ class OSXEnvironment(Environment):
     @property
     def pip_path(self):
         return os.path.join(_get_user_path(), 'Library', 'Python', '2.7', 'bin', 'pip2.7')
+    @property
+    def maya_user_path(self):
+        return os.path.join(_get_user_path(), "Library", "Preferences", "Autodesk", "maya")
 
 class WindowsEnvironment(Environment):
     @property
@@ -77,6 +97,9 @@ class WindowsEnvironment(Environment):
     @property
     def pip_path(self):
         return os.path.join(os.getenv('APPDATA'), 'Python', 'Scripts', 'pip2.7.exe')
+    @property
+    def maya_user_path(self):
+        return os.path.join(_get_user_path(), "Library", "Documents", "maya")
 
 
 environment = Environment.get_system_default()
@@ -110,24 +133,109 @@ else:
     from PySide.QtGui import *
 
 
-
 #TODO: remove this global state
 class InstallOptions(object):
-    def __init__(self):
-        pass
     installShelf = 1
     upgrade = 0
     tokenData = {}
+    def __init__(self):
+        pass
+   
+
+def install_syncsketch_gui(install_dir):
+
+    syncsketch_url = get_syncsketchGUI_release_url()
+    cmd = [
+        environment.pip_path,
+        "install",
+        "--upgrade",
+        "--user",
+        syncsketch_url
+    ]
+    subprocess.check_output(cmd)
 
 
 def install_pip():
     pip_installer_path = _make_temp_path("get-pip.py")
     _download_from_url_to_destionation(GET_PIP_URL, pip_installer_path)
-
+    subprocess.call(
+        [environment.python_path, pip_installer_path, "--user"])
 
 def is_pip_installed():
     return os.path.exists(environment.pip_path)
 
+def get_syncsketchGUI_release_url():
+    return 'https://github.com/syncsketch/syncsketch-maya/archive/{}.zip'.format(versionTag)
+
+class Installer(QObject):
+
+    def __init__(self):
+        self.threadpool = QThreadPool()
+    
+    def install(
+        self, 
+        install_parms,
+        finished_callback = None,
+        exception_callback = None
+        ):
+        worker = Worker(self._install, install_parms)
+        worker.signals.finished.connect(finished_callback)
+        worker.signals.error.connect(exception_callback)
+        self.threadpool.start(worker)
+
+    def _install(self, install_parms):
+        logger.info("Start Installing with Parms: {}".format(install_parms))
+
+        if not is_pip_installed():
+            logger.info("Pip is not installed at {}. Installing Pip.".format(
+                environment.pip_path
+            ))
+        
+        install_syncsketch_gui(install_parms.destination)
+
+    def uninstall(self):
+        pass
+    
+    def _uninstall(self):
+        pass
+
+class InstallParms(object):
+    def __init__(self):
+        self.ffmpeg = True
+        self.shelf = True 
+        self.destination = environment.maya_module_path
+
+    def __str__(self):
+        text = "Install FFmpeg: {}, Install Shelf: {}, Destination: {}".format(
+            self.ffmpeg, self.shelf, self.destination)
+        return text
+
+
+
+class Worker(QRunnable):
+
+    def __init__(self, fn, *args, **kwargs):
+        super(Worker, self).__init__()
+        # Store constructor arguments (re-used for processing)
+        self.fn = fn
+        self.args = args
+        self.kwargs = kwargs
+        self.signals = WorkerSignals()
+
+    def run(self):
+        try:
+            self.fn(*self.args, **self.kwargs)
+        except:
+            traceback.print_exc()
+            exctype, value = sys.exc_info()[:2]
+            self.signals.error.emit((exctype, value, traceback.format_exc()))
+        else:
+            self.signals.finished.emit()
+
+class WorkerSignals(QObject):
+    finished = Signal()
+    error = Signal(tuple)
+    progress = Signal(int)
 
 
 
@@ -172,6 +280,8 @@ class InstallDialog(QWidget, UIDesktop):
 
         UIDesktop.__init__(self, name, size, *args, **kwargs)
 
+        self._installer = Installer()
+
         self.setWindowTitle('Syncsketch Maya Installer')
         #self.setWindowModality(Qt.ApplicationModal)
         #self.setWindowFlags(Qt.FramelessWindowHint)
@@ -187,7 +297,7 @@ class InstallDialog(QWidget, UIDesktop):
         self.pb_install = IconButton('Upgrade' if InstallOptions.upgrade else 'Install', highlight=True)
         self.pb_install.clicked.connect(self._install_callback)
 
-        self.launchButton = IconButton('Launch Syncsketch UI', highlight=True, success=True)
+        self.pb_launch = IconButton('Launch Syncsketch UI', highlight=True, success=True)
         
         self.pb_close = IconButton(' Close', icon=Ressources.closeIcon())
         self.pb_close.clicked.connect(self._close_callblack)
@@ -207,10 +317,18 @@ class InstallDialog(QWidget, UIDesktop):
     
     def _install_callback(self):
         self._set_ui_to_install()
-        print("Install")
+        install_parms = self._create_install_parms()
+        self._installer.install(
+            install_parms,
+            finished_callback=self._install_finished_callback
+        )
+    
+    def _install_finished_callback(self):
+        print("Install finished")
+        self._set_ui_to_launch()
 
     def _init_ui(self):
-        self.launchButton.hide()
+        self.pb_launch.hide()
         self.cb_install_ffmpeg.setChecked(True)
         self.cb_install_sitepackages.setChecked(True)
     
@@ -221,6 +339,12 @@ class InstallDialog(QWidget, UIDesktop):
         self.wait_label.show()
         self.cb_install_ffmpeg.hide()
         self.cb_install_sitepackages.hide()
+    
+    def _set_ui_to_launch(self):
+        self.pb_launch.show()
+        self.pb_close.hide()
+        self.animated_gif.hide()
+        self.wait_label.hide()
 
     def _adjust_palette(self):
         palette = self.palette()
@@ -285,7 +409,7 @@ class InstallDialog(QWidget, UIDesktop):
         ButtonLayout = QHBoxLayout()
         ButtonLayout.setAlignment(Qt.AlignCenter)
         ButtonLayout.addStretch()
-        ButtonLayout.addWidget(self.launchButton)
+        ButtonLayout.addWidget(self.pb_launch)
         ButtonLayout.addWidget(self.pb_close)
         ButtonLayout.addWidget(self.pb_install)
         ButtonLayout.setAlignment(Qt.AlignCenter)
@@ -343,6 +467,11 @@ class InstallDialog(QWidget, UIDesktop):
         animated_gif.setMaximumWidth(24)
         movie.start()
         return animated_gif
+    
+    def _create_install_parms(self):
+        install_parms = InstallParms()
+        install_parms.ffmpeg = self.cb_install_ffmpeg.isChecked()
+        return install_parms
 
 class LinkButton(QPushButton):
     def __init__(self, text, link, *args, **kwargs):
