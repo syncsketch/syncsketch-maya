@@ -5,7 +5,8 @@ import logging
 from syncsketchGUI.vendor.Qt.QtWebKitWidgets import QWebView
 import syncsketchGUI.lib.user as user
 from syncsketchGUI.vendor.Qt import QtCore
-from syncsketchGUI.lib.gui import qt_utils
+
+from .. import qt_utils
 
 logger = logging.getLogger("syncsketchGUI")
 

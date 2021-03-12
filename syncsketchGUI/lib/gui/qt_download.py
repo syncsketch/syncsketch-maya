@@ -1,15 +1,21 @@
 import logging
+
 import syncsketchGUI
+
+
 from syncsketchGUI.vendor.Qt import QtWidgets, QtCore
-from syncsketchGUI.lib.gui.qt_widgets import SyncSketch_Window
+
 from syncsketchGUI.lib import database, user
-from syncsketchGUI.lib.gui.qt_widgets import RegularThumbnail, RegularComboBox, RegularStatusLabel, RegularLineEdit, RegularButton, RegularToolButton, RegularGridLayout, RegularQSpinBox
 from syncsketchGUI.lib.maya import scene as maya_scene
+
 import maya.cmds as cmds
 
+from . import qt_windows
+from . import qt_regulars
 
 logger = logging.getLogger("syncsketchGUI")
-class DownloadWindow(SyncSketch_Window):
+
+class DownloadWindow(qt_windows.SyncSketchWindow):
     """
     UI Frame to handle Download Actions
     """
@@ -80,17 +86,17 @@ class DownloadWindow(SyncSketch_Window):
 
         self.ui.main_layout.addLayout(self.ui.ui_downloadGeneral_layout)
 
-        self.ui.thumbnail_pushButton = RegularThumbnail(width=480, height=270)
-        self.ui.review_target_name = RegularLineEdit()
-        self.ui.review_target_url = RegularLineEdit()
-        self.ui.ui_status_label = RegularStatusLabel()
+        self.ui.thumbnail_pushButton = qt_regulars.Thumbnail(width=480, height=270)
+        self.ui.review_target_name = qt_regulars.LineEdit()
+        self.ui.review_target_url = qt_regulars.LineEdit()
+        self.ui.ui_status_label = qt_regulars.StatusLabel()
         self.ui.ui_downloadGeneral_layout.addWidget(self.ui.ui_status_label)
         self.ui.ui_downloadGeneral_layout.addWidget(self.ui.thumbnail_pushButton)
         self.ui.ui_downloadGeneral_layout.addWidget(self.ui.review_target_url)
 
         # GP Range Row
-        self.ui.downloadGP_range_layout = RegularGridLayout(self, label = 'Frame Offset')
-        self.ui.ui_downloadGP_rangeIn_textEdit   = RegularQSpinBox()
+        self.ui.downloadGP_range_layout = qt_regulars.GridLayout(self, label = 'Frame Offset')
+        self.ui.ui_downloadGP_rangeIn_textEdit   = qt_regulars.QSpinBox()
         self.ui.ui_downloadGP_rangeIn_textEdit.setValue(0)
         self.ui.ui_downloadGP_rangeIn_textEdit.setMinimum(-100000)
         self.ui.ui_downloadGP_rangeIn_textEdit.setMaximum(100000)
@@ -98,22 +104,22 @@ class DownloadWindow(SyncSketch_Window):
         self.ui.downloadGP_range_layout.setColumnStretch(2,0)
 
         # GP Application Row
-        self.ui.downloadGP_application_layout = RegularGridLayout(self, label = 'After Download')
+        self.ui.downloadGP_application_layout = qt_regulars.GridLayout(self, label = 'After Download')
         self.ui.downloadGP_application_checkbox = QtWidgets.QCheckBox()
         self.ui.downloadGP_application_checkbox.setText("Apply")
         self.ui.downloadGP_application_checkbox.setChecked(1)
         self.ui.downloadGP_application_checkbox.setFixedWidth(60)
         self.ui.downloadGP_application_layout.setColumnStretch(1,0)
-        self.ui.downloadGP_application_comboBox = RegularComboBox()
+        self.ui.downloadGP_application_comboBox = qt_regulars.ComboBox()
         self.ui.downloadGP_application_comboBox.addItems(maya_scene.get_available_cameras())
         self.ui.downloadGP_application_layout.addWidget(self.ui.downloadGP_application_checkbox,  0, 1)
         self.ui.downloadGP_application_layout.addWidget(self.ui.downloadGP_application_comboBox,  0, 2)
         self.ui.downloadGP_application_layout.setColumnStretch(2,1)
 
-        self.ui.ui_downloadGP_pushButton = RegularButton()
+        self.ui.ui_downloadGP_pushButton = qt_regulars.Button()
         self.ui.ui_downloadGP_pushButton.clicked.connect(self.download_greasepencil)
         self.ui.ui_downloadGP_pushButton.setText("Download\nGrease Pencil")
-        self.ui.ui_downloadVideoAnnotated_pushButton = RegularButton()
+        self.ui.ui_downloadVideoAnnotated_pushButton = qt_regulars.Button()
         self.ui.ui_downloadVideoAnnotated_pushButton.clicked.connect(self.download_video_annotated)
         self.ui.ui_downloadVideoAnnotated_pushButton.setText("Download\nAnnotated Video")
 
@@ -128,7 +134,7 @@ class DownloadWindow(SyncSketch_Window):
         self.ui.ui_downloadGP_layout.addLayout(self.ui.downloadGP_application_layout)
         self.ui.ui_downloadGP_layout.addLayout(self.ui.download_buttons_layout)
 
-        self.ui.main_layout.addWidget(self.ui.ui_downloadGP_groupbox)
+        self.lay_main.addWidget(self.ui.ui_downloadGP_groupbox)
 
 
     def download_greasepencil(self):

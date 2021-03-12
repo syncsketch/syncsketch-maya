@@ -4,116 +4,174 @@ import webbrowser
 logger = logging.getLogger("syncsketchGUI")
 
 from syncsketchGUI.vendor.Qt import QtCore, QtGui, QtWidgets
-from syncsketchGUI.lib import video, user, database
+from syncsketchGUI.lib import video, user, database, path
 
 from syncsketchGUI.gui import show_download_window
 
 # FIXME
-from syncsketchGUI.lib.gui.qt_widgets import *
-from syncsketchGUI.lib.gui.qt_utils import *
-
 from syncsketchGUI.gui import parse_url_data, get_current_item_from_ids, set_tree_selection, getReviewById
-from syncsketchGUI.lib.gui.literals import uploadPlaceHolderStr
+
+from . import qt_regulars
+from . import qt_presets
+from . import qt_utils
+
+
+from .literals import uploadPlaceHolderStr
 
 
 # FIXME
 USER_ACCOUNT_DATA = None
 
-class BrowserWidget(QtWidgets.QWidget):
+class ReviewBrowserWidget(QtWidgets.QWidget):
 
     target_changed = QtCore.Signal(dict) # dict: target_data
 
+    ######## Public ############
+
     def __init__(self, *args, **kwargs):
-        super(BrowserWidget, self).__init__(*args, **kwargs)
+        super(ReviewBrowserWidget, self).__init__(*args, **kwargs)
 
         self.reviewData = None
         self.mediaItemParent = None
 
-        self._decorate_ui()
+        self._create_ui()
+        self._layout_ui()
         self._build_connections()
-
-        #Populate Treewidget sparse
-        #self.asyncProcessRunning = False
         self._populate_tree()
-
         self._restore_ui_state()
 
-    def _decorate_ui(self):
+    def refresh(self):
+        logger.info("Refresh Clicked, trying to refresh if logged in")
+        current_user = user.SyncSketchUser()
+        if current_user.is_logged_in():
+            self._populate_tree()
+            self._update_target_from_cache()
 
-        self.browser_treeWidget = QtWidgets. QTreeWidget()
-        self.browser_treeWidget.header().setStyleSheet("color: %s"%success_color)
-        highlight_palette = self.browser_treeWidget.palette()
-        highlight_palette.setColor(QtGui.QPalette.Highlight, highlight_color)
-        self.browser_treeWidget.setPalette(highlight_palette)
-        self.browser_treeWidget.setHeaderLabel('refresh')
-        self.browser_treeWidget.header().setSectionsClickable(True)
+    def clear(self):
+        logger.info("Clear Browser Widget")
+        self._tree.clear()
+        self._ui_line_target.clear()
+        self._ui_thumbnail_item_preview.clear()
+    
+    def update_target_from_url(self, url):
+        url = self._sanitize(url)
 
-        self.browser_treeWidget.header().setDefaultAlignment(QtCore.Qt.AlignCenter)
+        url_payload = parse_url_data(url)  #FIXME
+        logger.info("url_payload: {} ".format(url_payload))
 
+        if not url_payload:
+            return
 
+        media_item = get_current_item_from_ids(self._tree, url_payload, setCurrentItem=False) #FIXME
         
-        self.target_lineEdit = RegularLineEdit() #FIXME
-        self.ui_open_pushButton = RegularToolButton(self, open_icon) #FIXME
-        self.ui_copyURL_pushButton = RegularToolButton(self, copy_icon) #FIXME
+        if not media_item:
 
-        self.ui_reviewSelection_hBoxLayout = QtWidgets.QHBoxLayout()
-        self.ui_reviewSelection_hBoxLayout.addWidget(self.target_lineEdit)
-        self.ui_reviewSelection_hBoxLayout.addWidget(self.ui_open_pushButton)
-        self.ui_reviewSelection_hBoxLayout.addWidget(self.ui_copyURL_pushButton)
+            logger.info("Cant find Media Item. Try to find Review Item and repopulate, then try again.")
 
-        self.thumbnail_itemPreview = RegularThumbnail(width=320, height=180) #FIXME
+            review_url_payload = {
+                "uuid" : url_payload["uuid"],
+                "id" : None,
+            } 
+
+            review_item = get_current_item_from_ids(self._tree, review_url_payload, setCurrentItem=False)
+
+            if not review_item:
+                logger.warning("Cant find Media and Review Item with payload: {}".format(url_payload))
+                return
+            else:
+                logger.info("Found Review Item: {}".format(review_item))
+            
+            self._populate_review_item(review_item)
+
+            media_item = get_current_item_from_ids(self._tree, url_payload, setCurrentItem=False)
         
-        # Download Button
-        self.ui_download_pushButton = RegularButton(self, icon = download_icon, color=download_color)
-        self.ui_download_pushButton.setToolTip('Download from SyncSketch Review Target')
-        self.ui_download_pushButton.setText("DOWNLOAD")
+
+        self._tree.setCurrentItem(media_item, 1)
+        self._tree.scrollToItem(media_item)
+        logger.info("Selected Media Item: {}".format(media_item))
+
+
+    ######## Private ############
+
+    def _create_ui(self):
+
+        self._tree = self._create_tree()
+        self._ui_line_target = qt_regulars.LineEdit()
+        self._ui_pb_open_url = qt_regulars.ToolButton(self, qt_presets.open_icon)
+        self._ui_pb_copy_url = qt_regulars.ToolButton(self, qt_presets.copy_icon)
+        self._ui_thumbnail_item_preview = qt_regulars.Thumbnail(width=320, height=180)
+        self._ui_pb_download = self._create_pb_download()
+
+    def _layout_ui(self):
+
+        lay_hbox_review_sel = QtWidgets.QHBoxLayout()
+        lay_hbox_review_sel.addWidget(self._ui_line_target)
+        lay_hbox_review_sel.addWidget(self._ui_pb_open_url)
+        lay_hbox_review_sel.addWidget(self._ui_pb_copy_url)
         
-        
-        self.review_ui_treeWidget_layout = QtWidgets.QVBoxLayout()
-        self.review_ui_treeWidget_layout.addWidget(self.browser_treeWidget)
-        self.review_ui_treeWidget_layout.addLayout(self.ui_reviewSelection_hBoxLayout)
-        self.review_ui_treeWidget_layout.addWidget(self.thumbnail_itemPreview)
-        self.review_ui_treeWidget_layout.addWidget(self.ui_download_pushButton, 10)
+        lay_vbox_tree = QtWidgets.QVBoxLayout()
+        lay_vbox_tree.addWidget(self._tree)
+        lay_vbox_tree.addLayout(lay_hbox_review_sel)
+        lay_vbox_tree.addWidget(self._ui_thumbnail_item_preview)
+        lay_vbox_tree.addWidget(self._ui_pb_download, 10)
 
     
-        self.ui_targetSelection_groupbox = QtWidgets.QGroupBox()
-        self.ui_targetSelection_groupbox.setTitle('TARGET FOR UPLOAD')
-        self.ui_targetSelection_groupbox.setLayout(self.review_ui_treeWidget_layout)
+        lay_groupbox = QtWidgets.QGroupBox()
+        lay_groupbox.setTitle('TARGET FOR UPLOAD')
+        lay_groupbox.setLayout(lay_vbox_tree)
 
 
-        self.main_layout = QtWidgets.QVBoxLayout()
-        self.main_layout.setSpacing(3)
-        self.main_layout.addWidget(self.ui_targetSelection_groupbox)
+        lay_main = QtWidgets.QVBoxLayout()
+        lay_main.setSpacing(3)
+        lay_main.addWidget(lay_groupbox)
 
-        self.setLayout(self.main_layout)
+        self.setLayout(lay_main)
     
     def _build_connections(self):
         
         #tree widget functions
-        self.browser_treeWidget.currentItemChanged.connect(self._update_target_from_item_callback)
+        self._tree.currentItemChanged.connect(self._update_target_from_item_callback)
 
-        self.browser_treeWidget.doubleClicked.connect(self._open_url_callback)
+        self._tree.doubleClicked.connect(self._open_url_callback)
 
         # Videos / Playblast Settings
-        self.target_lineEdit.textChanged.connect(self.update_target_from_url)
+        self._ui_line_target.textChanged.connect(self.update_target_from_url)
 
 
-        self.browser_treeWidget.itemExpanded.connect(self._expand_item_callback)
-        self.browser_treeWidget.header().sectionClicked.connect(self.refresh)
+        self._tree.itemExpanded.connect(self._expand_item_callback)
+        self._tree.header().sectionClicked.connect(self.refresh)
 
         # Videos / Upload Settings
-        self.ui_open_pushButton.clicked.connect(self._open_url_callback)
-        self.ui_copyURL_pushButton.clicked.connect(self.copy_to_clipboard)
+        self._ui_pb_open_url.clicked.connect(self._open_url_callback)
+        self._ui_pb_copy_url.clicked.connect(self._copy_to_clipboard)
         
-        self.ui_download_pushButton.clicked.connect(self._download_callback)
+        self._ui_pb_download.clicked.connect(self._download_callback)
 
         self.target_changed.connect(self._update_ui_from_target_data)
         self.target_changed.connect(self._cache_target_data)
 
+    
+    def _create_tree(self):
+        tree = QtWidgets.QTreeWidget()
+        tree.header().setStyleSheet("color: %s"%qt_presets.success_color)
+        highlight_palette = tree.palette()
+        highlight_palette.setColor(QtGui.QPalette.Highlight, qt_presets.highlight_color)
+        tree.setPalette(highlight_palette)
+        tree.setHeaderLabel('refresh')
+        tree.header().setSectionsClickable(True)
+        tree.header().setDefaultAlignment(QtCore.Qt.AlignCenter)
+        return tree
+    
+    def _create_pb_download(self):
+        pb = qt_regulars.Button(self, icon=qt_presets.download_icon, color=qt_presets.download_color)
+        pb.setToolTip('Download from SyncSketch Review Target')
+        pb.setText("DOWNLOAD")
+        return pb
+
     def _restore_ui_state(self):
         current_user = user.SyncSketchUser()
         if current_user.is_logged_in() :
-            self.update_target_from_cache()
+            self._update_target_from_cache()
 
     def _populate_tree(self, account_data=None, item_to_add = None, force = False):
 
@@ -122,7 +180,7 @@ class BrowserWidget(QtWidgets.QWidget):
             logger.info("User not logged in, returning")
             return
 
-        self.browser_treeWidget.clear()
+        self._tree.clear()
     
         account_data = self.current_user.get_account_data(withItems=False)
     
@@ -132,10 +190,10 @@ class BrowserWidget(QtWidgets.QWidget):
 
         logger.info("account_data: {}".format(account_data))
         for account in account_data:
-            account_treeWidgetItem = self._build_widget_item(parent = self.browser_treeWidget,
+            account_treeWidgetItem = self._build_widget_item(parent = self._tree,
                                                             item_name = account.get('name'),
                                                             item_type='account',
-                                                            item_icon = account_icon, #FIXME
+                                                            item_icon = qt_presets.account_icon,
                                                             item_data = account)
             # Add projects
             projects = account.get('projects')
@@ -143,7 +201,7 @@ class BrowserWidget(QtWidgets.QWidget):
                 project_treeWidgetItem = self._build_widget_item(parent = account_treeWidgetItem,
                                                                 item_name = project.get('name'),
                                                                 item_type='project',
-                                                                item_icon = project_icon, #FIXME
+                                                                item_icon = qt_presets.project_icon,
                                                                 item_data = project)
                 # Add reviews
                 reviews = project.get('reviews')
@@ -152,7 +210,7 @@ class BrowserWidget(QtWidgets.QWidget):
                     review_treeWidgetItem = self._build_widget_item(parent = project_treeWidgetItem,
                                                                 item_name = review.get('name'),
                                                                 item_type='review',
-                                                                item_icon = review_icon, #FIXME
+                                                                item_icon = qt_presets.review_icon,
                                                                 item_data = review)
                     # Add items
                     items = review.get('items')
@@ -162,20 +220,20 @@ class BrowserWidget(QtWidgets.QWidget):
                         #add UUID of the review container to the media, so we can use it in itemdata
                         media['uuid'] = review['uuid']
                         if not media.get('type'):
-                            specified_media_icon = media_unknown_icon #FIXME
+                            specified_media_icon = qt_presets.media_unknown_icon 
                         elif 'video' in media.get('type').lower():
-                            specified_media_icon = media_video_icon #FIXME
+                            specified_media_icon = qt_presets.media_video_icon 
                         elif 'image' in media.get('type').lower():
-                            specified_media_icon = media_image_icon #FIXME
+                            specified_media_icon = qt_presets.media_image_icon 
                         elif 'sketchfab' in media.get('type').lower():
-                            specified_media_icon = media_sketchfab_icon #FIXME
+                            specified_media_icon = qt_presets.media_sketchfab_icon 
                         else:
-                            specified_media_icon = media_unknown_icon
+                            specified_media_icon = qt_presets.media_unknown_icon
 
                         media_treeWidgetItem = self._build_widget_item(parent = review_treeWidgetItem,
                                                                     item_name = media.get('name'),
                                                                     item_type='media',
-                                                                    item_icon = specified_media_icon, #FIXME
+                                                                    item_icon = specified_media_icon,
                                                                     item_data = media)
 
                         media_treeWidgetItem.sizeHint(80)
@@ -199,15 +257,15 @@ class BrowserWidget(QtWidgets.QWidget):
             #add UUID of the review container to the media, so we can use it in itemdata
             media['uuid'] = review['uuid']
             if not media.get('type'):
-                specified_media_icon = media_unknown_icon #FIXME 
+                specified_media_icon = qt_presets.media_unknown_icon
             elif 'video' in media.get('type').lower():
-                specified_media_icon = media_video_icon  #FIXME
+                specified_media_icon = qt_presets.media_video_icon
             elif 'image' in media.get('type').lower():
-                specified_media_icon = media_image_icon  #FIXME
+                specified_media_icon = qt_presets.media_image_icon
             elif 'sketchfab' in media.get('type').lower():
-                specified_media_icon = media_sketchfab_icon  #FIXME
+                specified_media_icon = qt_presets.media_sketchfab_icon
             else:
-                specified_media_icon = media_unknown_icon   #FIXME
+                specified_media_icon = qt_presets.media_unknown_icon
 
             media_treeWidgetItem = self._build_widget_item(parent = review_item,
                                                         item_name = media.get('name'),
@@ -257,34 +315,34 @@ class BrowserWidget(QtWidgets.QWidget):
 
     def _update_target_from_item_callback(self, current_item, previous_item):
  
-        target_data = self.get_target_data(current_item)
+        target_data = self._get_target_data(current_item)
         self.target_changed.emit(target_data)
 
     def _update_ui_from_target_data(self, target_data):
         
         target_url = target_data["target_url"]
-        self.target_lineEdit.setText(target_url)
+        self._ui_line_target.setText(target_url)
         logger.info("Set target_lineEdit to {}".format(target_url))
 
         ui_to_toggle = [
-            self.ui_download_pushButton,
-            self.ui_copyURL_pushButton,
-            self.ui_reviewSelection_hBoxLayout
+            self._ui_pb_download,
+            self._ui_pb_copy_url,
+            self._ui_lay_hbox_review_sel
         ]
 
         target_type = target_data['target_url_type']
 
         if (target_type == "review") or (target_type == "media"):
-            enable_interface(ui_to_toggle, True)
+            qt_utils.enable_interface(ui_to_toggle, True)
         else:
-            enable_interface(ui_to_toggle, False)
-            self.target_lineEdit.setPlaceholderText(uploadPlaceHolderStr)
+            qt_utils.enable_interface(ui_to_toggle, False)
+            self._ui_line_target.setPlaceholderText(uploadPlaceHolderStr)
 
         if target_type == "media":
             current_user = user.SyncSketchUser()
             thumbURL = current_user.get_item_info(target_data['media_id'])['objects'][0]['thumbnail_url']
             logger.info("thumbURL: {}".format(thumbURL))
-            self.thumbnail_itemPreview.set_icon_from_url(thumbURL)
+            self._ui_thumbnail_item_preview.set_icon_from_url(thumbURL)
 
     def _cache_target_data(self, target_data):
         logger.info("Cache Target Data: {}".format(target_data))
@@ -318,9 +376,9 @@ class BrowserWidget(QtWidgets.QWidget):
 
     def _open_url_callback(self, selected_item= None):
         if not selected_item:
-            selected_item = self.browser_treeWidget.currentItem()
+            selected_item = self._tree.currentItem()
         
-        target_data = self.get_target_data(selected_item)
+        target_data = self._get_target_data(selected_item)
         offline_url = path.make_url_offlineMode(target_data["target_url"])
         logger.info("Opening Url: {} ".format(offline_url))
         if offline_url:
@@ -329,58 +387,16 @@ class BrowserWidget(QtWidgets.QWidget):
     def _sanitize(self, val):
         return val.rstrip().lstrip()
 
-    def refresh(self):
-        logger.info("Refresh Clicked, trying to refresh if logged in")
-        current_user = user.SyncSketchUser()
-        if current_user.is_logged_in():
-            self._populate_tree()
-            self.update_target_from_cache()
         
-    def copy_to_clipboard(self):
+    def _copy_to_clipboard(self):
         cb = QtWidgets.QApplication.clipboard()
         cb.clear(mode=cb.Clipboard)
-        link =  self.target_lineEdit.text()
+        link =  self._ui_line_target.text()
         #link = database.read_cache('us_last_upload_url_pushButton')
         cb.setText(link, mode=cb.Clipboard)
-    
-    def update_target_from_url(self, url):
-        url = self._sanitize(url)
 
-        url_payload = parse_url_data(url)  #FIXME
-        logger.info("url_payload: {} ".format(url_payload))
 
-        if not url_payload:
-            return
-
-        media_item = get_current_item_from_ids(self.browser_treeWidget, url_payload, setCurrentItem=False) #FIXME
-        
-        if not media_item:
-
-            logger.info("Cant find Media Item. Try to find Review Item and repopulate, then try again.")
-
-            review_url_payload = {
-                "uuid" : url_payload["uuid"],
-                "id" : None,
-            } 
-
-            review_item = get_current_item_from_ids(self.browser_treeWidget, review_url_payload, setCurrentItem=False)
-
-            if not review_item:
-                logger.warning("Cant find Media and Review Item with payload: {}".format(url_payload))
-                return
-            else:
-                logger.info("Found Review Item: {}".format(review_item))
-            
-            self._populate_review_item(review_item)
-
-            media_item = get_current_item_from_ids(self.browser_treeWidget, url_payload, setCurrentItem=False)
-        
-
-        self.browser_treeWidget.setCurrentItem(media_item, 1)
-        self.browser_treeWidget.scrollToItem(media_item)
-        logger.info("Selected Media Item: {}".format(media_item))
-
-    def update_target_from_cache(self):
+    def _update_target_from_cache(self):
         link = database.read_cache('upload_to_value')
         if not link:
             logger.info("Cache for 'upload_to_value' doesnt exist")
@@ -388,7 +404,7 @@ class BrowserWidget(QtWidgets.QWidget):
         logger.info("Update Target from URL: {} ".format(link))
         self.update_target_from_url(link)
     
-    def get_target_data(self, item):
+    def _get_target_data(self, item):
 
         if not item:
             logger.info("Nothing selected returning")
@@ -443,10 +459,4 @@ class BrowserWidget(QtWidgets.QWidget):
         logger.info("upload_to_value :{} ".format(current_data['upload_to_value']))
 
         return current_data
-
-    def clear(self):
-        logger.info("Clear Browser Widget")
-        self.browser_treeWidget.clear()
-        self.target_lineEdit.clear()
-        self.thumbnail_itemPreview.clear()
 

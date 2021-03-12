@@ -1,14 +1,18 @@
 import logging
 import webbrowser
 
-logger = logging.getLogger("syncsketchGUI")
+from syncsketchGUI.vendor.Qt import QtCore, QtGui, QtWidgets
 
 import syncsketchGUI
-from syncsketchGUI.vendor.Qt import QtCore, QtGui, QtWidgets
-from syncsketchGUI.lib.gui.qt_widgets import RegularLineEdit, RegularToolButton, HoverButton, RegularGridLayout, RegularButton
-from syncsketchGUI.lib.gui.icons import play_icon, upload_color, upload_icon, logo_icon, _get_qicon
 from syncsketchGUI.lib import video, user, database, path
-from syncsketchGUI.lib.gui.qt_utils import suppressedUI
+
+
+from . import qt_utils
+from . import qt_regulars
+from . import qt_presets
+
+
+logger = logging.getLogger("syncsketchGUI")
 
 class UploadWidget(QtWidgets.QWidget):
 
@@ -38,10 +42,10 @@ class UploadWidget(QtWidgets.QWidget):
         self.cs_info_label = QtWidgets.QLabel()
         self.cs_info_label.setStyleSheet("font: 9pt")
 
-        self.ps_lastfile_line_edit = RegularLineEdit(self)
+        self.ps_lastfile_line_edit = qt_regulars.LineEdit(self)
         self.ps_lastfile_line_edit.setReadOnly(1)
         
-        self.ps_filename_toolButton = RegularToolButton(self, icon=file_icon)
+        self.ps_filename_toolButton = qt_regulars.ToolButton(self, icon=file_icon)
         
 
         self.ui_lastfileSelection_layout = QtWidgets.QHBoxLayout()
@@ -50,7 +54,7 @@ class UploadWidget(QtWidgets.QWidget):
 
 
         # To DO should be cleaner
-        self.video_thumbOverlay_pushButton = HoverButton(icon=play_icon)
+        self.video_thumbOverlay_pushButton = qt_regulars.HoverButton(icon=qt_presets.play_icon)
         self.video_thumbOverlay_pushButton.setIconSize(QtCore.QSize(320, 180))
         self.video_thumbOverlay_pushButton.setToolTip('Play Clip')
        
@@ -62,10 +66,10 @@ class UploadWidget(QtWidgets.QWidget):
 
         self.ps_afterUpload_label = QtWidgets.QLabel("After Upload")
 
-        self.ps_record_after_layout = RegularGridLayout(self, label='After Upload')
+        self.ps_record_after_layout = qt_regulars.GridLayout(self, label='After Upload')
         self.ps_record_after_layout.addWidget(self.ps_open_afterUpload_checkBox, 0, 1)
         
-        self.ui_upload_pushButton = RegularButton(self, icon = upload_icon, color=upload_color)
+        self.ui_upload_pushButton = qt_regulars.Button(self, icon = qt_presets.upload_icon, color=qt_presets.upload_color)
         self.ui_upload_pushButton.setToolTip('Upload to SyncSketch Review Target')
         
 
@@ -136,7 +140,7 @@ class UploadWidget(QtWidgets.QWidget):
             pass
 
         if clips:
-            with suppressedUI(self.ps_lastfile_line_edit):
+            with qt_utils.suppressedUI(self.ps_lastfile_line_edit):
                 self.ps_lastfile_line_edit.clear()
                 self.ps_lastfile_line_edit.setText(database.read_cache('last_recorded')['filename'])
             self.update_clip_info()
@@ -201,9 +205,9 @@ class UploadWidget(QtWidgets.QWidget):
         except:
             pass
         if not fname:
-            imageWidget.setIcon(logo_icon)
+            imageWidget.setIcon(qt_presets.logo_icon)
         else:
-            icon = _get_qicon(fname)
+            icon = qt_presets._get_qicon(fname)
             imageWidget.setIcon(icon)
         imageWidget.setIconSize(QtCore.QSize(320, 180))
 

@@ -1,32 +1,33 @@
 import os 
 import logging
 
+from syncsketchGUI.vendor.Qt import QtWidgets, QtCore, QtGui
+
 import syncsketchGUI
 
-from syncsketchGUI.vendor.Qt import QtWidgets, QtCore, QtGui
-from syncsketchGUI.lib.gui.qt_widgets import RegularGridLayout, RegularComboBox, RegularToolButton, RegularLineEdit, RegularButton
-from syncsketchGUI.lib.gui.icons import record_icon, preset_icon, record_color
 from syncsketchGUI.lib import path
-from syncsketchGUI.lib.gui.literals import DEFAULT_VIEWPORT_PRESET, PRESET_YAML, VIEWPORT_YAML, DEFAULT_PRESET, message_is_not_connected
-from syncsketchGUI.lib.gui.qt_utils import enable_interface
-from syncsketchGUI.lib.maya import scene as maya_scene
 from syncsketchGUI.lib import database
+
+
+from syncsketchGUI.lib.maya import scene as maya_scene
 from syncsketchGUI.gui import  _maya_delete_ui
 
+from . import qt_regulars
+from . import qt_presets
+from . import qt_utils
+
+from .literals import DEFAULT_VIEWPORT_PRESET, PRESET_YAML, VIEWPORT_YAML, DEFAULT_PRESET, message_is_not_connected
 
 logger = logging.getLogger("syncsketchGUI")
 
-class MayaCaptureWidget(QtWidgets.QWidget):
+class MayaPlayblastRecorderWidget(QtWidgets.QWidget):
     title = "RECORD"
 
     recorded = QtCore.Signal(str) # str: recorded File
     uploaded = QtCore.Signal(str) # str: Url
 
     def __init__(self, *args, **kwargs):
-        super(MayaCaptureWidget, self).__init__(*args, **kwargs)
-        
-        
-
+        super(MayaPlayblastRecorderWidget, self).__init__(*args, **kwargs)
         
         self.decorate_ui()
         self.populate_ui()
@@ -55,41 +56,41 @@ class MayaCaptureWidget(QtWidgets.QWidget):
         
 
          # record_layout_layout -  format preset
-        self.upload_formatPreset_layout = RegularGridLayout(self, label='Format Preset')
+        self.upload_formatPreset_layout = qt_regulars.GridLayout(self, label='Format Preset')
         self.lay_grid_main.addLayout(self.upload_formatPreset_layout)
-        self.ui_formatPreset_comboBox = RegularComboBox(self)
+        self.ui_formatPreset_comboBox = qt_regulars.ComboBox(self)
         self.ps_preset_description = QtWidgets.QLabel()
         self.ps_preset_description.setStyleSheet("font: 9pt")
         self.ps_preset_description.setIndent(5)
-        self.ps_format_toolButton = RegularToolButton(self, icon = file_icon)
+        self.ps_format_toolButton = qt_regulars.ToolButton(self, icon = file_icon)
         self.upload_formatPreset_layout.addWidget(self.ui_formatPreset_comboBox, 0, 1)
         self.upload_formatPreset_layout.addWidget(self.ps_format_toolButton, 0, 2)
         self.upload_formatPreset_layout.addWidget(self.ps_preset_description,  1, 1, 1, 2)
 
         # record_layout - viewport preset
-        self.upload_viewportPreset_layout = RegularGridLayout(self, label='Viewport Preset')
+        self.upload_viewportPreset_layout = qt_regulars.GridLayout(self, label='Viewport Preset')
         self.lay_grid_main.addLayout(self.upload_viewportPreset_layout)
-        self.ui_viewportpreset_comboBox = RegularComboBox(self)
-        self.ui_viewport_toolButton = RegularToolButton(self, icon = preset_icon)
+        self.ui_viewportpreset_comboBox = qt_regulars.ComboBox(self)
+        self.ui_viewport_toolButton = qt_regulars.ToolButton(self, icon = qt_presets.preset_icon)
         self.upload_viewportPreset_layout.addWidget(self.ui_viewportpreset_comboBox, 0, 1)
         self.upload_viewportPreset_layout.addWidget(self.ui_viewport_toolButton, 0, 2)
 
         # record_layout - camera
-        self.upload_cameraPreset_layout = RegularGridLayout(self, label='Camera')
+        self.upload_cameraPreset_layout = qt_regulars.GridLayout(self, label='Camera')
         self.lay_grid_main.addLayout(self.upload_cameraPreset_layout)
-        self.ui_cameraPreset_comboBox = RegularComboBox(self)
-        self.ui_camera_toolButton = RegularToolButton(self, icon = file_icon)
+        self.ui_cameraPreset_comboBox = qt_regulars.ComboBox(self)
+        self.ui_camera_toolButton = qt_regulars.ToolButton(self, icon = file_icon)
         self.upload_cameraPreset_layout.addWidget(self.ui_cameraPreset_comboBox, 0, 1)
         self.upload_cameraPreset_layout.addWidget(self.ui_camera_toolButton, 0, 2)
 
         # record_layout - range
-        self.upload_range_layout = RegularGridLayout(self, label='Frame Range')
+        self.upload_range_layout = qt_regulars.GridLayout(self, label='Frame Range')
         self.lay_grid_main.addLayout(self.upload_range_layout)
-        self.ui_range_comboBox = RegularComboBox(self)
+        self.ui_range_comboBox = qt_regulars.ComboBox(self)
         self.ui_range_comboBox.addItems(["Start / End", "Time Slider","Highlighted","Current Frame"])
-        self.ui_range_toolButton = RegularToolButton(self, icon = file_icon)
-        self.ui_rangeIn_textEdit  = RegularLineEdit()
-        self.ui_rangeOut_textEdit  = RegularLineEdit()
+        self.ui_range_toolButton = qt_regulars.ToolButton(self, icon = file_icon)
+        self.ui_rangeIn_textEdit  = qt_regulars.LineEdit()
+        self.ui_rangeOut_textEdit  = qt_regulars.LineEdit()
         self.upload_range_layout.addWidget(self.ui_range_comboBox, 0, 1)
         self.upload_range_layout.addWidget(self.ui_rangeIn_textEdit, 0, 2)
         self.upload_range_layout.setColumnStretch(2,0)
@@ -109,37 +110,37 @@ class MayaCaptureWidget(QtWidgets.QWidget):
         self.ui_rangeOut_textEdit.setPlaceholderText('End')
 
         # record_layout - Directory
-        self.upload_directory_layout = RegularGridLayout(self, label='Directory')
+        self.upload_directory_layout = qt_regulars.GridLayout(self, label='Directory')
         self.lay_grid_main.addLayout(self.upload_directory_layout)
         self.ps_directory_lineEdit = QtWidgets.QLineEdit()
         self.ps_directory_lineEdit.setPlaceholderText('Output Directory')
-        self.ps_directory_toolButton = RegularToolButton(self, icon = directory_icon)
+        self.ps_directory_toolButton = qt_regulars.ToolButton(self, icon = directory_icon)
         self.upload_directory_layout.addWidget(self.ps_directory_lineEdit, 0, 1)
         self.upload_directory_layout.addWidget(self.ps_directory_toolButton, 0, 2)
 
         # record_layout - filename
-        self.upload_filename_layout = RegularGridLayout(self, label='Clip Name')
+        self.upload_filename_layout = qt_regulars.GridLayout(self, label='Clip Name')
         self.lay_grid_main.addLayout(self.upload_filename_layout)
         self.us_filename_lineEdit = QtWidgets.QLineEdit()
         self.us_filename_lineEdit.setPlaceholderText('File Name or Prefix')
-        self.ps_filename_toolButton = RegularToolButton(self)   ######    self.ps_filename_toolButton used twice  
+        self.ps_filename_toolButton = qt_regulars.ToolButton(self)   ######    self.ps_filename_toolButton used twice  
 
         self.ps_filename_toolButton.setEnabled(0)
         self.upload_filename_layout.addWidget(self.us_filename_lineEdit, 0, 1)
         self.upload_filename_layout.addWidget(self.ps_filename_toolButton, 0, 2)
 
         # record_layout - clipname
-        self.upload_clipname_layout = RegularGridLayout(self, label='Clip Suffix ')
+        self.upload_clipname_layout = qt_regulars.GridLayout(self, label='Clip Suffix ')
         self.lay_grid_main.addLayout(self.upload_clipname_layout)
         self.ps_clipname_lineEdit = QtWidgets.QLineEdit()
         self.ps_clipname_lineEdit.setPlaceholderText('Clip Suffix (optional)')
-        self.ps_clipname_toolButton = RegularToolButton(self)
+        self.ps_clipname_toolButton = qt_regulars.ToolButton(self)
         self.ps_clipname_toolButton.setEnabled(0)
         self.upload_clipname_layout.addWidget(self.ps_clipname_lineEdit, 0, 1)
         self.upload_clipname_layout.addWidget(self.ps_clipname_toolButton, 0, 2)
 
         # record_layout - after record
-        self.upload_after_layout = RegularGridLayout(self, label='After Record')
+        self.upload_after_layout = qt_regulars.GridLayout(self, label='After Record')
         self.ps_play_after_creation_checkBox = QtWidgets.QCheckBox()
         self.ps_play_after_creation_checkBox.setChecked(True)
         self.ps_play_after_creation_checkBox.setText('Play')
@@ -149,7 +150,7 @@ class MayaCaptureWidget(QtWidgets.QWidget):
         self.upload_after_layout.addWidget(self.ps_upload_after_creation_checkBox, 0, 2)
         self.lay_grid_main.addLayout(self.upload_after_layout)
         # record_layout - record button
-        self.ui_record_pushButton = RegularButton(self, icon=record_icon, color=record_color)
+        self.ui_record_pushButton = qt_regulars.Button(self, icon=qt_presets.record_icon, color=qt_presets.record_color)
         self.ui_record_pushButton.setText("RECORD")
 
         self.lay_grid_main.addWidget(self.ui_record_pushButton)
@@ -272,7 +273,7 @@ class MayaCaptureWidget(QtWidgets.QWidget):
             self.ui_rangeOut_textEdit,
             self.ui_range_toolButton
         ]
-        enable_interface(interface, show) 
+        qt_utils.enable_interface(interface, show) 
     
     def record_playblast(self):
         # store current preset since subsequent calls will use that data exclusively
@@ -334,13 +335,13 @@ class MayaCaptureWidget(QtWidgets.QWidget):
         database.dump_cache({'current_viewport_preset': val})
 
     def manage_preset(self):
-        from syncsketchGUI.lib.gui.syncsketchWidgets.formatPresetWidget import FormatPresetWindow
+        from .qt_recorder_preset import FormatPresetWindow
         _maya_delete_ui(FormatPresetWindow.window_name)
         preset_window = FormatPresetWindow(self)
         preset_window.show()
     
     def manage_viewport_preset(self):
-        from syncsketchGUI.lib.gui.syncsketchWidgets.viewportPresetWidget import ViewportPresetWindow
+        from .qt_viewport_preset import ViewportPresetWindow
         _maya_delete_ui(ViewportPresetWindow.window_name)
         preset_viewport_window = ViewportPresetWindow(self)
         preset_viewport_window.show()

@@ -1,13 +1,23 @@
-from syncsketchGUI.lib.gui.qt_widgets import SyncSketch_Window
+import logging 
+
+
 from syncsketchGUI.vendor.Qt import QtWidgets, QtCore
-from syncsketchGUI.lib.gui.icons import *
-from syncsketchGUI.lib.gui.icons import _get_qicon
-from syncsketchGUI.lib.gui.qt_widgets import *
-from syncsketchGUI.lib.gui.syncsketchWidgets.mainWidget import DEFAULT_PRESET, VIEWPORT_YAML, PRESET_YAML
+
+from syncsketchGUI.lib import path, database, user
+
 from syncsketchGUI.lib.maya import scene as maya_scene
 
 
-class ViewportPresetWindow(SyncSketch_Window):
+
+from . import qt_windows
+from . import qt_regulars
+from . import qt_presets
+from . import qt_dialogs
+from .literals import DEFAULT_PRESET, VIEWPORT_YAML, PRESET_YAML
+
+logger = logging.getLogger("syncsketchGUI")
+
+class ViewportPresetWindow(qt_windows.SyncSketchWindow):
     """
     Video Preset Window Class
     """
@@ -24,8 +34,8 @@ class ViewportPresetWindow(SyncSketch_Window):
 
     def decorate_ui(self):
         self.ui.ps_thumb_horizontalLayout = QtWidgets.QGridLayout()
-        self.ui.screenshot_pushButton = RegularThumbnail(width=480, height=270)
-        self.ui.ui_thumbcamera_label = HoverButton(icon=refresh_icon)
+        self.ui.screenshot_pushButton = qt_regulars.Thumbnail(width=480, height=270)
+        self.ui.ui_thumbcamera_label = qt_regulars.HoverButton(icon=qt_presets.refresh_icon)
         self.ui.ui_thumbcamera_label.setLayoutDirection(QtCore.Qt.RightToLeft)
         self.ui.ui_thumbcamera_label.setMinimumSize(480, 270)
         self.ui.ps_thumb_horizontalLayout.addWidget(self.ui.screenshot_pushButton,0,0)
@@ -34,20 +44,20 @@ class ViewportPresetWindow(SyncSketch_Window):
 
         # Viewport Preset Selection and Handling
         self.ui.ps_preset_horizontalLayout = QtWidgets.QHBoxLayout()
-        self.ui.ui_viewportpreset_comboBox = RegularComboBox()
+        self.ui.ui_viewportpreset_comboBox = qt_regulars.ComboBox()
 
 
-        self.ui.ps_new_preset_pushButton = RegularToolButton()
-        self.ui.ps_new_preset_pushButton.setIcon(add_icon)
+        self.ui.ps_new_preset_pushButton = qt_regulars.ToolButton()
+        self.ui.ps_new_preset_pushButton.setIcon(qt_presets.add_icon)
 
-        self.ui.ps_rename_preset_pushButton = RegularToolButton()
-        self.ui.ps_rename_preset_pushButton.setIcon(edit_icon)
+        self.ui.ps_rename_preset_pushButton = qt_regulars.ToolButton()
+        self.ui.ps_rename_preset_pushButton.setIcon(qt_presets.edit_icon)
 
-        self.ui.ps_delete_preset_pushButton = RegularToolButton()
-        self.ui.ps_delete_preset_pushButton.setIcon(delete_icon)
+        self.ui.ps_delete_preset_pushButton = qt_regulars.ToolButton()
+        self.ui.ps_delete_preset_pushButton.setIcon(qt_presets.delete_icon)
 
-        self.ui.ps_refresh_pushButton = RegularToolButton()
-        self.ui.ps_refresh_pushButton.setIcon(refresh_icon)
+        self.ui.ps_refresh_pushButton = qt_regulars.ToolButton()
+        self.ui.ps_refresh_pushButton.setIcon(qt_presets.refresh_icon)
 
         self.ui.ps_preset_horizontalLayout.addWidget(self.ui.ps_refresh_pushButton)
         self.ui.ps_preset_horizontalLayout.addWidget(self.ui.ui_viewportpreset_comboBox)
@@ -58,26 +68,26 @@ class ViewportPresetWindow(SyncSketch_Window):
         # Viewport Preset Application
         self.ui.buttons_horizontalLayout = QtWidgets.QHBoxLayout()
 
-        self.ui.ps_apply_preset_pushButton = RegularButton()
+        self.ui.ps_apply_preset_pushButton = qt_regulars.Button()
         self.ui.ps_apply_preset_pushButton.setText("Apply \nto current view")
         self.ui.buttons_horizontalLayout.addWidget(self.ui.ps_apply_preset_pushButton)
 
-        self.ui.ps_applyToAll_preset_pushButton = RegularButton()
+        self.ui.ps_applyToAll_preset_pushButton = qt_regulars.Button()
         self.ui.ps_applyToAll_preset_pushButton.setText("Apply\nto all views")
         self.ui.buttons_horizontalLayout.addWidget(self.ui.ps_applyToAll_preset_pushButton)
 
-        self.ui.ps_save_preset_pushButton = RegularButton()
+        self.ui.ps_save_preset_pushButton = qt_regulars.Button()
         self.ui.ps_save_preset_pushButton.setText("Override preset\nfrom view")
         self.ui.buttons_horizontalLayout.addWidget(self.ui.ps_save_preset_pushButton)
 
-        self.ui.ui_status_label = RegularStatusLabel()
+        self.ui.ui_status_label = qt_regulars.StatusLabel()
 
         self.ui.ui_status_label.setFixedHeight(30)
-        self.ui.master_layout.setSpacing(1)
-        self.ui.master_layout.addWidget(self.ui.ui_status_label)
-        self.ui.master_layout.addLayout(self.ui.ps_thumb_horizontalLayout)
-        self.ui.master_layout.addLayout(self.ui.ps_preset_horizontalLayout)
-        self.ui.master_layout.addLayout(self.ui.buttons_horizontalLayout)
+        self.lay_main.setSpacing(1)
+        self.lay_main.addWidget(self.ui.ui_status_label)
+        self.lay_main.addLayout(self.ui.ps_thumb_horizontalLayout)
+        self.lay_main.addLayout(self.ui.ps_preset_horizontalLayout)
+        self.lay_main.addLayout(self.ui.buttons_horizontalLayout)
 
     def build_connections(self):
         """Connects all widget's callbacks"""
@@ -97,7 +107,7 @@ class ViewportPresetWindow(SyncSketch_Window):
         """Create a new preset"""
         title = 'Creating Preset'
         message = 'Please choose a name for this preset.'
-        user_input = InputDialog(self, title, message)
+        user_input = qt_dialogs.InputDialog(self, title, message)
         if not user_input.response:
             return
         new_preset_name = user_input.response_text
@@ -138,7 +148,7 @@ class ViewportPresetWindow(SyncSketch_Window):
         if not new_preset_name:
             title = 'Error Renaming'
             message = 'It appears this name already exists.'
-            WarningDialog(self, title, message)
+            qt_dialogs.WarningDialog(self, title, message)
             return
         database.save_cache("current_viewport_preset", new_preset_name)
         self.populate_ui()
@@ -177,15 +187,15 @@ class ViewportPresetWindow(SyncSketch_Window):
         fname = maya_scene.screenshot_current_editor( preset_file, preset_name, camera = current_camera)
         self.ui.ui_status_label.update(preset_name)
         if not fname:
-            self.ui.screenshot_pushButton.setIcon(logo_icon)
+            self.ui.screenshot_pushButton.setIcon(qt_presets.logo_icon)
         else:
-            icon = _get_qicon(fname)
+            icon = qt_presets._get_qicon(fname)
             self.ui.screenshot_pushButton.setIcon(icon)
             self.ui.ui_status_label.update("Previewing Preset '%s' - from camera '%s'"%(preset_name,current_camera))
         self.ui.screenshot_pushButton.setText('')
         self.ui.screenshot_pushButton.setIconSize(QtCore.QSize(480, 270))
 
-        self.setWindowIcon(logo_icon)
+        self.setWindowIcon(qt_presets.logo_icon)
 
 
     def populate_ui(self):

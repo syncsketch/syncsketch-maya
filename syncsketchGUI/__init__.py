@@ -1,13 +1,10 @@
-from syncsketchGUI.installScripts import installGui
-from syncsketchGUI.installScripts.maintenance import getVersionDifference
+
 import os
 import time
 import webbrowser
 import logging
-from syncsketchGUI.lib.gui.syncsketchWidgets import infoDialog
-import pprint
 from pprint import pformat
-from syncsketchGUI.lib import user as user
+
 
 logger = logging.getLogger('syncsketchGUI')
 print("logger: {}".format(logger))
@@ -32,7 +29,7 @@ WAIT_TIME = 0.1 # seconds
 
 from syncsketchGUI.lib import user, path
 from syncsketchGUI.lib import video, database
-from syncsketchGUI.lib.gui import icons, qt_utils, qt_widgets
+from syncsketchGUI.lib.gui import qt_presets, qt_utils, qt_dialogs
 import gui
 
 # ======================================================================
@@ -68,9 +65,9 @@ def reload_toolkit():
     reload(video)
     reload(gui)
     reload(path)
-    reload(icons)
+    reload(qt_presets)
     reload(user)
-    reload(qt_widgets)
+    reload(qt_dialogs)
     reload(qt_utils)
 
 
@@ -115,7 +112,7 @@ def get_current_file():
     if not filename:
         title = 'No File for Upload'
         message = 'There is no previously recorded video file, please record one first through The Widget'
-        qt_widgets.WarningDialog(None, title, message)
+        qt_dialogs.WarningDialog(None, title, message)
         return
 
 
@@ -125,7 +122,7 @@ def get_current_file():
         title = 'Not a valid file'
         message = 'Please provide a valid file'
         logger.debug("{} is not a valid file".format(filename))
-        qt_widgets.WarningDialog(None, title, message)
+        qt_dialogs.WarningDialog(None, title, message)
         return
     else:
         return filename
@@ -136,7 +133,7 @@ def show_success_message(uploaded_item):
     title = 'Upload Successful'
     info_message = 'Your file has successfully been uploaded. Please follow this link:'
 
-    UploadedMediaDialog = infoDialog.InfoDialog(None,
+    UploadedMediaDialog = qt_dialogs.InfoDialog(None,
                                           title,
                                           info_message,
                                           uploaded_item)
@@ -246,7 +243,7 @@ def _record():
         title = 'Playblast Location'
         message = 'Please specify playblast file name and location.'
         return
-        qt_widgets.WarningDialog(None, title, message)
+        qt_dialogs.WarningDialog(None, title, message)
         filepath = os.path.expanduser('~/Desktop/playblasts/')
         filename = 'playblast'
     if clipname:
@@ -397,7 +394,7 @@ def playblast_and_upload():
     title = 'Upload Successful'
     info_message = 'Your file has successfully been uploaded. Please follow this link:'
 
-    UploadedMediaDialog = infoDialog.InfoDialog(title = title, info_text = info_message, media_url = uploaded_media_url.json()['reviewURL'])
+    UploadedMediaDialog = qt_dialogs.InfoDialog(title = title, info_text = info_message, media_url = uploaded_media_url.json()['reviewURL'])
     UploadedMediaDialog.exec_()
 
 def install_shelf():

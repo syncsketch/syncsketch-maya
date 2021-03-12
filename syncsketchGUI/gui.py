@@ -15,12 +15,12 @@ from vendor.Qt.QtWidgets import QApplication
 
 import syncsketchGUI
 
-from lib.gui.qt_widgets import *
+from syncsketchGUI.lib import user
+from syncsketchGUI.lib import database
+
 from lib.gui import qt_utils
-from lib.gui.qt_utils import *
+from lib.gui.web import LoginView
 
-
-from lib.connection import *
 from vendor import mayapalette
 from vendor.Qt import QtCompat
 from vendor.Qt import QtCore
@@ -31,7 +31,7 @@ import logging
 logger = logging.getLogger("syncsketchGUI")
 
 
-from lib.gui.syncsketchWidgets.web import LoginView
+
 import maya.cmds as cmds
 
 PALETTE_YAML = 'syncsketch_palette.yaml'
@@ -240,7 +240,7 @@ def show_web_login_window():
 
 
 def show_menu_window():
-    from syncsketchGUI.lib.gui.syncsketchWidgets.mainWidget import MenuWindow
+    from syncsketchGUI.lib.gui.qt_main_winow import MenuWindow
     _maya_delete_ui(MenuWindow.window_name)
     app = _call_ui_for_maya(MenuWindow)
     logger.info("app: {}".format(app))
@@ -248,13 +248,13 @@ def show_menu_window():
 
 
 def show_download_window():
-    from syncsketchGUI.lib.gui.syncsketchWidgets.downloadWidget import DownloadWindow
+    from syncsketchGUI.lib.gui.qt_download import DownloadWindow
     _maya_delete_ui(DownloadWindow.window_name)
     _call_ui_for_maya(DownloadWindow)
 
 
 def show_viewport_preset_window():
-    from syncsketchGUI.lib.gui.syncsketchWidgets.viewportPresetWidget import ViewportPresetWindow
+    from syncsketchGUI.lib.gui.qt_viewport_preset import ViewportPresetWindow
     _maya_delete_ui(ViewportPresetWindow.window_name)
     _call_ui_for_maya(ViewportPresetWindow)
 

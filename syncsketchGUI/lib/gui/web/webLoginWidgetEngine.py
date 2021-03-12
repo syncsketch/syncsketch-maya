@@ -4,7 +4,8 @@ import logging
 import json
 from syncsketchGUI.vendor.Qt import QtCore, QtWidgets, QtWebEngineWidgets, QtWebChannel
 from syncsketchGUI.lib import user
-from syncsketchGUI.lib.gui import qt_utils
+
+from .. import qt_utils
 
 logger = logging.getLogger("syncsketchGUI")
 
