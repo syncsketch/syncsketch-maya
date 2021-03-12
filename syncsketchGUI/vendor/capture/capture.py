@@ -3,7 +3,7 @@
 Playblasting with independent viewport, camera and display options
 
 """
-from syncsketchGUI.lib.gui import icons, qt_utils, qt_widgets
+
 import re
 import sys
 import contextlib
@@ -11,11 +11,16 @@ import contextlib
 from maya import cmds
 from maya import mel
 
+
+#TODO: Remove QT Dependency
 try:
     from PySide2 import QtGui, QtWidgets
 except ImportError:
     from PySide import QtGui
     QtWidgets = QtGui
+
+#TODO: Remove QT Dependency
+from syncsketchGUI.lib.gui import qt_dialogs    
 
 version_info =(2, 3, 0)
 
@@ -197,7 +202,7 @@ def capture(camera=None,
                         #This is a naive guess, but usually only happens if Quicktime libraries are missing
                         title = 'Quicktime not found on this machine,'
                         message = 'You can choose avi from the presets, which we will automatically convert for you into a mov'
-                        qt_widgets.WarningDialog(None, title, message)
+                        qt_dialogs.WarningDialog(None, title, message)
 
 
 
