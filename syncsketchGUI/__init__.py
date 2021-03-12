@@ -202,6 +202,8 @@ def record(upload_after_creation = None, play_after_creation = None,  show_succe
     # This a wrapper function and if called individually should mirror all the same effect as hitting 'record' in the UI
     recordData = {}
     capturedFile = _record()
+    if not capturedFile:
+        return {"playblast_file": ""}
     logger.info("capturedFile: {}".format(capturedFile))
     capturedFileNoExt, ext = os.path.splitext(capturedFile)
     if capturedFileNoExt[-5:] == '.####':

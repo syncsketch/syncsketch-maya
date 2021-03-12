@@ -123,5 +123,5 @@ dmypy.json
 syncsketchGUI/config/syncsketch_user.yaml
 
 ##vscode
-./vscode
+.vscode
 # End of https://www.gitignore.io/api/python

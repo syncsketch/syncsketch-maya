@@ -10,5 +10,9 @@ setup(
     packages = find_packages(),
     include_package_data = True,
     package_data = {'syncsketchGUI.config': ['*.yaml']},
-    install_requires = [],
+    install_requires = [
+          "requests",
+          "syncsketch",
+          "pyyaml"
+    ],
 )

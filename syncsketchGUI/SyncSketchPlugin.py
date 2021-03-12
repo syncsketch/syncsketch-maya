@@ -217,6 +217,9 @@ def login_cmd_creator():
 # Plugin Initializer
 
 def initializePlugin(mobject):
+
+    if om.MGlobal.mayaState() == om.MGlobal.kBatch:
+        return
     
     # Add the menu
     import syncsketchGUI
