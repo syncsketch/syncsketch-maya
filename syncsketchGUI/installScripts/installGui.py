@@ -569,7 +569,7 @@ class installThread(QThread):
                 pipInstaller = os.path.join(tmpdir, 'get-pip.py')
 
                 if Literals.PLATFORM == 'Darwin':
-                    cmd = 'curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o {0}'.format(ƒhInstaller).split(' ')
+                    cmd = 'curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o {0}'.format(pipInstaller).split(' ')
                     if not INSTALL_SSGUI_ONLY:
                         print('Calling shell command: {0}'.format(cmd))
                         print(subprocess.check_output(cmd))
