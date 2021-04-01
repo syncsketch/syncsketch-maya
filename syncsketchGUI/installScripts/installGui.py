@@ -63,7 +63,7 @@ def getMayaPlugInPath():
 ScriptInstallPath = {
     'Darwin': '{0}/Library/Preferences/Autodesk/maya/scripts/'.format(expanduser('~')),
     'Linux': '{0}/maya/scripts/'.format(expanduser('~')),
-    'Windows': '{0}/Documents/maya/scripts/'.format(expanduser('~'))
+    'Windows': '{0}/maya/scripts/'.format(expanduser('~'))
 }
 
 
@@ -71,7 +71,7 @@ ScriptInstallPath = {
 PluginInstallPath = {
     'Darwin': '{0}/Library/Preferences/Autodesk/maya/plug-ins/'.format(expanduser('~')),
     'Linux': '{0}/maya/plug-ins/'.format(expanduser('~')),
-    'Windows': '{0}/Documents/maya/plug-ins/'.format(getMayaPlugInPath())
+    'Windows': '{0}/maya/plug-ins/'.format(expanduser('~'))
 }
 
 
