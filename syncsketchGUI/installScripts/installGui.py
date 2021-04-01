@@ -167,7 +167,6 @@ class installerUI(QWidget, UIDesktop):
 
     def clean(self):
         Ressources.GIFDEVICE.close()
-        del Ressources.GIFDEVICE
         print ('Cleaning Ressources')
 
     def closeEvent(self, event):
@@ -592,7 +591,11 @@ class installThread(QThread):
                 else:
                     cmd = '{0}&{1}&--user&pip==19.2.3'.format(PYTHON_PATH, pipInstaller).split('&')
                 print('Calling shell command for pip: {0}'.format(cmd))
-                print(subprocess.check_output(cmd, stderr=subprocess.STDOUT))
+
+                proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                stdout, stderr = proc.communicate()
+                if proc.returncode:
+                    raise Exception('Failed to install Pip: {}'.format(stderr))
 
             # Install Dependencies
             cmd = '{0}&install&--force-reinstall&--user&{1}&setuptools&pyyaml&requests[security]'.format(PIP_PATH,
