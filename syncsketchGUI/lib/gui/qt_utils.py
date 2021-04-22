@@ -40,8 +40,11 @@ def get_persistent_widget(widget_cls, *args, **kwargs):
     
     widget_handle = widget_cls.__name__
 
-    if widget_handle not in _widget_store:
-        _widget_store[widget_handle] = widget_cls(*args, **kwargs)
+    if widget_handle in _widget_store:
+        old_widget = _widget_store[widget_handle]
+        old_widget.close()
 
-    widget = _widget_store[widget_handle]
+    widget = widget_cls(*args, **kwargs)
+    _widget_store[widget_handle] = widget
+
     return widget
