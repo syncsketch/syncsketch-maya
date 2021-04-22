@@ -63,7 +63,7 @@ def getMayaPlugInPath():
 ScriptInstallPath = {
     'Darwin': '{0}/Library/Preferences/Autodesk/maya/scripts/'.format(expanduser('~')),
     'Linux': '{0}/maya/scripts/'.format(expanduser('~')),
-    'Windows': '{}/'.format(getMayaScriptPath())
+    'Windows': '{0}/maya/scripts/'.format(expanduser('~'))
 }
 
 
@@ -71,7 +71,7 @@ ScriptInstallPath = {
 PluginInstallPath = {
     'Darwin': '{0}/Library/Preferences/Autodesk/maya/plug-ins/'.format(expanduser('~')),
     'Linux': '{0}/maya/plug-ins/'.format(expanduser('~')),
-    'Windows': '{}/'.format(getMayaPlugInPath())
+    'Windows': '{0}/maya/plug-ins/'.format(expanduser('~'))
 }
 
 
@@ -167,7 +167,6 @@ class installerUI(QWidget, UIDesktop):
 
     def clean(self):
         Ressources.GIFDEVICE.close()
-        del Ressources.GIFDEVICE
         print ('Cleaning Ressources')
 
     def closeEvent(self, event):
@@ -569,7 +568,7 @@ class installThread(QThread):
                 pipInstaller = os.path.join(tmpdir, 'get-pip.py')
 
                 if Literals.PLATFORM == 'Darwin':
-                    cmd = 'curl https://bootstrap.pypa.io/2.7/get-pip.py -o {0}'.format(pipInstaller).split(' ')
+                    cmd = 'curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o {0}'.format(pipInstaller).split(' ')
                     if not INSTALL_SSGUI_ONLY:
                         print('Calling shell command: {0}'.format(cmd))
                         print(subprocess.check_output(cmd))
@@ -577,7 +576,7 @@ class installThread(QThread):
                 else:
                     # this should be using secure https, but we shoul dbe fine for now
                     # as we are only reading data, but might be a possible mid attack
-                    response = urllib2.urlopen('https://bootstrap.pypa.io/2.7/get-pip.py')
+                    response = urllib2.urlopen('https://bootstrap.pypa.io/pip/2.7/get-pip.py')
                     data = response.read()
                     with open(pipInstaller, 'w') as f:
                         f.write(data)
@@ -592,7 +591,11 @@ class installThread(QThread):
                 else:
                     cmd = '{0}&{1}&--user&pip==19.2.3'.format(PYTHON_PATH, pipInstaller).split('&')
                 print('Calling shell command for pip: {0}'.format(cmd))
-                print(subprocess.check_output(cmd, stderr=subprocess.STDOUT))
+
+                proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                stdout, stderr = proc.communicate()
+                if proc.returncode:
+                    raise Exception('Failed to install Pip: {}'.format(stderr))
 
             # Install Dependencies
             cmd = '{0}&install&--force-reinstall&--user&{1}&setuptools&pyyaml&requests[security]'.format(PIP_PATH,
