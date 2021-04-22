@@ -1,5 +1,6 @@
 import logging
 import webbrowser
+import re
 
 logger = logging.getLogger("syncsketchGUI")
 
@@ -38,6 +39,8 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
         self._build_connections()
         self._populate_tree()
         self._restore_ui_state()
+        self._update_thumbnail()
+        self._update_pb_download()
 
     def refresh(self):
         logger.info("Refresh Clicked, trying to refresh if logged in")
@@ -45,12 +48,12 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
         if current_user.is_logged_in():
             self._populate_tree()
             self._update_target_from_cache()
+        else:
+            self._clear()
+        
+        self._update_pb_download()
+        self._update_thumbnail()
 
-    def clear(self):
-        logger.info("Clear Browser Widget")
-        self._tree.clear()
-        self._ui_line_target.clear()
-        self._ui_thumbnail_item_preview.clear()
     
     def update_target_from_url(self, url):
         url = self._sanitize(url)
@@ -91,6 +94,12 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
 
 
     ######## Private ############
+
+    def _clear(self):
+        logger.info("Clear Browser Widget")
+        self._tree.clear()
+        self._ui_line_target.clear()
+        self._ui_thumbnail_item_preview.clear()
 
     def _create_ui(self):
 
@@ -159,6 +168,7 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
         tree.setHeaderLabel('refresh')
         tree.header().setSectionsClickable(True)
         tree.header().setDefaultAlignment(QtCore.Qt.AlignCenter)
+        tree.setSelectionMode(QtWidgets.QTreeWidget.SingleSelection)
         return tree
     
     def _create_pb_download(self):
@@ -324,9 +334,7 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
         logger.info("Set target_lineEdit to {}".format(target_url))
 
         ui_to_toggle = [
-            self._ui_pb_download,
             self._ui_pb_copy_url,
-            self._ui_lay_hbox_review_sel
         ]
 
         target_type = target_data['target_url_type']
@@ -336,12 +344,51 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
         else:
             qt_utils.enable_interface(ui_to_toggle, False)
             self._ui_line_target.setPlaceholderText(uploadPlaceHolderStr)
+        
+        self._update_pb_download()
+        self._update_thumbnail()
+
+        
+    def _update_thumbnail(self):
+        current_item = self._tree.currentItem()
+
+        if not current_item:
+            self._ui_thumbnail_item_preview.clear()
+            return
+
+        item_data = self._get_target_data(current_item)
+        target_type = item_data['target_url_type']
 
         if target_type == "media":
             current_user = user.SyncSketchUser()
-            thumbURL = current_user.get_item_info(target_data['media_id'])['objects'][0]['thumbnail_url']
+            thumbURL = current_user.get_item_info(item_data['media_id'])['objects'][0]['thumbnail_url']
             logger.info("thumbURL: {}".format(thumbURL))
             self._ui_thumbnail_item_preview.set_icon_from_url(thumbURL)
+        
+        else:
+            self._ui_thumbnail_item_preview.clear()
+
+
+    def _update_pb_download(self):
+
+        current_user = user.SyncSketchUser()
+        if not current_user.is_logged_in():
+            self._ui_pb_download.setEnabled(False)
+            return
+
+        current_item = self._tree.currentItem()
+        if not current_item:
+            self._ui_pb_download.setEnabled(False)
+            return
+        
+        item_data = self._get_target_data(current_item)
+        target_type = item_data['target_url_type']
+
+        if (target_type == "review") or (target_type == "media"):
+            self._ui_pb_download.setEnabled(True)
+        else:
+            self._ui_pb_download.setEnabled(False)
+
 
     def _cache_target_data(self, target_data):
         logger.info("Cache Target Data: {}".format(target_data))
@@ -386,14 +433,12 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
     def _sanitize(self, val):
         return val.rstrip().lstrip()
 
-        
     def _copy_to_clipboard(self):
         cb = QtWidgets.QApplication.clipboard()
         cb.clear(mode=cb.Clipboard)
         link =  self._ui_line_target.text()
         #link = database.read_cache('us_last_upload_url_pushButton')
         cb.setText(link, mode=cb.Clipboard)
-
 
     def _update_target_from_cache(self):
         link = database.read_cache('upload_to_value')

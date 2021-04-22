@@ -58,7 +58,7 @@ class MenuWindow(qt_windows.SyncSketchWindow):
     def _connect_ui(self):
 
         #Menu
-        self._ui_menu.logged_out.connect(self._ui_browser.clear)
+        self._ui_menu.logged_out.connect(self._ui_browser.refresh)
         self._ui_menu.logged_in.connect(self._ui_browser.refresh)
 
         # Upload
@@ -117,7 +117,6 @@ class MenuWindow(qt_windows.SyncSketchWindow):
     def target_changed(self, targetdata):
         ui_to_toggle = [
             self._ui_upload.ui_upload_pushButton,
-            self._ui_upload.ui_open_pushButton,
             self._ui_recorder.ps_upload_after_creation_checkBox,
         ]
 
