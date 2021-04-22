@@ -98,10 +98,10 @@ class Playblast(ommpx.MPxCommand):
         ommpx.MPxCommand.__init__(self)
     
     def doIt(self, *arg):
-        import syncsketchGUI;
-        reload(syncsketchGUI);
-        syncsketchGUI.reload_toolkit();
-        syncsketchGUI.playblast()
+        import syncsketchGUI
+        reload(syncsketchGUI)
+        # syncsketchGUI.reload_toolkit()
+        syncsketchGUI.actions.playblast() #FIXME: playblast method not available
     
 class PlayblastOption(ommpx.MPxCommand):
     '''
@@ -123,10 +123,10 @@ class PlayblastAndUpload(ommpx.MPxCommand):
         ommpx.MPxCommand.__init__(self)
     
     def doIt(self, *arg):
-        import syncsketchGUI;
-        reload(syncsketchGUI);
-        syncsketchGUI.reload_toolkit();
-        syncsketchGUI.playblast_and_upload()
+        import syncsketchGUI
+        reload(syncsketchGUI)
+        #syncsketchGUI.actions.reload_toolkit();
+        syncsketchGUI.actions.playblast_and_upload()
     
 class PlayblastAndUploadOption(ommpx.MPxCommand):
     '''
@@ -136,10 +136,10 @@ class PlayblastAndUploadOption(ommpx.MPxCommand):
         ommpx.MPxCommand.__init__(self)
     
     def doIt(self, *arg):
-        import syncsketchGUI;
-        reload(syncsketchGUI);
-        syncsketchGUI.reload_toolkit();
-        syncsketchGUI.show_menu_window()
+        import syncsketchGUI
+        reload(syncsketchGUI)
+        #syncsketchGUI.reload_toolkit();
+        syncsketchGUI.actions.show_menu_window()
     
 class ExportFBX(ommpx.MPxCommand):
     '''
@@ -184,7 +184,7 @@ class Login(ommpx.MPxCommand):
     def doIt(self, *arg):
         # TO DO: Replace with syncsketchGUI custom command
         import syncsketchGUI
-        syncsketchGUI.show_login_dialog()
+        syncsketchGUI.actions.show_login_window()
     
 # ======================================================================
 # Command Creators
@@ -223,9 +223,9 @@ def initializePlugin(mobject):
     
     # Add the menu
     import syncsketchGUI
-    syncsketchGUI.build_menu()
-    syncsketchGUI.refresh_menu_state()
-    syncsketchGUI.add_timeline_context_menu()
+    syncsketchGUI.actions.build_menu()
+    syncsketchGUI.actions.refresh_menu_state()
+    syncsketchGUI.actions.add_timeline_context_menu()
     
     # Register command pairs
     mplugin = ommpx.MFnPlugin( mobject,
@@ -243,7 +243,7 @@ def uninitializePlugin(mobject):
     
     # Remove the menu
     import syncsketchGUI
-    syncsketchGUI.delete_menu()
+    syncsketchGUI.actions.delete_menu()
     
     # Deregister command pairs
     mplugin = ommpx.MFnPlugin(mobject)

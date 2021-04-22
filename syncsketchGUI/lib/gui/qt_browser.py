@@ -6,10 +6,8 @@ logger = logging.getLogger("syncsketchGUI")
 from syncsketchGUI.vendor.Qt import QtCore, QtGui, QtWidgets
 from syncsketchGUI.lib import video, user, database, path
 
-from syncsketchGUI.gui import show_download_window
+from syncsketchGUI import actions
 
-# FIXME
-from syncsketchGUI.gui import parse_url_data, get_current_item_from_ids, set_tree_selection, getReviewById
 
 from . import qt_regulars
 from . import qt_presets
@@ -24,6 +22,7 @@ USER_ACCOUNT_DATA = None
 
 class ReviewBrowserWidget(QtWidgets.QWidget):
 
+    title = "ReviewBrowser"
     target_changed = QtCore.Signal(dict) # dict: target_data
 
     ######## Public ############
@@ -371,7 +370,7 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
     def _download_callback(self):
         logger.info("Download pressed")
         #self.validate_review_url()
-        show_download_window()
+        actions.show_download_window()
         return
 
     def _open_url_callback(self, selected_item= None):
@@ -460,3 +459,101 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
 
         return current_data
 
+
+def get_current_item_from_ids(tree, payload=None, setCurrentItem=True):
+    logger.info("payload: {}".format(payload))
+    searchValue = ''
+    searchType = ''
+
+    if not payload:
+        return
+
+    #Got both uuid and id, we are dealing with an item
+    if payload['uuid'] and payload['id']:
+        searchType = 'id'
+        searchValue = int(payload['id'])
+        logger.info("both payload['uuid'] and payload['id'] set {}".format(payload['uuid'], payload['id']))
+
+    #Got only uuid, it's a review
+    elif payload['uuid']:
+        searchType = 'uuid'
+        searchValue = payload['uuid']
+        logger.info("payload['uuid'] set: {}".format(payload['uuid']))
+
+    #Nothing useful found return
+    else:
+        logger.info("No uuid or id in payload, aborting")
+        return
+
+
+    iterator = QtWidgets.QTreeWidgetItemIterator(tree, QtWidgets.QTreeWidgetItemIterator.All)
+
+    while iterator.value():
+        item = iterator.value()
+        item_data = item.data(1, QtCore.Qt.EditRole)
+        if item_data.get(searchType) == searchValue:
+            if setCurrentItem:
+                tree.setCurrentItem(item, 1)
+                tree.scrollToItem(item)
+                logger.info("Setting current Item : {} text:{} setCurrentItem: {}".format(item, item.text(0), setCurrentItem))
+            return item
+        iterator +=1
+
+    logger.info("Item not found while iterating, no item set, setCurrentItem: {}".format(setCurrentItem))
+
+
+
+def parse_url_data(link=database.read_cache('upload_to_value')):
+    '''
+    simple url parser that extract uuid, review_id and revision_id
+    '''
+    #url = 'https://www.syncsketch.com/sketch/bff609f9cbac/#711273/637821'
+    #       https://syncsketch.com/sketch/bff609f9cbac#711680
+
+    #Remove reduntant path and check if it's expected
+    logger.info("link parser: {}".format(link))
+    if not link:
+        logger.info("Link isn't a link: {}".format(link))
+        return
+
+    baseUrl = 'https://syncsketch.com/sketch/'
+
+    #Remove leading forward slash
+    if link[-1] == "/":
+        link = link[:-1]
+
+    #Remove www
+    link = link.replace("www.", "")
+
+    data = {"uuid":0, "id":0, "revision_id":0}
+    #Add a slash so we don't need to chase two different cases
+    if not link.split("#")[0][-1] == "/":
+        link = "/#".join(link.split("#"))
+        logger.info("Modified link: {}".format(link))
+
+
+    if not link[0:len(baseUrl)] == baseUrl:
+        logger.info("URL need's to start with: {}".format(baseUrl))
+        return data
+
+
+    #Find UUID
+    payload = link[len(baseUrl):].split("/")
+
+    if len(link) > 0:
+        uuidPart = (re.findall(r"([a-fA-F\d]{12})", payload[0]))
+        if uuidPart:
+            data['uuid'] = uuidPart[0]
+        else:
+            print("link need's to be of the form https://www.syncsketch.com/sketch/bff609f9cbac/ got {}".format(link))
+    #Find ID
+    if len(payload) > 1:
+        if payload[1].startswith("#"):
+            data['id'] = payload[1][1:]
+        else:
+            print("link need's to be of the form https://www.syncsketch.com/sketch/bff609f9cbac/#711273 got {}".format(link))
+
+    if len(payload) > 3:
+        pass
+        #handle revision
+    return data

@@ -10,7 +10,6 @@ from syncsketchGUI.lib import database
 
 
 from syncsketchGUI.lib.maya import scene as maya_scene
-from syncsketchGUI.gui import  _maya_delete_ui
 
 from . import qt_regulars
 from . import qt_presets
@@ -336,14 +335,12 @@ class MayaPlayblastRecorderWidget(QtWidgets.QWidget):
 
     def manage_preset(self):
         from .qt_recorder_preset import FormatPresetWindow
-        _maya_delete_ui(FormatPresetWindow.window_name)
-        preset_window = FormatPresetWindow(self)
+        preset_window = qt_utils.get_persistent_widget(FormatPresetWindow)
         preset_window.show()
     
     def manage_viewport_preset(self):
         from .qt_viewport_preset import ViewportPresetWindow
-        _maya_delete_ui(ViewportPresetWindow.window_name)
-        preset_viewport_window = ViewportPresetWindow(self)
+        preset_viewport_window = qt_utils.get_persistent_widget(ViewportPresetWindow)
         preset_viewport_window.show()
     
     def update_current_camera(self):

@@ -22,7 +22,7 @@ class SyncSketchWindow(QtWidgets.QMainWindow):
 
 #        self.ui.master_layout.setMargin(0)
         
-        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+        #self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.parent = parent
 
         self.setWindowTitle(self.window_label)

@@ -65,7 +65,7 @@ class StatusLabel(QtWidgets.QLabel):
         self.setColors(color)
         self.setText(message)
         self.repaint()
-        QtWidgets.qApp.processEvents()
+        #QtWidgets.qApp.processEvents()
 
     def setColors(self, color ='white', bgColor='rgba(0,0,0,0.3)', borderColor='rgba(0,0,0,0.1)'):
         self.setStyleSheet("background-color: %s;  color: %s; border-bottom: 1px solid %s; border-top: 1px solid %s;"%(bgColor, color,borderColor , borderColor))

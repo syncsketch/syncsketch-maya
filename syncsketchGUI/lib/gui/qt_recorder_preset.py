@@ -8,7 +8,7 @@ from functools import partial
 from syncsketchGUI.vendor.Qt import QtWidgets, QtCore
 
 from syncsketchGUI.lib import database, user, path
-from syncsketchGUI.lib.connection import is_connected, open_url
+from syncsketchGUI.lib.connection import is_connected
 
 from syncsketchGUI.lib.maya import scene as maya_scene
 
@@ -16,6 +16,7 @@ from . import qt_windows
 from . import qt_regulars
 from . import qt_dialogs
 from . import qt_presets
+
 from .literals import DEFAULT_PRESET, VIEWPORT_YAML, PRESET_YAML
 
 logger = logging.getLogger("syncsketchGUI")
@@ -174,26 +175,6 @@ class FormatPresetWindow(qt_windows.SyncSketchWindow):
         encodings = maya_scene.get_available_compressions(compressionFormat)
         self.ui.encoding_comboBox.clear()
         self.ui.encoding_comboBox.addItems(encodings)
-
-
-    def update_login_ui(self):
-        #user Login
-        self.currentUser = user.SyncSketchUser()
-        if self.currentUser.is_logged_in() and is_connected():
-            username = self.currentUser.get_name()
-            self.ui.ui_login_label.setText("Logged into SyncSketch as \n%s" % username)
-            self.ui.ui_login_label.setStyleSheet("color: white; font-size: 11px;")
-            self.ui.login_pushButton.hide()
-            self.ui.signup_pushButton.hide()
-            self.ui.logout_pushButton.show()
-        else:
-            # self.ui.ui_login_label.setText("You're not logged in")
-            # self.ui.logged_in_groupBox.hide()
-            self.ui.ui_login_label.setText("You are not logged into SyncSketch")
-            self.ui.ui_login_label.setStyleSheet("color: white; font-size: 11px;")
-            self.ui.login_pushButton.show()
-            self.ui.signup_pushButton.show()
-            self.ui.logout_pushButton.hide()
 
 
     def load_preset(self, presetName=None):
@@ -362,4 +343,4 @@ class FormatPresetWindow(qt_windows.SyncSketchWindow):
 
     def _update_current_preset(self, preset_name):
         database.save_cache("current_preset", preset_name)
-        self.parent.ui_formatPreset_comboBox.populate_combo_list(PRESET_YAML, preset_name) #FIXME: Dont call parent
+        #self.parent.ui_formatPreset_comboBox.populate_combo_list(PRESET_YAML, preset_name) #FIXME: Dont call parent

@@ -6,12 +6,12 @@ from syncsketchGUI.lib import path, user
 from syncsketchGUI.lib.connection import is_connected
 from syncsketchGUI.installScripts.maintenance import getVersionDifference
 
-from syncsketchGUI.gui import  _maya_delete_ui
 
 from . import web
 from . import qt_presets
 from . import qt_regulars
 from . import qt_dialogs
+from . import qt_utils
 
 from .literals import message_is_not_loggedin, message_is_not_connected
 
@@ -134,8 +134,8 @@ class MenuWidget(QtWidgets.QWidget):
     def connect_account(self):
 
         if is_connected():
-            _maya_delete_ui(web.LoginView.window_name) #TODO: Remove Maya Dependency 
-            web.weblogin_window = web.LoginView(self)
+            login = qt_utils.get_persistent_widget(web.LoginView, self)
+            login.show()
 
         else:
             title='Not able to reach SyncSketch'

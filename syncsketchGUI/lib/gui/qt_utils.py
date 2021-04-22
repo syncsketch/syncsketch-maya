@@ -32,3 +32,16 @@ def align_to_center(widget, align_object):
 
     widget.move(x_coordinate, y_coordinate)
     return widget.geometry()
+
+
+_widget_store = dict()
+
+def get_persistent_widget(widget_cls, *args, **kwargs):
+    
+    widget_handle = widget_cls.__name__
+
+    if widget_handle not in _widget_store:
+        _widget_store[widget_handle] = widget_cls(*args, **kwargs)
+
+    widget = _widget_store[widget_handle]
+    return widget

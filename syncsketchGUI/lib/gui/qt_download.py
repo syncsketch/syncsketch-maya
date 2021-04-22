@@ -1,7 +1,5 @@
 import logging
 
-import syncsketchGUI
-
 
 from syncsketchGUI.vendor.Qt import QtWidgets, QtCore
 
@@ -58,7 +56,6 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
         self.ui.review_target_name.setText(self.item_data['name'])
 
     def editingFinished(self):
-        from syncsketchGUI.gui import parse_url_data
         text = self.ui.review_target_url.text()
         current_user = user.SyncSketchUser()
 
@@ -84,7 +81,7 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
         self.ui.ui_downloadGeneral_layout = QtWidgets.QVBoxLayout()
         self.ui.ui_downloadGP_layout = QtWidgets.QVBoxLayout()
 
-        self.ui.main_layout.addLayout(self.ui.ui_downloadGeneral_layout)
+        self.lay_main.addLayout(self.ui.ui_downloadGeneral_layout)
 
         self.ui.thumbnail_pushButton = qt_regulars.Thumbnail(width=480, height=270)
         self.ui.review_target_name = qt_regulars.LineEdit()
@@ -156,3 +153,59 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
             logger.info(downloaded_item)
             camera = self.ui.downloadGP_application_comboBox.currentText()
             maya_scene.apply_imageplane(downloaded_item, camera)
+
+
+def parse_url_data(link=database.read_cache('upload_to_value')):
+    '''
+    simple url parser that extract uuid, review_id and revision_id
+    '''
+    #url = 'https://www.syncsketch.com/sketch/bff609f9cbac/#711273/637821'
+    #       https://syncsketch.com/sketch/bff609f9cbac#711680
+
+    #Remove reduntant path and check if it's expected
+    logger.info("link parser: {}".format(link))
+    if not link:
+        logger.info("Link isn't a link: {}".format(link))
+        return
+
+    baseUrl = 'https://syncsketch.com/sketch/'
+
+    #Remove leading forward slash
+    if link[-1] == "/":
+        link = link[:-1]
+
+    #Remove www
+    link = link.replace("www.", "")
+
+    data = {"uuid":0, "id":0, "revision_id":0}
+    #Add a slash so we don't need to chase two different cases
+    if not link.split("#")[0][-1] == "/":
+        link = "/#".join(link.split("#"))
+        logger.info("Modified link: {}".format(link))
+
+
+    if not link[0:len(baseUrl)] == baseUrl:
+        logger.info("URL need's to start with: {}".format(baseUrl))
+        return data
+
+
+    #Find UUID
+    payload = link[len(baseUrl):].split("/")
+
+    if len(link) > 0:
+        uuidPart = (re.findall(r"([a-fA-F\d]{12})", payload[0]))
+        if uuidPart:
+            data['uuid'] = uuidPart[0]
+        else:
+            print("link need's to be of the form https://www.syncsketch.com/sketch/bff609f9cbac/ got {}".format(link))
+    #Find ID
+    if len(payload) > 1:
+        if payload[1].startswith("#"):
+            data['id'] = payload[1][1:]
+        else:
+            print("link need's to be of the form https://www.syncsketch.com/sketch/bff609f9cbac/#711273 got {}".format(link))
+
+    if len(payload) > 3:
+        pass
+        #handle revision
+    return data

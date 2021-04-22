@@ -29,7 +29,7 @@ class MenuWindow(qt_windows.SyncSketchWindow):
 
     account_is_connected = False
 
-    def __init__(self, parent):
+    def __init__(self, parent=None):
         super(MenuWindow, self).__init__(parent=parent)
 
         self.installer = None
