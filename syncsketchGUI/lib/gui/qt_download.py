@@ -1,12 +1,11 @@
 import logging
-
+import re
 
 from syncsketchGUI.vendor.Qt import QtWidgets, QtCore
 
 from syncsketchGUI.lib import database, user
 from syncsketchGUI.lib.maya import scene as maya_scene
 
-import maya.cmds as cmds
 
 from . import qt_windows
 from . import qt_regulars
@@ -39,7 +38,6 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
             logger.info("target_media_id: {}".format(target_media_id))
         except Exception as e:
             logger.info(e)
-            cmds.warning("No target media selected, please select an item from the UI")
             return
 
 
