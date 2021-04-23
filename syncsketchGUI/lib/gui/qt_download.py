@@ -6,6 +6,7 @@ from syncsketchGUI.vendor.Qt import QtWidgets, QtCore
 from syncsketchGUI.lib import database, user
 from syncsketchGUI.lib.maya import scene as maya_scene
 
+from syncsketchGUI import actions
 
 from . import qt_windows
 from . import qt_regulars
@@ -134,7 +135,7 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
 
     def download_greasepencil(self):
         """Downloads the greasepencil """
-        downloaded_item = syncsketchGUI.download()
+        downloaded_item = actions.download()
         offset = int(self.ui.ui_downloadGP_rangeIn_textEdit.value())
         if downloaded_item:
             if offset is not 0:
@@ -146,7 +147,7 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
 
     def download_video_annotated(self):
         """Downloads the annoated video"""
-        downloaded_item = syncsketchGUI.downloadVideo(media_id=self.media_id)
+        downloaded_item = actions.download_video(media_id=self.media_id)
         if downloaded_item:
             logger.info(downloaded_item)
             camera = self.ui.downloadGP_application_comboBox.currentText()
