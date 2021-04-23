@@ -34,6 +34,9 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
         self.reviewData = None
         self.mediaItemParent = None
 
+        self._is_logged_in = False
+        self._cache_user()
+
         self._create_ui()
         self._layout_ui()
         self._build_connections()
@@ -41,11 +44,12 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
         self._restore_ui_state()
         self._update_thumbnail()
         self._update_pb_download()
+        
 
     def refresh(self):
         logger.info("Refresh Clicked, trying to refresh if logged in")
-        current_user = user.SyncSketchUser()
-        if current_user.is_logged_in():
+        self._cache_user()
+        if self._is_logged_in:
             self._populate_tree()
             self._update_target_from_cache()
         else:
@@ -54,7 +58,6 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
         self._update_pb_download()
         self._update_thumbnail()
 
-    
     def update_target_from_url(self, url):
         url = self._sanitize(url)
 
@@ -64,7 +67,7 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
         if not url_payload:
             return
 
-        media_item = get_current_item_from_ids(self._tree, url_payload, setCurrentItem=False) #FIXME
+        media_item = get_current_item_from_ids(self._tree, url_payload) #FIXME
         
         if not media_item:
 
@@ -75,7 +78,7 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
                 "id" : None,
             } 
 
-            review_item = get_current_item_from_ids(self._tree, review_url_payload, setCurrentItem=False)
+            review_item = get_current_item_from_ids(self._tree, review_url_payload)
 
             if not review_item:
                 logger.warning("Cant find Media and Review Item with payload: {}".format(url_payload))
@@ -85,7 +88,7 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
             
             self._populate_review_item(review_item)
 
-            media_item = get_current_item_from_ids(self._tree, url_payload, setCurrentItem=False)
+            media_item = get_current_item_from_ids(self._tree, url_payload)
         
 
         self._tree.setCurrentItem(media_item, 1)
@@ -94,6 +97,14 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
 
 
     ######## Private ############
+
+    def _cache_user(self):
+        self.current_user = user.SyncSketchUser()
+        if self.current_user.is_logged_in():
+            self._is_logged_in = True
+        else:
+            self._is_logged_in = False
+        logger.info("Cache login status for user: {}".format(self._is_logged_in))
 
     def _clear(self):
         logger.info("Clear Browser Widget")
@@ -143,7 +154,7 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
         self._tree.doubleClicked.connect(self._open_url_callback)
 
         # Videos / Playblast Settings
-        self._ui_line_target.textChanged.connect(self.update_target_from_url)
+        self._ui_line_target.textEdited.connect(self.update_target_from_url)
 
 
         self._tree.itemExpanded.connect(self._expand_item_callback)
@@ -178,14 +189,12 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
         return pb
 
     def _restore_ui_state(self):
-        current_user = user.SyncSketchUser()
-        if current_user.is_logged_in() :
+        if  self._is_logged_in:
             self._update_target_from_cache()
 
     def _populate_tree(self, account_data=None, item_to_add = None, force = False):
 
-        self.current_user = user.SyncSketchUser()
-        if not self.current_user.is_logged_in():
+        if not self._is_logged_in:
             logger.info("User not logged in, returning")
             return
 
@@ -249,15 +258,13 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
 
     def _populate_review_item(self, review_item):
         
-        current_user = user.SyncSketchUser()
-        current_user.auto_login()
-        if not current_user.is_logged_in():
+        if not self._is_logged_in:
             return
 
         review = review_item.data(1, QtCore.Qt.EditRole)
 
         review_id = review['id']
-        items = current_user.host_data.getMediaByReviewId(review_id)['objects']
+        items = self.current_user.host_data.getMediaByReviewId(review_id)['objects']
 
         # Removes current child items
         review_item.takeChildren()
@@ -323,7 +330,8 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
             #item.setSelected(True)
 
     def _update_target_from_item_callback(self, current_item, previous_item):
- 
+        
+        logger.info("Browser Target changed. Signal emitted.")
         target_data = self._get_target_data(current_item)
         self.target_changed.emit(target_data)
 
@@ -360,8 +368,7 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
         target_type = item_data['target_url_type']
 
         if target_type == "media":
-            current_user = user.SyncSketchUser()
-            thumbURL = current_user.get_item_info(item_data['media_id'])['objects'][0]['thumbnail_url']
+            thumbURL = self.current_user.get_item_info(item_data['media_id'])['objects'][0]['thumbnail_url']
             logger.info("thumbURL: {}".format(thumbURL))
             self._ui_thumbnail_item_preview.set_icon_from_url(thumbURL)
         
@@ -371,8 +378,7 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
 
     def _update_pb_download(self):
 
-        current_user = user.SyncSketchUser()
-        if not current_user.is_logged_in():
+        if not self._is_logged_in:
             self._ui_pb_download.setEnabled(False)
             return
 
@@ -384,7 +390,7 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
         item_data = self._get_target_data(current_item)
         target_type = item_data['target_url_type']
 
-        if (target_type == "review") or (target_type == "media"):
+        if (target_type == "media"):
             self._ui_pb_download.setEnabled(True)
         else:
             self._ui_pb_download.setEnabled(False)
@@ -493,7 +499,6 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
 
 
         while item.parent():
-            logger.info("item.parent() {}".format(item))
             current_data['breadcrumb'] = ' > '.join([item.text(0), current_data['upload_to_value']])
             item = item.parent()
 
@@ -505,7 +510,7 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
         return current_data
 
 
-def get_current_item_from_ids(tree, payload=None, setCurrentItem=True):
+def get_current_item_from_ids(tree, payload=None):
     logger.info("payload: {}".format(payload))
     searchValue = ''
     searchType = ''
@@ -537,14 +542,10 @@ def get_current_item_from_ids(tree, payload=None, setCurrentItem=True):
         item = iterator.value()
         item_data = item.data(1, QtCore.Qt.EditRole)
         if item_data.get(searchType) == searchValue:
-            if setCurrentItem:
-                tree.setCurrentItem(item, 1)
-                tree.scrollToItem(item)
-                logger.info("Setting current Item : {} text:{} setCurrentItem: {}".format(item, item.text(0), setCurrentItem))
             return item
         iterator +=1
 
-    logger.info("Item not found while iterating, no item set, setCurrentItem: {}".format(setCurrentItem))
+    logger.info("Item not found while iterating")
 
 
 
