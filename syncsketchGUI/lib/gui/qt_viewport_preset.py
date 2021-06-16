@@ -183,7 +183,7 @@ class ViewportPresetWindow(qt_windows.SyncSketchWindow):
 
         preset_file = path.get_config_yaml(VIEWPORT_YAML)
 
-        current_camera = database.read_cache('selected_camera')
+        current_camera = self._get_current_camera()
         fname = maya_scene.screenshot_current_editor( preset_file, preset_name, camera = current_camera)
         self.ui.ui_status_label.update(preset_name)
         if not fname:
@@ -197,6 +197,13 @@ class ViewportPresetWindow(qt_windows.SyncSketchWindow):
 
         self.setWindowIcon(qt_presets.logo_icon)
 
+    def _get_current_camera(self):
+        cached_cam = database.read_cache('selected_camera')
+
+        if cached_cam in maya_scene.get_available_cameras():
+            return cached_cam
+        else:
+            return maya_scene.get_current_camera()
 
     def populate_ui(self):
         """
