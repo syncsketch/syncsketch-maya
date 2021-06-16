@@ -24,6 +24,8 @@ from syncsketchGUI.vendor.capture import capture
 import logging
 logger = logging.getLogger("syncsketchGUI")
 
+GREASEPENCIL_XML_NAME = 'greasePencil.xml'
+
 # ======================================================================
 # Module Functions
 
@@ -160,13 +162,64 @@ def get_InOutFrames(type = 'Time Slider'):
         pass
     return in_out
 
-def modifyXMLData(xmlFile, xmlFileSaved, offsetFrames):
+
+def offset_greasepencil(original_zip_path, offset=0):
+    """
+    Its not possible to mofify files in a zip file directly. Therefor we have to create a new zip file and copy
+    all images and add the modiefied xml. 
+    """
+    if not offset:
+        return original_zip_path
+
+    offseted_zip_path = _create_tmp_zip_path()
+    offseted_zip_file = zipfile.ZipFile(offseted_zip_path, mode='w', compression=zipfile.ZIP_DEFLATED)
+    offseted_zip_file.close()
+
+    _copy_zip_file_images(original_zip_path, offseted_zip_path)
+    _offset_zip_greacepencil_xml(original_zip_path, offseted_zip_path, offset)
+
+    os.remove(original_zip_path)
+    os.rename(offseted_zip_path, original_zip_path)
+
+def _copy_zip_file_images(src_zip_path, dst_zip_path):
+    with zipfile.ZipFile(src_zip_path, 'r') as src_zip_file:
+        with zipfile.ZipFile(dst_zip_path, 'a') as dst_zip_file:
+            dst_zip_file.comment = src_zip_file.comment
+            for content in src_zip_file.infolist():
+                if content.filename != GREASEPENCIL_XML_NAME:
+                    dst_zip_file.writestr(content, src_zip_file.read(content.filename))
+
+def _offset_zip_greacepencil_xml(src_zip_path, dst_zip_path, offset):
+    with zipfile.ZipFile(src_zip_path, 'r') as src_zip_file:
+        with zipfile.ZipFile(dst_zip_path, 'a', compression=zipfile.ZIP_DEFLATED) as dst_zip_file:
+
+            src_xml_file = src_zip_file.open(GREASEPENCIL_XML_NAME)
+            tree = ET.parse(src_xml_file)
+            root = tree.getroot()
+            for neighbor in root.iter('frame'):
+                current_frame = int(neighbor.attrib.get('time'))
+                neighbor.set('time', str(current_frame + offset))
+
+            tmp_file = tempfile.TemporaryFile()
+            tree.write(tmp_file)
+            tmp_file.seek(0)
+            dst_zip_file.writestr(GREASEPENCIL_XML_NAME, tmp_file.read())
+            tmp_file.close()
+            
+
+
+def _create_tmp_zip_path():
+    tempdir = tempfile.mkdtemp()
+    zip_path = os.path.join(tempdir, "tmp.zip")
+    return zip_path
+
+def modifyXMLData(xmlFile, offsetFrames):
     tree = ET.parse(xmlFile)
     root = tree.getroot()
     for neighbor in root.iter('frame'):
         current_frame = int(neighbor.attrib.get('time'))
         neighbor.set('time', str(current_frame + offsetFrames))
-    tree.write(xmlFileSaved)
+    tree.write(xmlFile)
 
 def updateZip(zipname, filename, data):
     # generate a temp file
@@ -188,26 +241,6 @@ def updateZip(zipname, filename, data):
     # now add filename with its new data
     with zipfile.ZipFile(zipname, mode='a', compression=zipfile.ZIP_DEFLATED) as zf:
         zf.writestr(filename, data)
-
-
-def modifyGreasePencil(zipname, offset=0):
-    print(zipname)
-    if not offset:
-        return zipname
-    xmlfileName = 'greasePencil.xml'
-    with zipfile.ZipFile(zipname, mode='a', compression=zipfile.ZIP_DEFLATED) as zf:
-        for f in zf.namelist():
-            logger.info(f)
-            print(f)
-        zipFileXML = zf.open(xmlfileName)
-        # Generate temp file name for modified zml file
-        tmpname = tempfile.TemporaryFile()
-        # modify existing xml file and write to temp file
-        modifyXMLData(zipFileXML, tmpname, offset)
-        tmpname.seek(0)
-        updateZip(zipname, xmlfileName, tmpname.read())
-        tmpname.close()
-    return path.sanitize(zipname)
 
 
 def apply_greasepencil(filename, clear_existing_frames=False):

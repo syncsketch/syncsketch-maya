@@ -24,14 +24,6 @@ def upload():
     from .devices import uploader
     uploader.upload()
 
-def download():
-    from .devices import downloader
-    return downloader.download()
-
-def download_video(*args, **kwargs):
-    from .devices import downloader
-    return downloader.download_video(*args, **kwargs)
-
 def install_shelf():
     _get_maya_shelf().install()
 

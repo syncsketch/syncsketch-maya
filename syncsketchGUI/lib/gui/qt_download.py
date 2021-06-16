@@ -1,12 +1,13 @@
 import logging
 import re
+import os 
 
 from syncsketchGUI.vendor.Qt import QtWidgets, QtCore
 
 from syncsketchGUI.lib import database, user
 from syncsketchGUI.lib.maya import scene as maya_scene
 
-from syncsketchGUI import actions
+from syncsketchGUI.devices import downloader
 
 from . import qt_windows
 from . import qt_regulars
@@ -135,19 +136,19 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
 
     def download_greasepencil(self):
         """Downloads the greasepencil """
-        downloaded_item = actions.download()
+        downloaded_greasepencile_path = downloader.download_greasepencil()
         offset = int(self.ui.ui_downloadGP_rangeIn_textEdit.value())
-        if downloaded_item:
+        if downloaded_greasepencile_path:
             if offset is not 0:
-                logger.info("Offsetting by %s frames"%offset)
-                downloaded_item = maya_scene.modifyGreasePencil(downloaded_item, offset)
-            maya_scene.apply_greasepencil(downloaded_item, clear_existing_frames = True)
+                maya_scene.offset_greasepencil(downloaded_greasepencile_path, offset)
+            maya_scene.apply_greasepencil(downloaded_greasepencile_path, clear_existing_frames = True)
+            os.remove(x)
         else:
             logger.info("Error: Could not download grease pencil file...")
 
     def download_video_annotated(self):
         """Downloads the annoated video"""
-        downloaded_item = actions.download_video(media_id=self.media_id)
+        downloaded_item = downloader.download_video(media_id=self.media_id)
         if downloaded_item:
             logger.info(downloaded_item)
             camera = self.ui.downloadGP_application_comboBox.currentText()

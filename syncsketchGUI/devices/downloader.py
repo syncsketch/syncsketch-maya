@@ -5,7 +5,7 @@ from ..lib import database
 
 logger = logging.getLogger("syncsketchGUI")
 
-def download(current_user = None):
+def download_greasepencil(current_user = None):
     if not current_user:
         current_user = user.SyncSketchUser()
     review_id = database.read_cache('target_review_id')
