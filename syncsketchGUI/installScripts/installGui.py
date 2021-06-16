@@ -379,7 +379,7 @@ class SyncSketchInstaller(QObject):
 
         # Install the Shelf
         if InstallOptions.installShelf:
-            from syncsketchGUI import install_shelf, uninstall_shelf
+            from syncsketchGUI.actions import install_shelf, uninstall_shelf
             uninstall_shelf()
             install_shelf()
 
