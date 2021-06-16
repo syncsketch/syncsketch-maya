@@ -599,7 +599,7 @@ class installThread(QThread):
                     raise Exception('Failed to install Pip: {}'.format(stderr))
 
             # Install Dependencies
-            cmd = '{0}&install&--force-reinstall&--user&{1}&setuptools&pyyaml&requests[security]'.format(PIP_PATH,
+            cmd = '{0}&install&--force-reinstall&--user&{1}&setuptools&pyyaml&requests[security]&syncsketch'.format(PIP_PATH,
                                                                                                SYNCSKETCH_API_RELEASE_PATH).split(
                 '&')
             if not INSTALL_SSGUI_ONLY:
@@ -627,7 +627,7 @@ class installThread(QThread):
                 # todo: delete as well SyncsketchGUI-1.0.0.dist-info
                 print('Deleting previous directory for a clean install {0} '.format(Literals.SYNCSKETCH_INSTALL_PATH))
 
-            cmd = '{0}&install&--upgrade&--target={1}&{2}'.format(PIP_PATH, MAYA_SCRIPTS_PATH,
+            cmd = '{0}&install&--upgrade&--no-deps&--force-reinstall&--target={1}&{2}'.format(PIP_PATH, MAYA_SCRIPTS_PATH,
                                                                            SYNCSKETCH_GUI_RELEASE_PATH).split('&')
             print('Calling shell command: {0}'.format(cmd))
             print(subprocess.check_output(cmd))
@@ -651,7 +651,7 @@ class installThread(QThread):
                 print('creating plugin dir: {}'.format(pluginDir))
                 os.makedirs(pluginDir)
 
-            fromSource = os.path.join(Literals.SYNCSKETCH_INSTALL_PATH, 'SyncSketchPlugin.py')
+            fromSource = os.path.join(Literals.SYNCSKETCH_INSTALL_PATH, 'plug-ins', 'SyncSketchPlugin.py')
             toTarget = os.path.join(PluginInstallPath[Literals.PLATFORM], 'SyncSketchPlugin.py')
             print('Copy From : {} to: {}'.format(fromSource, toTarget))
             shutil.copy(fromSource, toTarget)
