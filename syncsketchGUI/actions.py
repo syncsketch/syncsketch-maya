@@ -72,27 +72,17 @@ def cycle_viewport_presets():
     cache = path.get_config_yaml(VIEWPORT_PRESET_YAML)
     presets = database._parse_yaml(cache).keys()
     current_viewport_preset = database.read_cache('current_viewport_preset')
-    logger.info(presets)
-    l = len(presets)
 
-
-    i = 0
-    if current_viewport_preset in presets:
-        for k in range(l):
-            i = k
-            logger.info("presets[%s] %s"%(i, presets[i]))
-            if current_viewport_preset == presets[i]:
-                logger.info("%s is a match"%i)
-                break
-    else:
-        i = 0
-
-    i += 1
-    if i >= l:
-        i = 0
-
-    database.save_cache('current_viewport_preset', presets[i], yaml_file = CACHE_YAML)
-    maya_scene.apply_viewport_preset(cache, presets[i])
+    try:
+        next_preset_index = presets.index(current_viewport_preset) + 1
+        next_preset = presets[next_preset_index]
+    except ValueError: 
+        next_preset = presets[0]
+    except IndexError:
+        next_preset = presets[0]
+    
+    database.save_cache('current_viewport_preset', next_preset, yaml_file = CACHE_YAML)
+    _get_maya_scene().apply_viewport_preset(cache, next_preset)
 
 def show_login_window():
     from .lib.gui.web import LoginView
