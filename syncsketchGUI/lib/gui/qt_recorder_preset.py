@@ -11,13 +11,12 @@ from syncsketchGUI.lib import database, user, path
 from syncsketchGUI.lib.connection import is_connected
 
 from syncsketchGUI.lib.maya import scene as maya_scene
+from syncsketchGUI.settings import PRESET_YAML
 
 from . import qt_windows
 from . import qt_regulars
 from . import qt_dialogs
 from . import qt_presets
-
-from .literals import DEFAULT_PRESET, VIEWPORT_YAML, PRESET_YAML
 
 logger = logging.getLogger("syncsketchGUI")
 
@@ -152,7 +151,7 @@ class FormatPresetWindow(qt_windows.SyncSketchWindow):
         # Populate the preset names
         self.ui.ui_formatPreset_comboBox.clear()
 
-        self.ui.ui_formatPreset_comboBox.populate_combo_list(PRESET_YAML, defaultValue= DEFAULT_PRESET )
+        self.ui.ui_formatPreset_comboBox.populate_combo_list(PRESET_YAML, defaultValue= database.read_cache('current_preset'))
 
         # Populate the values to the fields based on the preset
         self.ui.format_comboBox.clear()
@@ -194,8 +193,8 @@ class FormatPresetWindow(qt_windows.SyncSketchWindow):
             self.ui.height_spinBox.setValue(720)
 
 
-        elif presetName == DEFAULT_PRESET:
-            self.ui.ui_formatPreset_comboBox.set_combobox_index( selection=DEFAULT_PRESET)
+        elif presetName == database.read_cache('current_preset'):
+            self.ui.ui_formatPreset_comboBox.set_combobox_index( selection=database.read_cache('current_preset'))
 
             if sys.platform == 'darwin':
                 format = 'avfoundation'

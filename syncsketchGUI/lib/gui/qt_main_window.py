@@ -4,10 +4,10 @@ import time
 from syncsketchGUI.vendor.Qt import QtCore, QtGui, QtWidgets
 
 from syncsketchGUI.lib import user
+from syncsketchGUI.literals import message_is_not_connected
 
 from syncsketchGUI.installScripts.maintenance import getLatestSetupPyFileFromLocal
 
-from .literals import message_is_not_connected
 from . import qt_browser
 from . import qt_menu
 from . import qt_recorder

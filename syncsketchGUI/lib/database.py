@@ -6,10 +6,7 @@ import logging
 logger = logging.getLogger("syncsketchGUI")
 from syncsketchGUI.lib import path
 
-# ======================================================================
-# Global Variables
-
-CACHE_YAML = 'syncsketch_cache.yaml'
+from syncsketchGUI.settings import CACHE_YAML
 
 # ======================================================================
 # Module Utilities

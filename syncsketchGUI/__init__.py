@@ -15,12 +15,7 @@ logger.addHandler(ch)
 logger.propagate = 0
 
 
-# ======================================================================
-# Global Variables
-
-PRESET_YAML = 'syncsketch_preset.yaml'
-CACHE_YAML = 'syncsketch_cache.yaml'
-VIEWPORT_PRESET_YAML = 'syncsketch_viewport.yaml'
+from .settings import CACHE_YAML, VIEWPORT_YAML, PRESET_YAML
 
 # ======================================================================
 # Module Public Interface

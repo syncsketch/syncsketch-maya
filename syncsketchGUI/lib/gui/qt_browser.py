@@ -6,6 +6,7 @@ logger = logging.getLogger("syncsketchGUI")
 
 from syncsketchGUI.vendor.Qt import QtCore, QtGui, QtWidgets
 from syncsketchGUI.lib import video, user, database, path
+from syncsketchGUI.literals import uploadPlaceHolderStr
 
 from syncsketchGUI import actions
 
@@ -13,9 +14,6 @@ from syncsketchGUI import actions
 from . import qt_regulars
 from . import qt_presets
 from . import qt_utils
-
-
-from .literals import uploadPlaceHolderStr
 
 
 # FIXME

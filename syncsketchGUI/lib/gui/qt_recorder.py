@@ -10,12 +10,12 @@ from syncsketchGUI.lib import database
 
 
 from syncsketchGUI.lib.maya import scene as maya_scene
+from syncsketchGUI.settings import VIEWPORT_YAML, PRESET_YAML
+from syncsketchGUI.literals import message_is_not_connected
 
 from . import qt_regulars
 from . import qt_presets
 from . import qt_utils
-
-from .literals import DEFAULT_VIEWPORT_PRESET, PRESET_YAML, VIEWPORT_YAML, DEFAULT_PRESET, message_is_not_connected
 
 logger = logging.getLogger("syncsketchGUI")
 
@@ -160,8 +160,8 @@ class MayaPlayblastRecorderWidget(QtWidgets.QWidget):
         # filepath = path.sanitize(filepath)
         # self.ps_directory_lineEdit.setText(filepath)
 
-        self.ui_formatPreset_comboBox.populate_combo_list(PRESET_YAML, DEFAULT_PRESET)
-        self.ui_viewportpreset_comboBox.populate_combo_list(VIEWPORT_YAML, DEFAULT_VIEWPORT_PRESET)
+        self.ui_formatPreset_comboBox.populate_combo_list(PRESET_YAML, database.read_cache('current_preset'))
+        self.ui_viewportpreset_comboBox.populate_combo_list(VIEWPORT_YAML, database.read_cache('current_viewport_preset'))
 
         #self.update_last_recorded()
 

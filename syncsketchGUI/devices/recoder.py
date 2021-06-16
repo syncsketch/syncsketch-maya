@@ -1,6 +1,7 @@
 import logging
 import os 
 
+from syncsketchGUI.settings import PRESET_YAML, VIEWPORT_PRESET_YAML
 
 from ..lib import database, video, path
 
@@ -11,10 +12,6 @@ from . import player
 from . import uploader
 
 logger = logging.getLogger("syncsketchGUI")
-
-PRESET_YAML = 'syncsketch_preset.yaml' #TODO move global state
-VIEWPORT_PRESET_YAML = 'syncsketch_viewport.yaml' #TODO: move global state
-
 
 def record(upload_after_creation = None, play_after_creation = None,  show_success_msg = True):
     # This a wrapper function and if called individually should mirror all the same effect as hitting 'record' in the UI

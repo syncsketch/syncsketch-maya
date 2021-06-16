@@ -8,7 +8,7 @@ from .lib import user
 from .lib.gui import qt_utils
 
 
-VIEWPORT_PRESET_YAML = 'syncsketch_viewport.yaml' #TODO: Remove global state
+from .settings import CACHE_YAML, VIEWPORT_PRESET_YAML
 
 logger = logging.getLogger("syncsketchGUI")
 
