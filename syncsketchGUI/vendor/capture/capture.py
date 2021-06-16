@@ -386,7 +386,7 @@ def apply_view(panel, **options):
     # Camera options
     camera_options = options.get("camera_options", {})
     for key, value in camera_options.iteritems():
-        cmds.setAttr("{0}.{1}".format(camera, key), value)
+        _set_attribute_if_unlocked("{0}.{1}".format(camera, key), value)
 
     # Viewport options
     viewport_options = options.get("viewport_options", {})
@@ -643,14 +643,14 @@ def _applied_camera_options(options, panel):
             options.pop(opt)
 
     for opt, value in options.iteritems():
-        cmds.setAttr(camera + "." + opt, value)
+        _set_attribute_if_unlocked(camera + "." + opt, value)
 
     try:
         yield
     finally:
         if old_options:
             for opt, value in old_options.iteritems():
-                cmds.setAttr(camera + "." + opt, value)
+                _set_attribute_if_unlocked(camera + "." + opt, value)
 
 
 @contextlib.contextmanager
@@ -818,6 +818,10 @@ def _get_screen_size():
 
 def _in_standalone():
     return not hasattr(cmds, "about") or cmds.about(batch=True)
+
+def _set_attribute_if_unlocked(name, value):
+    if not cmds.getAttr(name, l=True):
+        cmds.setAttr(name, value)
 
 
 # --------------------------------
