@@ -102,7 +102,10 @@ def _record():
             "compression":
                 preset.get('encoding'),
             "off_screen":
-                True
+                True,
+            "sound":
+                maya_scene.get_active_sound_node()
+
     }
     logger.info("recArgs: {}".format(recArgs))
 

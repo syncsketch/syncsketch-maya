@@ -646,3 +646,7 @@ def get_playblast_encoding():
     Unfortunately it doesnt return the currently selected setting in the playblast menu.
     '''
     return cmds.optionVar(query="playblastCompression")
+
+def get_active_sound_node():
+    time_control = mel.eval("$gPlayBackSlider = $gPlayBackSlider")
+    return cmds.timeControl(time_control, q=True, sound=True) or None
