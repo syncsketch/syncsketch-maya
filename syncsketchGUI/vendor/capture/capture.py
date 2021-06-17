@@ -11,6 +11,7 @@ import contextlib
 from maya import cmds
 from maya import mel
 
+from syncsketchGUI import literals
 
 #TODO: Remove QT Dependency
 try:
@@ -199,10 +200,9 @@ def capture(camera=None,
                         framePadding=frame_padding,
                         **playblast_kwargs)
                 except RuntimeError as e:
-                        #This is a naive guess, but usually only happens if Quicktime libraries are missing
-                        title = 'Quicktime not found on this machine,'
+                        #This is a naive guess, but usually only happens if Quicktime libraries are missing'
                         message = 'You can choose avi from the presets, which we will automatically convert for you into a mov'
-                        qt_dialogs.WarningDialog(None, title, message)
+                        qt_dialogs.WarningDialog(None, literals.qtff_not_supported, message)
 
 
 

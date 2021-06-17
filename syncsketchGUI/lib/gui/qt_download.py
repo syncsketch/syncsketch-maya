@@ -2,6 +2,8 @@ import logging
 import re
 import os 
 
+from syncsketchGUI import literals
+
 from syncsketchGUI.vendor.Qt import QtWidgets, QtCore
 
 from syncsketchGUI.lib import database, user
@@ -11,6 +13,7 @@ from syncsketchGUI.devices import downloader
 
 from . import qt_windows
 from . import qt_regulars
+from . import qt_dialogs
 
 logger = logging.getLogger("syncsketchGUI")
 
@@ -148,11 +151,26 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
 
     def download_video_annotated(self):
         """Downloads the annoated video"""
+
+        if not self._quicktime_available():
+            qt_dialogs.WarningDialog(
+                None,
+                literals.qtff_not_supported,
+                literals.quicktime_install_instructions
+                )
+            return
+
         downloaded_item = downloader.download_video(media_id=self.media_id)
         if downloaded_item:
             logger.info(downloaded_item)
             camera = self.ui.downloadGP_application_comboBox.currentText()
             maya_scene.apply_imageplane(downloaded_item, camera)
+    
+    def _quicktime_available(self):
+        if "qt" in maya_scene.get_available_formats():
+            return True
+        else:
+            return False
 
 
 def parse_url_data(link=database.read_cache('upload_to_value')):
