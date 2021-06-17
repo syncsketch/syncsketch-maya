@@ -275,11 +275,17 @@ def apply_imageplane(filename, camera=None):
         # todo: there might be another camera in this hierarchy
         ssCamera = filter((lambda x: x if "Shape" in x else None), cmds.ls(camera, dag=True))[0]
 
-    imagePlane = cmds.imagePlane(camera=ssCamera)
-    cmds.setAttr("{}.type".format(imagePlane[1], 2), 2)
-    cmds.setAttr("{}.imageName".format(imagePlane[1], 2), filename, type='string')
+    image_plane_shape = cmds.imagePlane(camera=ssCamera)[1]
 
+    cmds.setAttr("{}.type".format(image_plane_shape), 2)  # set type to movie
+    cmds.setAttr("{}.imageName".format(image_plane_shape), filename, type='string')
+    _set_image_plane_frame_expression(image_plane_shape)
+    
 
+def _set_image_plane_frame_expression(image_plane_shape):
+    cmds.setAttr("{}.useFrameExtension".format(image_plane_shape), True)
+    frame_expression = "{}.frameExtension=frame".format(image_plane_shape)
+    cmds.expression(s=frame_expression)
 
 def add_extension(file, rec_args):
     """
