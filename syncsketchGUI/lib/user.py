@@ -4,6 +4,7 @@ import os
 import yaml
 import syncsketch
 import requests
+import time
 
 from syncsketchGUI.lib import database
 from syncsketchGUI.lib import path
@@ -313,5 +314,61 @@ class SyncSketchUser():
                 if chunk:
                     f.write(chunk)
         return local_filename
+
+    def download_annotated_video(self, item_id, review_id):
+        self.auto_login()
+        if not self.host_data:
+            logger.warning('Please login first.')
+            return
+
+        media = self.host_data.getMedia({'id': item_id})
+        video_url = media['objects'][0]['url']
+        filename = video_url.split(str(item_id) + '/')[1].split("?")[0]
+        local_dir = "{0}".format(expanduser('~'))
+        local_filename = os.path.join(local_dir, filename)
+
+        url = "{}/api/v2/downloads/videoWithSketches/{}/{}/".format(
+            self.host_data.HOST, review_id, item_id)
+        logger.debug("Get annotated video processing id from {}".format(url))
+
+        r = requests.post(url, params=self.host_data.api_params, headers=self.host_data.headers)    
+        celery_task_id = r.json()
+
+        # check the celery task
+        request_processing = True
+        check_celery_url = "{}/api/v2/downloads/videoWithSketches/{}/".format(
+            self.host_data.HOST, celery_task_id)
+        logger.debug("Check annotated video processing status at {}".format(check_celery_url))
+
+        r = requests.get(check_celery_url, params=self.host_data.api_params, headers=self.host_data.headers)
+
+        while request_processing:
+            result = r.json()
+
+            if result.get('status') == 'done':
+                data = result.get('data')
+                logger.debug(
+                    "Annotated video processing succeeded, downloading file to {}".format(local_filename))
+
+                r = requests.get(data["s3Path"], stream=True)
+                with open(local_filename, "wb") as f:
+                    for chunk in r.iter_content(chunk_size=1024):
+                        if chunk:
+                            f.write(chunk)
+
+                request_processing = False
+                return local_filename
+
+            if result.get('status') == 'failed':
+                logger.error("Annotated video processing failed for item {}".format(item_id))
+                request_processing = False
+                return False
+
+            # wait a bit
+            time.sleep(1)
+
+            # check the url again
+            r = requests.get(check_celery_url, params=self.host_data.api_params, headers=self.host_data.headers)
+
 
 
