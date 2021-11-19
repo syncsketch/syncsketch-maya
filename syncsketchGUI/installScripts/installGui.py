@@ -61,10 +61,18 @@ def getMayaPlugInPath():
     return candidates[0]
 
 
+# Using MAYA_APP_DIR instead of ~ for Windows.
+# Seems like some machines evaluate '~' to 'C:\Users\username\Documents' 
+# and on other to only 'C:\Users\username\'. MAYA_APP_DIR is decribed as: 
+# defines your personal Maya application directory. Which is what we are looking for.
+# Maybe we can also use MAYA_APP_DIR for Linux and MacOS as well. But for 
+# now let`s only try it in Windows.
+
+
 ScriptInstallPath = {
     'Darwin': '{0}/Library/Preferences/Autodesk/maya/scripts/'.format(expanduser('~')),
     'Linux': '{0}/maya/scripts/'.format(expanduser('~')),
-    'Windows': '{0}/maya/scripts/'.format(expanduser('~'))
+    'Windows': '{0}/scripts/'.format(os.environ['MAYA_APP_DIR'])
 }
 
 
@@ -72,7 +80,7 @@ ScriptInstallPath = {
 PluginInstallPath = {
     'Darwin': '{0}/Library/Preferences/Autodesk/maya/plug-ins/'.format(expanduser('~')),
     'Linux': '{0}/maya/plug-ins/'.format(expanduser('~')),
-    'Windows': '{0}/maya/plug-ins/'.format(expanduser('~'))
+    'Windows': '{0}/plug-ins/'.format(os.environ['MAYA_APP_DIR'])
 }
 
 
