@@ -2,7 +2,9 @@
 ![maya2017](https://img.shields.io/badge/Maya2017-tested-brightgreen.svg)
 ![maya2018](https://img.shields.io/badge/Maya2018-tested-brightgreen.svg)
 
-# The Maya plug-in is not currently compatible with Maya 2022.  We plan to update our architecture to support it but we do not yet have a schedule for the release. Upvote the feature request on our feedback site to help prioritize Maya plugin development: https://feedback.syncsketch.com/feature-requests/p/maya-plugin
+#### The Maya plug-in is not currently compatible with Maya 2022.  We plan to update our architecture to support it but we do not yet have a schedule for the release. 
+
+#### Upvote the feature request on our feedback site to help prioritize Maya plugin development: https://feedback.syncsketch.com/feature-requests/p/maya-plugin
 
 The syncsketch-maya plugin which will allow you to 
 - upload videos and plablasts to syncsketch in seconds, skipping any conversion process
