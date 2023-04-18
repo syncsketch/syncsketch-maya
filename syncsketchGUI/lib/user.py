@@ -246,7 +246,8 @@ class SyncSketchUser():
             return
 
         uploaded_item = self.host_data.addMedia(review_id, filepath, noConvertFlag=noConvertFlag, itemParentId=itemParentId)
-        uploaded_item = self.host_data.updateItem(uploaded_item["id"], data )
+        if uploaded_item:
+            uploaded_item = self.host_data.updateItem(uploaded_item["id"], data)
         return uploaded_item
 
     def update_item(self, item_id, filepath, data = None):
