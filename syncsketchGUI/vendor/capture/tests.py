@@ -108,46 +108,46 @@ def test_apply_parsed_view_all():
     for key, value in capture.CameraOptions.items():
         if isinstance(value, bool):
             value = not value
-        elif isinstance(value,(int, float)):
+        elif isinstance(value, (int, float)):
             value = value + 1
         else:
             raise Exception("Unexpected value in CameraOptions: %s=%s"
-                            %(key, value))
+                            % (key, value))
 
     for key, value in capture.DisplayOptions.items():
         if isinstance(value, bool):
             value = not value
         elif isinstance(value, tuple):
-            value =(1, 0, 1)
+            value = (1, 0, 1)
         else:
             raise Exception("Unexpected value in DisplayOptions: %s=%s"
-                            %(key, value))
+                            % (key, value))
 
     for key, value in capture.ViewportOptions.items():
         if isinstance(value, bool):
             value = not value
-        elif isinstance(value,(int, float)):
+        elif isinstance(value, (int, float)):
             value = value + 1
         elif isinstance(value, tuple):
-            value =(1, 0, 1)
+            value = (1, 0, 1)
         elif isinstance(value, basestring):
             pass  # Don't bother, for now
         else:
             raise Exception("Unexpected value in ViewportOptions: %s=%s"
-                            %(key, value))
+                            % (key, value))
 
     for key, value in capture.Viewport2Options.items():
         if isinstance(value, bool):
             value = not value
-        elif isinstance(value,(int, float)):
+        elif isinstance(value, (int, float)):
             value = value + 1
         elif isinstance(value, tuple):
-            value =(1, 0, 1)
+            value = (1, 0, 1)
         elif isinstance(value, basestring):
             pass  # Don't bother, for now
         else:
             raise Exception("Unexpected value in Viewport2Options: %s=%s"
-                            %(key, value))
+                            % (key, value))
 
     defaults = {
         "camera_options": capture.CameraOptions.copy(),
@@ -185,9 +185,9 @@ def test_apply_parsed_view_all():
                 if isinstance(value, float) or isinstance(other_value, float):
                     if abs(value - other_value) > precision:
                         return False
-                elif isinstance(value,(tuple, list)):
+                elif isinstance(value, (tuple, list)):
                     # Assuming for now that any tuple or list contains floats
-                    if not all((abs(a-b) < precision)
+                    if not all((abs(a - b) < precision)
                                for a, b in zip(value, other_value)):
                         return False
                 else:
@@ -237,16 +237,15 @@ def test_parse_active_scene():
         "width": cmds.getAttr("defaultResolution.width"),
         "height": cmds.getAttr("defaultResolution.height"),
         "compression": cmds.optionVar(query="playblastCompression"),
-        "filename":(cmds.optionVar(query="playblastFile")
+        "filename": (cmds.optionVar(query="playblastFile")
                      if cmds.optionVar(query="playblastSaveToFile") else None),
         "format": cmds.optionVar(query="playblastFormat"),
-        "off_screen":(True if cmds.optionVar(query="playblastOffscreen")
+        "off_screen": (True if cmds.optionVar(query="playblastOffscreen")
                        else False),
-        "show_ornaments":(True if cmds.optionVar(query="playblastShowOrnaments")
-                       else False),
+        "show_ornaments": (True if cmds.optionVar(query="playblastShowOrnaments")
+                           else False),
         "quality": cmds.optionVar(query="playblastQuality")
     }
 
     for key, value in reference.items():
-
         assert parsed[key] == value

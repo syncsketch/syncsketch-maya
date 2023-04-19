@@ -13,23 +13,26 @@ from maya import mel
 
 from syncsketchGUI import literals
 
-#TODO: Remove QT Dependency
+# TODO: Remove QT Dependency
 try:
     from PySide2 import QtGui, QtWidgets
 except ImportError:
     from PySide import QtGui
+
     QtWidgets = QtGui
 
-#TODO: Remove QT Dependency
-from syncsketchGUI.lib.gui import qt_dialogs    
+# TODO: Remove QT Dependency
+from syncsketchGUI.lib.gui import qt_dialogs
 
-version_info =(2, 3, 0)
+version_info = (2, 3, 0)
 
 __version__ = "%s.%s.%s" % version_info
 __license__ = "MIT"
 
 import logging
+
 logger = logging.getLogger("syncsketchGUI")
+
 
 def capture(camera=None,
             width=None,
@@ -135,7 +138,7 @@ def capture(camera=None,
     if end_frame is None:
         end_frame = cmds.playbackOptions(maxTime=True, query=True)
 
-    #(#74) Bugfix: `maya.cmds.playblast` will raise an error when playblasting
+    # (#74) Bugfix: `maya.cmds.playblast` will raise an error when playblasting
     # with `rawFrameNumbers` set to True but no explicit `frames` provided.
     # Since we always know what frames will be included we can provide it
     # explicitly
@@ -158,12 +161,12 @@ def capture(camera=None,
     # in a minimal integer frame number : filename.-2147483648.png for any
     # negative rendered frame
     if frame and raw_frame_numbers:
-        check = frame if isinstance(frame,(list, tuple)) else [frame]
+        check = frame if isinstance(frame, (list, tuple)) else [frame]
         if any(f < 0 for f in check):
             raise RuntimeError("Negative frames are not supported with "
                                "raw frame numbers and explicit frame numbers")
 
-    #(#21) Bugfix: `maya.cmds.playblast` suffers from undo bug where it
+    # (#21) Bugfix: `maya.cmds.playblast` suffers from undo bug where it
     # always sets the currentTime to frame 1. By setting currentTime before
     # the playblast call it'll undo correctly.
     cmds.currentTime(cmds.currentTime(query=True))
@@ -174,37 +177,35 @@ def capture(camera=None,
                             off_screen=off_screen) as panel:
         cmds.setFocus(panel)
         with contextlib.nested(
-             _disabled_inview_messages(),
-             _maintain_camera(panel, camera),
-             _applied_viewport_options(viewport_options, panel),
-             _applied_camera_options(camera_options, panel),
-             _applied_display_options(display_options),
-             _applied_viewport2_options(viewport2_options),
-             _isolated_nodes(isolate, panel),
-             _maintained_time()):
-                try:
-                    output = cmds.playblast(
-                        compression=compression,
-                        format=format,
-                        percent=100,
-                        quality=quality,
-                        viewer=viewer,
-                        startTime=start_frame,
-                        endTime=end_frame,
-                        offScreen=off_screen,
-                        showOrnaments=show_ornaments,
-                        forceOverwrite=overwrite,
-                        filename=filename,
-                        widthHeight=[width, height],
-                        rawFrameNumbers=raw_frame_numbers,
-                        framePadding=frame_padding,
-                        **playblast_kwargs)
-                except RuntimeError as e:
-                        #This is a naive guess, but usually only happens if Quicktime libraries are missing'
-                        message = 'You can choose avi from the presets, which we will automatically convert for you into a mov'
-                        qt_dialogs.WarningDialog(None, literals.qtff_not_supported, message)
-
-
+                _disabled_inview_messages(),
+                _maintain_camera(panel, camera),
+                _applied_viewport_options(viewport_options, panel),
+                _applied_camera_options(camera_options, panel),
+                _applied_display_options(display_options),
+                _applied_viewport2_options(viewport2_options),
+                _isolated_nodes(isolate, panel),
+                _maintained_time()):
+            try:
+                output = cmds.playblast(
+                    compression=compression,
+                    format=format,
+                    percent=100,
+                    quality=quality,
+                    viewer=viewer,
+                    startTime=start_frame,
+                    endTime=end_frame,
+                    offScreen=off_screen,
+                    showOrnaments=show_ornaments,
+                    forceOverwrite=overwrite,
+                    filename=filename,
+                    widthHeight=[width, height],
+                    rawFrameNumbers=raw_frame_numbers,
+                    framePadding=frame_padding,
+                    **playblast_kwargs)
+            except RuntimeError as e:
+                # This is a naive guess, but usually only happens if Quicktime libraries are missing'
+                message = 'You can choose avi from the presets, which we will automatically convert for you into a mov'
+                qt_dialogs.WarningDialog(None, literals.qtff_not_supported, message)
 
         return output
 
@@ -233,7 +234,7 @@ def snap(*args, **kwargs):
     kwargs['end_frame'] = frame
     kwargs['frame'] = frame
 
-    if not isinstance(frame,(int, float)):
+    if not isinstance(frame, (int, float)):
         raise TypeError("frame must be a single frame(integer or float). "
                         "Use `capture()` for sequences.")
 
@@ -281,9 +282,9 @@ CameraOptions = {
 
 DisplayOptions = {
     "displayGradient": True,
-    "background":(0.631, 0.631, 0.631),
-    "backgroundTop":(0.535, 0.617, 0.702),
-    "backgroundBottom":(0.052, 0.052, 0.052),
+    "background": (0.631, 0.631, 0.631),
+    "backgroundTop": (0.535, 0.617, 0.702),
+    "backgroundBottom": (0.052, 0.052, 0.052),
 }
 
 # These display options require a different command to be queried and set
@@ -297,7 +298,7 @@ ViewportOptions = {
     "fogDensity": 1,
     "fogStart": 1,
     "fogEnd": 1,
-    "fogColor":(0, 0, 0, 0),
+    "fogColor": (0, 0, 0, 0),
     "shadows": False,
     "displayTextures": True,
     "displayLights": "default",
@@ -454,7 +455,7 @@ def parse_view(panel):
 
     # Viewport options
     viewport_options = {}
-    
+
     # capture plugin display filters first to ensure we never override 
     # built-in arguments if ever possible a plugin has similarly named 
     # plugin display filters(which it shouldn't!)
@@ -463,7 +464,7 @@ def parse_view(panel):
         plugin = str(plugin)  # unicode->str for simplicity of the dict
         state = cmds.modelEditor(panel, query=True, queryPluginObjects=plugin)
         viewport_options[plugin] = state
-    
+
     for key in ViewportOptions:
         viewport_options[key] = cmds.modelEditor(
             panel, query=True, **{key: True})
@@ -500,13 +501,13 @@ def parse_active_scene():
         "width": cmds.getAttr("defaultResolution.width"),
         "height": cmds.getAttr("defaultResolution.height"),
         "compression": cmds.optionVar(query="playblastCompression"),
-        "filename":(cmds.optionVar(query="playblastFile")
+        "filename": (cmds.optionVar(query="playblastFile")
                      if cmds.optionVar(query="playblastSaveToFile") else None),
         "format": cmds.optionVar(query="playblastFormat"),
-        "off_screen":(True if cmds.optionVar(query="playblastOffscreen")
+        "off_screen": (True if cmds.optionVar(query="playblastOffscreen")
                        else False),
-        "show_ornaments":(True if cmds.optionVar(query="playblastShowOrnaments")
-                       else False),
+        "show_ornaments": (True if cmds.optionVar(query="playblastShowOrnaments")
+                           else False),
         "quality": cmds.optionVar(query="playblastQuality"),
         "sound": cmds.timeControl(time_control, q=True, sound=True) or None
     }
@@ -589,8 +590,8 @@ def _independent_panel(width, height, off_screen=False):
 
     # center panel on screen
     screen_width, screen_height = _get_screen_size()
-    topLeft = [int((screen_height-height)/2.0),
-               int((screen_width-width)/2.0)]
+    topLeft = [int((screen_height - height) / 2.0),
+               int((screen_width - width) / 2.0)]
 
     window = cmds.window(width=width,
                          height=height,
@@ -696,7 +697,7 @@ def _applied_viewport_options(options, panel):
     """Context manager for applying `options` to `panel`"""
 
     options = dict(ViewportOptions, **(options or {}))
-    
+
     # separate the plugin display filter options since they need to
     # be set differently(see #55)
     plugins = cmds.pluginDisplayFilter(query=True, listFilters=True)
@@ -704,14 +705,14 @@ def _applied_viewport_options(options, panel):
     for plugin in plugins:
         if plugin in options:
             plugin_options[plugin] = options.pop(plugin)
-    
+
     # default options
     cmds.modelEditor(panel, edit=True, **options)
 
     # plugin display filter options
     for plugin, state in plugin_options.items():
         cmds.modelEditor(panel, edit=True, pluginObjects=(plugin, state))
-    
+
     yield
 
 
@@ -818,6 +819,7 @@ def _get_screen_size():
 
 def _in_standalone():
     return not hasattr(cmds, "about") or cmds.about(batch=True)
+
 
 def _set_attribute_if_unlocked(name, value):
     if not cmds.getAttr(name, l=True):

@@ -2,7 +2,7 @@ import sys
 import subprocess
 import platform
 import re
-import os 
+import os
 import urllib2
 import tempfile
 import traceback
@@ -15,41 +15,47 @@ logger = logging.getLogger('syncsketchGUI_install')
 logger.setLevel(logging.DEBUG)
 
 ch = logging.StreamHandler()
-formatter = logging.Formatter('[%(asctime)s - %(filename)s:%(lineno)s - %(levelname)s - %(message)s]', "%Y-%m-%d %H:%M:%S")
+formatter = logging.Formatter('[%(asctime)s - %(filename)s:%(lineno)s - %(levelname)s - %(message)s]',
+                              "%Y-%m-%d %H:%M:%S")
 ch.setFormatter(formatter)
 logger.addHandler(ch)
-
 
 GET_PIP_URL = "https://bootstrap.pypa.io/2.7/get-pip.py"
 FFMPEG_API_ENDPOINT = 'https://ffbinaries.com/api/v1/version/4.2'
 
 syncsketchURL = 'http://www.syncsketch.com'
-syncsketchMayaPluginRepoURL  = 'https://github.com/syncsketch/syncsketch-maya'
+syncsketchMayaPluginRepoURL = 'https://github.com/syncsketch/syncsketch-maya'
 syncsketchMayaPluginVideoURL = 'https://vimeo.com/syncsketch/integrationmaya'
 syncsketchMayaPluginDocsURL = 'https://support.syncsketch.com/article/62-maya-syncsketch-integration'
 
 versionTag = os.getenv('SS_DEV') or 'release'
 
+
 def _get_user_path():
     return os.path.expanduser('~')
+
 
 class Environment():
     @property
     def python_path(self):
-         raise NotImplementedError
+        raise NotImplementedError
+
     @property
     def pip_path(self):
         raise NotImplementedError
+
     @property
     def maya_user_path(self):
-       raise NotImplementedError 
+        raise NotImplementedError
+
     @property
     def maya_script_path(self):
         return os.path.join(self.maya_user_path, "scripts")
+
     @property
     def maya_plugins_path(self):
         return os.path.join(self.maya_user_path, "plug-ins")
-    
+
     @property
     def maya_module_path(self):
         return os.path.join(self.maya_user_path, "modules")
@@ -65,38 +71,47 @@ class Environment():
             return LinuxEnvironment()
         else:
             raise NotImplementedError(
-        "No Environment availabe for system: {}"
-            .format(system_name))
+                "No Environment availabe for system: {}"
+                .format(system_name))
 
-class LinuxEnvironment(Environment):  
+
+class LinuxEnvironment(Environment):
     @property
     def python_path(self):
-         return '/usr/bin/python'
+        return '/usr/bin/python'
+
     @property
     def pip_path(self):
         return os.path.join(_get_user_path(), '.local', 'bin', 'pip2.7')
+
     @property
     def maya_user_path(self):
         return os.path.join(_get_user_path, "maya")
 
+
 class OSXEnvironment(Environment):
     @property
     def python_path(self):
-         return '/usr/bin/python'
+        return '/usr/bin/python'
+
     @property
     def pip_path(self):
         return os.path.join(_get_user_path(), 'Library', 'Python', '2.7', 'bin', 'pip2.7')
+
     @property
     def maya_user_path(self):
         return os.path.join(_get_user_path(), "Library", "Preferences", "Autodesk", "maya")
 
+
 class WindowsEnvironment(Environment):
     @property
     def python_path(self):
-         return os.path.join(os.getenv('MAYA_LOCATION'), 'bin', 'mayapy.exe')
+        return os.path.join(os.getenv('MAYA_LOCATION'), 'bin', 'mayapy.exe')
+
     @property
     def pip_path(self):
         return os.path.join(os.getenv('APPDATA'), 'Python', 'Scripts', 'pip2.7.exe')
+
     @property
     def maya_user_path(self):
         return os.path.join(_get_user_path(), "Library", "Documents", "maya")
@@ -104,22 +119,25 @@ class WindowsEnvironment(Environment):
 
 environment = Environment.get_system_default()
 
+
 class MayaDCC():
     @staticmethod
     def get_int_version():
         return int(str(maya.cmds.about(apiVersion=True))[:4])
-    
+
+
 class StandaloneDCC():
     @staticmethod
     def get_int_version():
         return 2020
 
+
 try:
     import maya.cmds
+
     dcc_app = MayaDCC()
 except ImportError:
     dcc_app = StandaloneDCC()
-
 
 MAYA_API_VERSION = dcc_app.get_int_version()
 
@@ -133,17 +151,17 @@ else:
     from PySide.QtGui import *
 
 
-#TODO: remove this global state
+# TODO: remove this global state
 class InstallOptions(object):
     installShelf = 1
     upgrade = 0
     tokenData = {}
+
     def __init__(self):
         pass
-   
+
 
 def install_syncsketch_gui(install_dir):
-
     syncsketch_url = get_syncsketchGUI_release_url()
     cmd = [
         environment.pip_path,
@@ -161,23 +179,26 @@ def install_pip():
     subprocess.call(
         [environment.python_path, pip_installer_path, "--user"])
 
+
 def is_pip_installed():
     return os.path.exists(environment.pip_path)
 
+
 def get_syncsketchGUI_release_url():
     return 'https://github.com/syncsketch/syncsketch-maya/archive/{}.zip'.format(versionTag)
+
 
 class Installer(QObject):
 
     def __init__(self):
         self.threadpool = QThreadPool()
-    
+
     def install(
-        self, 
-        install_parms,
-        finished_callback = None,
-        exception_callback = None
-        ):
+            self,
+            install_parms,
+            finished_callback=None,
+            exception_callback=None
+    ):
         worker = Worker(self._install, install_parms)
         worker.signals.finished.connect(finished_callback)
         worker.signals.error.connect(exception_callback)
@@ -190,26 +211,26 @@ class Installer(QObject):
             logger.info("Pip is not installed at {}. Installing Pip.".format(
                 environment.pip_path
             ))
-        
+
         install_syncsketch_gui(install_parms.destination)
 
     def uninstall(self):
         pass
-    
+
     def _uninstall(self):
         pass
+
 
 class InstallParms(object):
     def __init__(self):
         self.ffmpeg = True
-        self.shelf = True 
+        self.shelf = True
         self.destination = environment.maya_module_path
 
     def __str__(self):
         text = "Install FFmpeg: {}, Install Shelf: {}, Destination: {}".format(
             self.ffmpeg, self.shelf, self.destination)
         return text
-
 
 
 class Worker(QRunnable):
@@ -232,11 +253,11 @@ class Worker(QRunnable):
         else:
             self.signals.finished.emit()
 
+
 class WorkerSignals(QObject):
     finished = Signal()
     error = Signal(tuple)
     progress = Signal(int)
-
 
 
 ###########################################################################################
@@ -258,12 +279,13 @@ class UIDesktop(object):
         self.setGeometry(QRect(widthCenter, heightCenter, width, height))
         self.setWindowIcon(Ressources.olaf())
 
+
 class InstallDialog(QWidget, UIDesktop):
 
     def clean(self):
         Ressources.GIFDEVICE.close()
-        #del Ressources.GIFDEVICE #TODO figure out why this was used in first place
-        print ('Cleaning Ressources')
+        # del Ressources.GIFDEVICE #TODO figure out why this was used in first place
+        print('Cleaning Ressources')
 
     def closeEvent(self, event):
         self.clean()
@@ -283,25 +305,23 @@ class InstallDialog(QWidget, UIDesktop):
         self._installer = Installer()
 
         self.setWindowTitle('Syncsketch Maya Installer')
-        #self.setWindowModality(Qt.ApplicationModal)
-        #self.setWindowFlags(Qt.FramelessWindowHint)
-        #self.setWindowFlags(Qt.Tool)
+        # self.setWindowModality(Qt.ApplicationModal)
+        # self.setWindowFlags(Qt.FramelessWindowHint)
+        # self.setWindowFlags(Qt.Tool)
         self.setFixedSize(QSize(*size))
 
         self._create_ui()
         self._init_ui()
         self._adjust_palette()
-    
-    def _create_ui(self):
 
+    def _create_ui(self):
         self.pb_install = IconButton('Upgrade' if InstallOptions.upgrade else 'Install', highlight=True)
         self.pb_install.clicked.connect(self._install_callback)
 
         self.pb_launch = IconButton('Launch Syncsketch UI', highlight=True, success=True)
-        
+
         self.pb_close = IconButton(' Close', icon=Ressources.closeIcon())
         self.pb_close.clicked.connect(self._close_callblack)
-
 
         self.animated_gif = self._create_animated_gif()
         self.wait_label = self._create_wait_label()
@@ -310,11 +330,11 @@ class InstallDialog(QWidget, UIDesktop):
         self.cb_install_ffmpeg = QCheckBox("Install FFMPEG")
 
         self.setLayout(self._create_main_layout())
-    
+
     def _close_callblack(self):
         self.clean()
         self.close()
-    
+
     def _install_callback(self):
         self._set_ui_to_install()
         install_parms = self._create_install_parms()
@@ -322,7 +342,7 @@ class InstallDialog(QWidget, UIDesktop):
             install_parms,
             finished_callback=self._install_finished_callback
         )
-    
+
     def _install_finished_callback(self):
         print("Install finished")
         self._set_ui_to_launch()
@@ -331,7 +351,7 @@ class InstallDialog(QWidget, UIDesktop):
         self.pb_launch.hide()
         self.cb_install_ffmpeg.setChecked(True)
         self.cb_install_sitepackages.setChecked(True)
-    
+
     def _set_ui_to_install(self):
         self.pb_install.hide()
         self.pb_close.hide()
@@ -339,7 +359,7 @@ class InstallDialog(QWidget, UIDesktop):
         self.wait_label.show()
         self.cb_install_ffmpeg.hide()
         self.cb_install_sitepackages.hide()
-    
+
     def _set_ui_to_launch(self):
         self.pb_launch.show()
         self.pb_close.hide()
@@ -352,7 +372,6 @@ class InstallDialog(QWidget, UIDesktop):
         self.setPalette(palette)
 
     def _create_main_layout(self):
-
         main_layout = QVBoxLayout()
 
         company_logo = self._create_company_logo()
@@ -360,7 +379,7 @@ class InstallDialog(QWidget, UIDesktop):
 
         subtext_label = self._create_subtext_label()
         main_layout.addWidget(subtext_label)
-        
+
         info_layout = self._create_info_layout()
         main_layout.addLayout(info_layout, 0)
 
@@ -378,7 +397,7 @@ class InstallDialog(QWidget, UIDesktop):
 
         button_layout = self._create_button_layout()
         main_layout.addLayout(button_layout)
-        
+
         progress_layout = self._create_progress_layout()
         main_layout.addLayout(progress_layout)
 
@@ -389,7 +408,7 @@ class InstallDialog(QWidget, UIDesktop):
         option_layout.addWidget(self.cb_install_sitepackages)
         option_layout.addWidget(self.cb_install_ffmpeg)
         return option_layout
-    
+
     def _create_company_logo(self):
         logo = QLabel()
         smallLogo = Ressources.companyLogo().scaled(240, 110, Qt.KeepAspectRatio, Qt.SmoothTransformation)
@@ -397,10 +416,11 @@ class InstallDialog(QWidget, UIDesktop):
         logo.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
         logo.setMargin(15)
         return logo
-    
+
     def _create_subtext_label(self):
         subtext = QLabel(
-            u'Update Available: Would you like to upgrade to the latest?' if InstallOptions.upgrade else 'SyncSketch Integration for Maya [{} cut]'.format(versionTag))
+            u'Update Available: Would you like to upgrade to the latest?' if InstallOptions.upgrade else 'SyncSketch Integration for Maya [{} cut]'.format(
+                versionTag))
         subtext.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
         subtext.setMargin(5)
         return subtext
@@ -430,12 +450,12 @@ class InstallDialog(QWidget, UIDesktop):
 
         documentationButton = LinkButton('Documentation', link=syncsketchMayaPluginDocsURL)
         info_layout.addWidget(documentationButton, 0)
-     
+
         spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Expanding)
         info_layout.addItem(spacer)
 
         return info_layout
-    
+
     def _create_wait_label(self):
         wait_label = QLabel()
         wait_label.setText('Installing, please wait ...')
@@ -445,7 +465,6 @@ class InstallDialog(QWidget, UIDesktop):
         progressLayout = QHBoxLayout()
         progressLayout.setAlignment(Qt.AlignCenter)
 
-      
         progressLayout.addWidget(self.wait_label)
 
         progressLayout.addWidget(self.animated_gif)
@@ -467,11 +486,12 @@ class InstallDialog(QWidget, UIDesktop):
         animated_gif.setMaximumWidth(24)
         movie.start()
         return animated_gif
-    
+
     def _create_install_parms(self):
         install_parms = InstallParms()
         install_parms.ffmpeg = self.cb_install_ffmpeg.isChecked()
         return install_parms
+
 
 class LinkButton(QPushButton):
     def __init__(self, text, link, *args, **kwargs):
@@ -481,6 +501,7 @@ class LinkButton(QPushButton):
         self.setMaximumHeight(20)
         self.setStyleSheet('QPushButton {text-decoration: underline; color: #00c899}')
         self.clicked.connect(lambda: webbrowser.open(link, new=0, autoraise=True))
+
 
 class IconButton(QPushButton):
     def __init__(self, text, highlight=False, icon=None, success=False, *args, **kwargs):
@@ -492,14 +513,16 @@ class IconButton(QPushButton):
         self.setMinimumHeight(34)
         self.setCursor(QCursor(Qt.PointingHandCursor))
         if self.highlight:
-            self.setStyleSheet('QPushButton{color: #161a1d; background-color: #00a07b; border: none; border-radius: 3px; padding: 10px;} QPushButton:hover {background-color: #00c899}')
+            self.setStyleSheet(
+                'QPushButton{color: #161a1d; background-color: #00a07b; border: none; border-radius: 3px; padding: 10px;} QPushButton:hover {background-color: #00c899}')
             font = self.font()
             font.setPointSize(14)
             font.setBold(True)
             self.setFont(font)
 
         if self.success:
-            self.setStyleSheet('QPushButton{color: #161a1d; background-color: #dfefd9; border: none; border-radius: 3px; padding: 10px;}')
+            self.setStyleSheet(
+                'QPushButton{color: #161a1d; background-color: #dfefd9; border: none; border-radius: 3px; padding: 10px;}')
             font = self.font()
             font.setPointSize(14)
             font.setBold(True)
@@ -522,6 +545,7 @@ class IconButton(QPushButton):
         else:
             return QPixmap(self.icon)
 
+
 class Icon():
     def __init__(self, base64Image):
         self.base64Image = base64Image
@@ -531,15 +555,17 @@ class Icon():
         pixmap.loadFromData(QByteArray.fromBase64(str(self.base64Image)))
         return pixmap
 
+
 def _create_qpixmap_getter(image_string):
     def _create_qpixmap():
         return QPixmap(Icon(image_string).base64ToQPixmap())
+
     return staticmethod(_create_qpixmap)
+
 
 class Ressources(object):
     def __init__(self):
         pass
-
 
     companyLogoBase64 = '''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'''
     companyLogo = _create_qpixmap_getter(companyLogoBase64)
@@ -561,6 +587,7 @@ class Ressources(object):
     byteArraseGif = QByteArray.fromBase64(str(preloaderAnimBase64))
     GIFDEVICE = QBuffer(byteArraseGif)
 
+
 ###########################################################################################
 ################### Util ##################################################################
 ###########################################################################################
@@ -570,21 +597,23 @@ def _make_temp_path(name):
     tmpdir = tempfile.mkdtemp()
     return os.path.join(tmpdir, name)
 
+
 def _download_from_url_to_destionation(url, destination):
     response = _get_response_from_url(url)
     with open(destination, 'wb') as f:
         f.write(response.read())
     logger.info("Downloading from {} to {}"
-        .format(url, destination))
+                .format(url, destination))
+
 
 def _get_response_from_url(url):
-    req = urllib2.Request(url, headers = {"User-Agent": "Mozilla/5.0"})
+    req = urllib2.Request(url, headers={"User-Agent": "Mozilla/5.0"})
     response = urllib2.urlopen(req)
     return response
 
 
 def main():
-    app  = QApplication(sys.argv)
+    app = QApplication(sys.argv)
     installer = InstallDialog()
     installer.show()
     sys.exit(app.exec_())

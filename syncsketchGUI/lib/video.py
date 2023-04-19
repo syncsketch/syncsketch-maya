@@ -6,7 +6,9 @@ import sys
 from os.path import expanduser
 from syncsketchGUI.lib import path
 import logging
+
 logger = logging.getLogger("syncsketchGUI")
+
 
 # ======================================================================
 # Module Functions
@@ -14,17 +16,16 @@ logger = logging.getLogger("syncsketchGUI")
 def get_creation_date(filename):
     if not os.path.isfile(filename):
         return str()
-    
+
     mtime = os.path.getmtime(filename)
     creation_date = datetime.datetime.fromtimestamp(mtime)
-    return str(creation_date.replace(microsecond = 0))
-
+    return str(creation_date.replace(microsecond=0))
 
 
 def probe(filename):
     if not filename:
         return
-    
+
     ffmpeg_path = path.get_ffmpeg_bin() + '/'
     ffmpeg_path = path.sanitize(ffmpeg_path)
     filename = path.sanitize(filename)
@@ -34,7 +35,7 @@ def probe(filename):
     else:
         ffprobe_executable = 'ffprobe'
 
-    ffprobe_command = '"{}{}" '.format(ffmpeg_path,ffprobe_executable)
+    ffprobe_command = '"{}{}" '.format(ffmpeg_path, ffprobe_executable)
     ffprobe_command += '-v error  '
     ffprobe_command += '-loglevel quiet  '
     ffprobe_command += '-select_streams v:0 '
@@ -45,15 +46,16 @@ def probe(filename):
     ffprobe_command += ' "{}"'.format(filename)
 
     try:
-        ffprobe_output = subprocess.check_output(ffprobe_command, shell = True).decode('utf-8')
+        ffprobe_output = subprocess.check_output(ffprobe_command, shell=True).decode('utf-8')
         ffprobe_output = json.loads(ffprobe_output)
         return ffprobe_output
-    
+
     except Exception as err:
-        print (u'%s' %(err))
+        print(u'%s' % (err))
         return
 
-def encodeToH264Mov(filepath = None, output_file = ""):
+
+def encodeToH264Mov(filepath=None, output_file=""):
     ffmpeg_path = path.get_ffmpeg_bin() + '\\'
 
     if sys.platform == 'win32':
@@ -68,7 +70,7 @@ def encodeToH264Mov(filepath = None, output_file = ""):
         ffmpeg_path = os.path.join(ffmpeg_path, ffmpeg_executable)
         ffmpeg_path = path.sanitize(ffmpeg_path)
         output_file = path.sanitize(output_file)
-    
+
     if not os.path.isfile(ffmpeg_path):
         logger.error("FFMPEG executable missing. No File at: {}".format(ffmpeg_path))
         raise RuntimeError("FFMPEG executable missing")
@@ -86,21 +88,22 @@ def encodeToH264Mov(filepath = None, output_file = ""):
         subprocess.check_output(ffmpeg_command, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as err:
         logger.error("FFMPEG conversion non zero exit: {}".format(err.output))
-        raise err    
+        raise err
 
-
-    # print "Creating Thumb for %s >> %s"%(filepath,output_file)
+        # print "Creating Thumb for %s >> %s"%(filepath,output_file)
     if not os.path.isfile(output_file):
-        logger.error("FFMPEG conversion from {} to {} not successful. Converted File missing. \n Command used: {}".format(filepath, output_file, ffmpeg_command))
+        logger.error(
+            "FFMPEG conversion from {} to {} not successful. Converted File missing. \n Command used: {}".format(
+                filepath, output_file, ffmpeg_command))
         return
     else:
         return path.sanitize(output_file)
 
 
-def get_thumb(filepath = None, output_file = ""):
+def get_thumb(filepath=None, output_file=""):
     if not output_file:
         output_file = "{0}/Desktop/output_file.jpg".format(expanduser("~"))
-   
+
     # should make this global
     ffmpeg_path = path.get_ffmpeg_bin() + '\\'
 
@@ -118,7 +121,7 @@ def get_thumb(filepath = None, output_file = ""):
     # ffmpeg_command += '-filter:v select="eq(n\,0)" -vframes 1'
     ffmpeg_command += '-y '
     ffmpeg_command += '"{}"'.format(output_file)
-    subprocess.call(ffmpeg_command, shell = True)
+    subprocess.call(ffmpeg_command, shell=True)
     output_file = path.sanitize(output_file)
 
     # print "Creating Thumb for %s >> %s"%(filepath,output_file)
@@ -143,6 +146,7 @@ def get_thumb(filepath = None, output_file = ""):
     
         return output_file
     '''
+
 
 def play_in_default_player(filename):
     filename = path.sanitize(filename)

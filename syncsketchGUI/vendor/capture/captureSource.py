@@ -135,28 +135,27 @@ def capture(camera=None,
         cmds.setFocus(panel)
 
         with contextlib.nested(
-             _maintain_camera(panel, camera),
-             _applied_viewport_options(viewport_options, panel),
-             _applied_camera_options(camera_options, panel),
-             _applied_display_options(display_options),
-             _applied_viewport2_options(viewport2_options),
-             _isolated_nodes(isolate, panel),
-             _maintained_time()):
-
-                output = cmds.playblast(
-                    compression=compression,
-                    format=format,
-                    percent=100,
-                    quality=quality,
-                    viewer=viewer,
-                    startTime=start_frame,
-                    endTime=end_frame,
-                    offScreen=off_screen,
-                    forceOverwrite=overwrite,
-                    filename=filename,
-                    widthHeight=[width, height],
-                    rawFrameNumbers=raw_frame_numbers,
-                    **playblast_kwargs)
+                _maintain_camera(panel, camera),
+                _applied_viewport_options(viewport_options, panel),
+                _applied_camera_options(camera_options, panel),
+                _applied_display_options(display_options),
+                _applied_viewport2_options(viewport2_options),
+                _isolated_nodes(isolate, panel),
+                _maintained_time()):
+            output = cmds.playblast(
+                compression=compression,
+                format=format,
+                percent=100,
+                quality=quality,
+                viewer=viewer,
+                startTime=start_frame,
+                endTime=end_frame,
+                offScreen=off_screen,
+                forceOverwrite=overwrite,
+                filename=filename,
+                widthHeight=[width, height],
+                rawFrameNumbers=raw_frame_numbers,
+                **playblast_kwargs)
 
         return output
 
@@ -216,7 +215,6 @@ def snap(*args, **kwargs):
         _image_to_clipboard(output)
 
     return output
-
 
 
 def wedge(layers,
@@ -675,8 +673,8 @@ def _independent_panel(width, height, off_screen=False):
 
     # center panel on screen
     screen_width, screen_height = _get_screen_size()
-    topLeft = [int((screen_height-height)/2.0),
-               int((screen_width-width)/2.0)]
+    topLeft = [int((screen_height - height) / 2.0),
+               int((screen_width - width) / 2.0)]
 
     window = cmds.window(width=width,
                          height=height,

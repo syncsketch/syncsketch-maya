@@ -2,10 +2,9 @@ import sys
 import subprocess
 import platform
 import re
-import os 
+import os
 
 import syncsketchGUI_install.util
-
 
 GET_PIP_URL = "https://bootstrap.pypa.io/2.7/get-pip.py"
 
@@ -16,11 +15,11 @@ def _get_user_path():
 
 class Environment():
     python_path = None
-    pip_path    = None
+    pip_path = None
 
-    def __new__(cls): 
+    def __new__(cls):
         os_name = platform.system()
-        if  os_name == "Windows":
+        if os_name == "Windows":
             return WindowsEnvironment()
         elif os_name == "Linux":
             return LinuxEnvironment()
@@ -29,17 +28,20 @@ class Environment():
         else:
             raise Exception("No Environment available for {}".format(os_name))
 
+
 class LinuxEnvironment(Environment):
     python_path = '/usr/bin/python'
-    pip_path    = os.path.join(_get_user_path(), '.local', 'bin', 'pip2.7')
+    pip_path = os.path.join(_get_user_path(), '.local', 'bin', 'pip2.7')
+
 
 class OSXEnvironment(OSXEnvironment):
     python_path = '/usr/bin/python'
-    pip_path    = os.path.join(_get_user_path(), 'Library', 'Python', '2.7', 'bin', 'pip2.7')
+    pip_path = os.path.join(_get_user_path(), 'Library', 'Python', '2.7', 'bin', 'pip2.7')
+
 
 class WindowsEnvironment(WindowsEnvironment):
     python_path = os.path.join(os.getenv('MAYA_LOCATION'), 'bin', 'mayapy.exe')
-    pip_path    = os.path.join(os.getenv('APPDATA'), 'Python', 'Scripts', 'pip2.7.exe')
+    pip_path = os.path.join(os.getenv('APPDATA'), 'Python', 'Scripts', 'pip2.7.exe')
 
 
 environment = Environment()
@@ -62,7 +64,8 @@ def install_pip():
     subprocess.call(
         [environment.python_path, pip_installer_path, "--user"])
 
-def is_pip_installed():    
+
+def is_pip_installed():
     return os.path.exists(environment.pip_path)
 
 
@@ -71,8 +74,7 @@ def _get_version_tuple_from_string(version_string):
 
 
 if __name__ == "__main__":
-    print is_pip_installed()
+    print(is_pip_installed())
     # print get_pip_version()
-    print install_pip()
+    print(install_pip())
     pass
-

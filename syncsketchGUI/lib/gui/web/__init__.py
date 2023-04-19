@@ -1,4 +1,5 @@
 import logging
+
 logger = logging.getLogger("syncsketchGUI")
 
 '''
@@ -8,7 +9,7 @@ In order to support both Maya versions this module switches between two widget i
 Unfortunately Maya2019 seems to have a bug with the QWebEngineView widget, since it displays only a grey window.
 Therefore the old widget is used as default. With this implementation only >=Maya2020 uses the new widgets. 
 '''
-try: 
+try:
     from webLoginWidget import WebLoginWindow as LoginView
     from webLoginWidget import logout_view
 except ImportError:
@@ -17,7 +18,6 @@ except ImportError:
 else:
     logger.debug("Import Deprecated LoginView")
 
-
 try:
     from webPlayerWidget import OpenPlayer as OpenPlayerView
 except ImportError:
@@ -25,5 +25,3 @@ except ImportError:
     from webPlayerWidgetEngine import OpenPlayerView as OpenPlayerView
 else:
     logger.debug("Import Deprecated PlayerView")
-    
-

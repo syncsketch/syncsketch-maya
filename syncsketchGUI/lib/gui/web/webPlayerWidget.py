@@ -1,9 +1,9 @@
-
 from syncsketchGUI.lib import user as user
 from syncsketchGUI.vendor.Qt import QtCore
 from syncsketchGUI.vendor.Qt.QtWebKitWidgets import QWebView
 
 from .. import qt_utils
+
 
 class OpenPlayer(QWebView):
     """

@@ -3,6 +3,7 @@ from syncsketchGUI.vendor.Qt import QtCore, QtWebEngineWidgets
 
 from .. import qt_utils
 
+
 class OpenPlayerView(QtWebEngineWidgets.QWebEngineView):
     """
     Login Window Class

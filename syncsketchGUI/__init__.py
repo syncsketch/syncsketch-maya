@@ -7,13 +7,13 @@ ch = logging.StreamHandler()
 ch.setLevel(logging.INFO)
 
 # create formatter
-formatter = logging.Formatter('[%(asctime)s - %(filename)s:%(lineno)s - %(levelname)s - %(message)s]', "%Y-%m-%d %H:%M:%S")
+formatter = logging.Formatter('[%(asctime)s - %(filename)s:%(lineno)s - %(levelname)s - %(message)s]',
+                              "%Y-%m-%d %H:%M:%S")
 ch.setFormatter(formatter)
 
 logger.addHandler(ch)
 # prevent logging from bubbling up to maya's logger
 logger.propagate = 0
-
 
 from .settings import CACHE_YAML, VIEWPORT_YAML, PRESET_YAML
 
@@ -23,7 +23,7 @@ from .settings import CACHE_YAML, VIEWPORT_YAML, PRESET_YAML
 from .actions import install_shelf
 
 # These functions are used from within the Shelf Tools
-from .actions import show_main_window as show_menu_window #Supports older shelf installations
+from .actions import show_main_window as show_menu_window  # Supports older shelf installations
 from .actions import show_main_window
 from .actions import record
 from .actions import play
@@ -38,6 +38,8 @@ def reload_toolkit():
     Exists to support older shelf installations. Might become deprecated.
     """
     pass
+
+
 # ======================================================================
 # Module Utilities
 
@@ -57,7 +59,6 @@ def _reload_toolkit():
     reload(path)
     reload(user)
 
-
     from syncsketchGUI.lib.maya import menu as maya_menu
     from syncsketchGUI.lib.maya import scene as maya_scene
     from syncsketchGUI.lib.maya import shelf as maya_shelf
@@ -69,6 +70,3 @@ def _reload_toolkit():
     reload(maya_shelf)
     reload(maya_capture)
     reload(maya_timeline)
-
-
-

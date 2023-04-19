@@ -1,7 +1,8 @@
-<!DOCTYPE RCC><RCC version="1.0">
-	<qresource>
-		<file alias="icon_play.png">icon_play_100.png</file>
-		<file>icon_play_150.png</file>
-		<file>icon_play_200.png</file>
-	</qresource>
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource>
+        <file alias="icon_play.png">icon_play_100.png</file>
+        <file>icon_play_150.png</file>
+        <file>icon_play_200.png</file>
+    </qresource>
 </RCC>

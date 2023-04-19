@@ -10,9 +10,11 @@ from .. import qt_utils
 
 logger = logging.getLogger("syncsketchGUI")
 
+
 # empty methond to complie to web interface
 def logout_view():
     pass
+
 
 class WebLoginWindow(QWebView):
     """
@@ -43,8 +45,6 @@ class WebLoginWindow(QWebView):
 
         self.setProperty('saveWindowPref', True)
 
-
-
     def changed(self):
         '''Store user tokens'''
         thisUrl = self.url().toString()
@@ -65,12 +65,12 @@ class WebLoginWindow(QWebView):
                     logger.info("sleeping")
                     time.sleep(0.1)
             self.close()
-            #self.parent.update_login_ui()
-            #todo: turn this into a signal
-            #self.parent.asyncPopulateTree(withItems=False)
+            # self.parent.update_login_ui()
+            # todo: turn this into a signal
+            # self.parent.asyncPopulateTree(withItems=False)
             self.parent.logged_in.emit()
-            #self.parent.asyncPopulateTree(withItems=True)
-            #self.parent.restore_ui_state()
+            # self.parent.asyncPopulateTree(withItems=True)
+            # self.parent.restore_ui_state()
 
     def _myBindingFunction(self):
         self.page().mainFrame().loadFinished.connect(self.changed)

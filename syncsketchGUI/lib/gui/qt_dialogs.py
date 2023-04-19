@@ -5,6 +5,7 @@ from syncsketchGUI.vendor.Qt import QtCore, QtGui, QtWidgets
 from . import qt_presets
 
 import logging
+
 logger = logging.getLogger("syncsketchGUI")
 
 
@@ -13,6 +14,7 @@ class WarningDialog(QtWidgets.QMessageBox):
     Customized modal dialog to be used for warnings.
     Dialog will be shown as soon as the class is called.
     """
+
     def __init__(self, parent, title, message):
         super(WarningDialog, self).__init__(parent)
         self.setIcon(QtWidgets.QMessageBox.Warning)
@@ -26,23 +28,25 @@ class InputDialog(QtWidgets.QWidget):
     """
     Customized raw input dialog for getting user's email
     """
-    def __init__(  self,
-                    parent = None,
-                    title = 'Ready to upload your file!',
-                    message='Once finished, we will email the review link to:'):
+
+    def __init__(self,
+                 parent=None,
+                 title='Ready to upload your file!',
+                 message='Once finished, we will email the review link to:'):
         QtWidgets.QWidget.__init__(self, parent=parent)
 
         self.response_text, self.response = \
-            QtWidgets.QInputDialog.getText( self,
-                                            title,
-                                            message)
+            QtWidgets.QInputDialog.getText(self,
+                                           title,
+                                           message)
 
 
 class StatusDialog(QtWidgets.QMessageBox):
     """
     Customized dialog to show the progress without the progress bar
     """
-    def __init__(self, parent = None):
+
+    def __init__(self, parent=None):
         super(StatusDialog, self).__init__(parent)
 
         self.setIcon(QtWidgets.QMessageBox.Warning)
@@ -56,12 +60,12 @@ class InfoDialog(QtWidgets.QDialog):
     """
     Customized Popup Dialog
     """
-    def __init__(self,
-                parent = None,
-                title = 'Upload Successful',
-                info_text = '',
-                media_url = ''):
 
+    def __init__(self,
+                 parent=None,
+                 title='Upload Successful',
+                 info_text='',
+                 media_url=''):
         super(InfoDialog, self).__init__(parent)
 
         self.info_text = info_text

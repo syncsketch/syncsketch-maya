@@ -1,6 +1,6 @@
 import logging
 import re
-import os 
+import os
 
 from syncsketchGUI import literals
 
@@ -16,6 +16,7 @@ from . import qt_regulars
 from . import qt_dialogs
 
 logger = logging.getLogger("syncsketchGUI")
+
 
 class DownloadWindow(qt_windows.SyncSketchWindow):
     """
@@ -37,7 +38,6 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
             logger.info("Please Login to syncsketch to Download content")
             return
 
-
         try:
             target_media_id = int(database.read_cache('target_media_id'))
             logger.info("target_media_id: {}".format(target_media_id))
@@ -45,14 +45,12 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
             logger.info(e)
             return
 
-
         self.item_data = current_user.get_item_info(int(database.read_cache('target_media_id')))['objects'][0]
 
         review_id = database.read_cache('target_review_id')
-        media_id  = database.read_cache('target_media_id')
-        target_url  = database.read_cache('upload_to_value')
+        media_id = database.read_cache('target_media_id')
+        target_url = database.read_cache('upload_to_value')
         thumb_url = current_user.get_item_info(media_id)['objects'][0]['thumbnail_url']
-
 
         self.ui.review_target_url.setText(target_url)
         self.ui.thumbnail_pushButton.set_icon_from_url(thumb_url)
@@ -66,18 +64,16 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
             logger.info("You are not logged in, please use the syncsketchGUI to log in first")
             return
 
-
         cleanUrl = parse_url_data(text)
         media_id = cleanUrl.get('id')
         if media_id:
             self.media_id = media_id
             item = current_user.get_item_info(media_id)
-            #todo : try except this part if user is not logged in
+            # todo : try except this part if user is not logged in
             thumb_url = item['objects'][0]['thumbnail_url']
             self.ui.thumbnail_pushButton.set_icon_from_url(thumb_url)
         else:
             logger.info("The URL is not accessible {} with  id {} doesn't exist".format(text, media_id))
-
 
     def decorate_ui(self):
         self.ui.ui_greasepencilDownload_layout = QtWidgets.QVBoxLayout()
@@ -95,26 +91,26 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
         self.ui.ui_downloadGeneral_layout.addWidget(self.ui.review_target_url)
 
         # GP Range Row
-        self.ui.downloadGP_range_layout = qt_regulars.GridLayout(self, label = 'Frame Offset')
-        self.ui.ui_downloadGP_rangeIn_textEdit   = qt_regulars.QSpinBox()
+        self.ui.downloadGP_range_layout = qt_regulars.GridLayout(self, label='Frame Offset')
+        self.ui.ui_downloadGP_rangeIn_textEdit = qt_regulars.QSpinBox()
         self.ui.ui_downloadGP_rangeIn_textEdit.setValue(0)
         self.ui.ui_downloadGP_rangeIn_textEdit.setMinimum(-100000)
         self.ui.ui_downloadGP_rangeIn_textEdit.setMaximum(100000)
-        self.ui.downloadGP_range_layout.addWidget(self.ui.ui_downloadGP_rangeIn_textEdit,  0, 1)
-        self.ui.downloadGP_range_layout.setColumnStretch(2,0)
+        self.ui.downloadGP_range_layout.addWidget(self.ui.ui_downloadGP_rangeIn_textEdit, 0, 1)
+        self.ui.downloadGP_range_layout.setColumnStretch(2, 0)
 
         # GP Application Row
-        self.ui.downloadGP_application_layout = qt_regulars.GridLayout(self, label = 'After Download')
+        self.ui.downloadGP_application_layout = qt_regulars.GridLayout(self, label='After Download')
         self.ui.downloadGP_application_checkbox = QtWidgets.QCheckBox()
         self.ui.downloadGP_application_checkbox.setText("Apply")
         self.ui.downloadGP_application_checkbox.setChecked(1)
         self.ui.downloadGP_application_checkbox.setFixedWidth(60)
-        self.ui.downloadGP_application_layout.setColumnStretch(1,0)
+        self.ui.downloadGP_application_layout.setColumnStretch(1, 0)
         self.ui.downloadGP_application_comboBox = qt_regulars.ComboBox()
         self.ui.downloadGP_application_comboBox.addItems(maya_scene.get_available_cameras())
-        self.ui.downloadGP_application_layout.addWidget(self.ui.downloadGP_application_checkbox,  0, 1)
-        self.ui.downloadGP_application_layout.addWidget(self.ui.downloadGP_application_comboBox,  0, 2)
-        self.ui.downloadGP_application_layout.setColumnStretch(2,1)
+        self.ui.downloadGP_application_layout.addWidget(self.ui.downloadGP_application_checkbox, 0, 1)
+        self.ui.downloadGP_application_layout.addWidget(self.ui.downloadGP_application_comboBox, 0, 2)
+        self.ui.downloadGP_application_layout.setColumnStretch(2, 1)
 
         self.ui.ui_downloadGP_pushButton = qt_regulars.Button()
         self.ui.ui_downloadGP_pushButton.clicked.connect(self.download_greasepencil)
@@ -136,7 +132,6 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
 
         self.lay_main.addWidget(self.ui.ui_downloadGP_groupbox)
 
-
     def download_greasepencil(self):
         """Downloads the greasepencil """
         downloaded_greasepencile_path = downloader.download_greasepencil()
@@ -144,7 +139,7 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
         if downloaded_greasepencile_path:
             if offset is not 0:
                 maya_scene.offset_greasepencil(downloaded_greasepencile_path, offset)
-            maya_scene.apply_greasepencil(downloaded_greasepencile_path, clear_existing_frames = True)
+            maya_scene.apply_greasepencil(downloaded_greasepencile_path, clear_existing_frames=True)
             os.remove(x)
         else:
             logger.info("Error: Could not download grease pencil file...")
@@ -157,7 +152,7 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
                 None,
                 literals.qtff_not_supported,
                 literals.quicktime_install_instructions
-                )
+            )
             return
 
         downloaded_item = downloader.download_video(media_id=self.media_id)
@@ -165,7 +160,7 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
             logger.info(downloaded_item)
             camera = self.ui.downloadGP_application_comboBox.currentText()
             maya_scene.apply_imageplane(downloaded_item, camera)
-    
+
     def _quicktime_available(self):
         if "qt" in maya_scene.get_available_formats():
             return True
@@ -177,10 +172,10 @@ def parse_url_data(link=database.read_cache('upload_to_value')):
     '''
     simple url parser that extract uuid, review_id and revision_id
     '''
-    #url = 'https://www.syncsketch.com/sketch/bff609f9cbac/#711273/637821'
+    # url = 'https://www.syncsketch.com/sketch/bff609f9cbac/#711273/637821'
     #       https://syncsketch.com/sketch/bff609f9cbac#711680
 
-    #Remove reduntant path and check if it's expected
+    # Remove reduntant path and check if it's expected
     logger.info("link parser: {}".format(link))
     if not link:
         logger.info("Link isn't a link: {}".format(link))
@@ -188,26 +183,24 @@ def parse_url_data(link=database.read_cache('upload_to_value')):
 
     baseUrl = 'https://syncsketch.com/sketch/'
 
-    #Remove leading forward slash
+    # Remove leading forward slash
     if link[-1] == "/":
         link = link[:-1]
 
-    #Remove www
+    # Remove www
     link = link.replace("www.", "")
 
-    data = {"uuid":0, "id":0, "revision_id":0}
-    #Add a slash so we don't need to chase two different cases
+    data = {"uuid": 0, "id": 0, "revision_id": 0}
+    # Add a slash so we don't need to chase two different cases
     if not link.split("#")[0][-1] == "/":
         link = "/#".join(link.split("#"))
         logger.info("Modified link: {}".format(link))
-
 
     if not link[0:len(baseUrl)] == baseUrl:
         logger.info("URL need's to start with: {}".format(baseUrl))
         return data
 
-
-    #Find UUID
+    # Find UUID
     payload = link[len(baseUrl):].split("/")
 
     if len(link) > 0:
@@ -216,14 +209,15 @@ def parse_url_data(link=database.read_cache('upload_to_value')):
             data['uuid'] = uuidPart[0]
         else:
             print("link need's to be of the form https://www.syncsketch.com/sketch/bff609f9cbac/ got {}".format(link))
-    #Find ID
+    # Find ID
     if len(payload) > 1:
         if payload[1].startswith("#"):
             data['id'] = payload[1][1:]
         else:
-            print("link need's to be of the form https://www.syncsketch.com/sketch/bff609f9cbac/#711273 got {}".format(link))
+            print("link need's to be of the form https://www.syncsketch.com/sketch/bff609f9cbac/#711273 got {}".format(
+                link))
 
     if len(payload) > 3:
         pass
-        #handle revision
+        # handle revision
     return data

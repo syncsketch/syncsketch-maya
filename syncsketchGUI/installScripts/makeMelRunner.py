@@ -1,5 +1,6 @@
 import sys
 import os
+
 path, filename = os.path.split(sys.argv[0])
 pythonInstallerPath = os.path.join(path, "installGui.py")
 lines = []

@@ -7,12 +7,10 @@ from syncsketchGUI_install import util
 
 logger = logging.getLogger('syncsketchGUI_install')
 
-
 FFMPEG_API_ENDPOINT = 'https://ffbinaries.com/api/v1/version/4.2'
 
 FFMPEG_BINARIES = ["ffmpeg", "ffprobe"]
-    
-    
+
 
 def install(destination=None):
     for binary in FFMPEG_BINARIES:
@@ -20,7 +18,6 @@ def install(destination=None):
 
 
 def _install_ffbinary(binary_name, destination=None):
-
     donwloaded_file = _download_ffbinary(binary_name)
     extract_directory = util.extract_zip_file(donwloaded_file)
     downloaded_binary_file = _find_binary_in_dir(binary_name, extract_directory)
@@ -32,12 +29,13 @@ def _install_ffbinary(binary_name, destination=None):
 def _make_install_path(name, destination=None):
     if not destination:
         destination = util.get_this_package_directory()
-    
+
     if not os.path.exists(destination):
         os.makedirs(destination)
-    
+
     install_path = os.path.join(destination, name)
     return install_path
+
 
 def _download_ffbinary(binary_name):
     download_url = _get_os_specific_download_url_for(binary_name)
@@ -51,16 +49,17 @@ def _find_binary_in_dir(binary_name, directory):
     print('Found binary {} at {}'.format(binary_name, bin_path))
     return bin_path
 
+
 def _set_permission(file_path):
     os.chmod(file_path, 0o755)
 
-def _get_os_specific_download_url_for(binary_name):
 
+def _get_os_specific_download_url_for(binary_name):
     platform_mapping = {
         'Windows': 'windows-64',
-        'Darwin' : 'osx-64',
-        'Linux'  : 'linux-64'
-                }   
+        'Darwin': 'osx-64',
+        'Linux': 'linux-64'
+    }
 
     platform_id = platform_mapping[platform.system()]
     ffmpeg_resp = util.get_json_response_from_url(FFMPEG_API_ENDPOINT)

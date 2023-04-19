@@ -5,9 +5,9 @@ current_range_type: Start / End
 current_viewport_preset: Animation
 frame_end: '200'
 frame_start: '1'
-last_recorded: {camera: persp, compression: H.264, end_frame: '200', filename: '',
-  format: avfoundation, height: 720, off_screen: true, overwrite: false, show_ornaments: false,
-  start_frame: '1', viewer: false, width: 1280}
+last_recorded: { camera: persp, compression: H.264, end_frame: '200', filename: '',
+                 format: avfoundation, height: 720, off_screen: true, overwrite: false, show_ornaments: false,
+                 start_frame: '1', viewer: false, width: 1280 }
 last_recorded_selection: ''
 ps_clipname_lineEdit: ''
 ps_directory_lineEdit: ''

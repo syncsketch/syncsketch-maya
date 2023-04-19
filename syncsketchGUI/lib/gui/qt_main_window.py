@@ -16,16 +16,17 @@ from . import qt_presets
 from . import qt_utils
 from . import qt_windows
 
-
 import logging
+
 logger = logging.getLogger("syncsketchGUI")
+
 
 class MenuWindow(qt_windows.SyncSketchWindow):
     """
     Main browser window of the syncsketchGUI services
     """
-    window_name='syncsketchGUI_menu_window'
-    window_label='SyncSketch'
+    window_name = 'syncsketchGUI_menu_window'
+    window_label = 'SyncSketch'
 
     account_is_connected = False
 
@@ -42,11 +43,9 @@ class MenuWindow(qt_windows.SyncSketchWindow):
         self._connect_ui()
         self._restore_ui()
 
-
     def closeEvent(self, event):
         logger.info("Closing Window")
         event.accept()
-
 
     def _create_ui(self):
 
@@ -57,7 +56,7 @@ class MenuWindow(qt_windows.SyncSketchWindow):
 
     def _connect_ui(self):
 
-        #Menu
+        # Menu
         self._ui_menu.logged_out.connect(self._ui_browser.refresh)
         self._ui_menu.logged_in.connect(self._ui_browser.refresh)
 
@@ -70,9 +69,9 @@ class MenuWindow(qt_windows.SyncSketchWindow):
 
         # Browser
         self._ui_browser.target_changed.connect(self.target_changed)
-        
+
     def _layout_ui(self):
-        
+
         # Adding the two colums to main_layout
         lay_grid_left = QtWidgets.QGridLayout()
         lay_grid_left.setSpacing(1)
@@ -83,7 +82,7 @@ class MenuWindow(qt_windows.SyncSketchWindow):
         lay_vbox_right = QtWidgets.QVBoxLayout()
         lay_vbox_right.setSpacing(2)
         lay_vbox_right.addWidget(self._ui_browser)
-        
+
         lay_grid_main = QtWidgets.QGridLayout()
         lay_grid_main.setSpacing(6)
         lay_grid_main.setColumnMinimumWidth(0, 320)
@@ -101,19 +100,18 @@ class MenuWindow(qt_windows.SyncSketchWindow):
 
         self.lay_main.addLayout(lay_vbox_master)
 
-
-        
     @QtCore.Slot(str)
     def update_record(self, file):
         logger.debug('Update Record Slot triggerd with File [{}]'.format(file))
         if file:
             playblast_filename = os.path.split(file)[-1]
             self._ui_menu.set_status('Playblast file [{}] is created.'.format(playblast_filename))
-            self._ui_upload.update_last_recorded() 
+            self._ui_upload.update_last_recorded()
         else:
-            self._ui_menu.set_status('Playblast failed. %s'%message_is_not_connected , color=qt_presets.error_color)
+            self._ui_menu.set_status('Playblast failed. %s' % message_is_not_connected, color=qt_presets.error_color)
 
     QtCore.Slot(str)
+
     def target_changed(self, targetdata):
         ui_to_toggle = [
             self._ui_upload.ui_upload_pushButton,
@@ -125,17 +123,19 @@ class MenuWindow(qt_windows.SyncSketchWindow):
         if (target == "review") or (target == "media"):
             qt_utils.enable_interface(ui_to_toggle, True)
             self._ui_menu.set_status('Valid Review Selected.', color='LightGreen')
-            self._ui_upload.ui_upload_pushButton.setText("UPLOAD\n Clip to Review '%s'"%targetdata["name"])
+            self._ui_upload.ui_upload_pushButton.setText("UPLOAD\n Clip to Review '%s'" % targetdata["name"])
             logger.info("Review or Media, enabling UI")
         else:
             qt_utils.enable_interface(ui_to_toggle, False)
-            self._ui_menu.set_status('Please select a review to upload to, using the tree widget or by entering a SyncSketch link', color=warning_color)
+            self._ui_menu.set_status(
+                'Please select a review to upload to, using the tree widget or by entering a SyncSketch link',
+                color=warning_color)
             self._ui_upload.ui_upload_pushButton.setText("CANNOT UPLOAD\nSelect a target to upload to(right panel)")
-    
-            
+
     QtCore.Slot(dict)
+
     def item_uploaded(self, uploaded_item):
-      
+
         if not uploaded_item:
             self._ui_menu.set_status('Upload Failed, please check log', color=qt_presets.error_color)
             return
@@ -144,13 +144,12 @@ class MenuWindow(qt_windows.SyncSketchWindow):
 
     def _restore_ui(self):
         logger.info("restoring ui state")
-        
 
     def retrievePanelData(self):
         begin = time.time()
 
         logger.warn("Use of deprecated function retrievePanelData")
-        
+
         current_user = user.SyncSketchUser()
 
         try:
@@ -162,13 +161,13 @@ class MenuWindow(qt_windows.SyncSketchWindow):
 
         finally:
             if self.account_data:
-                message='Connected and authorized with syncsketchGUI as "{}"'.format(current_user.get_name())
+                message = 'Connected and authorized with syncsketchGUI as "{}"'.format(current_user.get_name())
                 color = qt_presets.success_color
             else:
-                message='WARNING: Could not connect to SyncSketch. '
+                message = 'WARNING: Could not connect to SyncSketch. '
                 message += message_is_not_connected
                 color = qt_presets.error_color
-            
+
         if not self.account_data or type(self.account_data) is dict:
             logger.info("Error: No SyncSketch account data found.")
             return

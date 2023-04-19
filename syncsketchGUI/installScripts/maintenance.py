@@ -5,15 +5,19 @@ import urllib2
 import sys
 
 import logging
+
 logger = logging.getLogger("syncsketchGUI")
 
 from syncsketchGUI.installScripts import installGui
 from syncsketchGUI.lib import user as user
 
+
 class InstallerLiterals(object):
     versionTag = os.getenv("SS_DEV") or "release"
     setupPyPath = 'https://raw.githubusercontent.com/syncsketch/syncsketch-maya/{}/setup.py'.format(versionTag)
-    installerPyGuiPath = 'https://raw.githubusercontent.com/syncsketch/syncsketch-maya/{}/syncsketchGUI/installScripts/installGui.py'.format(versionTag)
+    installerPyGuiPath = 'https://raw.githubusercontent.com/syncsketch/syncsketch-maya/{}/syncsketchGUI/installScripts/installGui.py'.format(
+        versionTag)
+
 
 def getLatestSetupPyFileFromRepo():
     """Parses latest setup.py's version number"""
@@ -25,7 +29,7 @@ def getLatestSetupPyFileFromRepo():
 def getLatestSetupPyFileFromLocal():
     """Checks locally installed packages version number"""
     import pkg_resources
-    #reload module to make sure we have loaded the latest live install
+    # reload module to make sure we have loaded the latest live install
     reload(pkg_resources)
     local = pkg_resources.get_distribution(
         "syncSketchGUI").version
@@ -38,9 +42,10 @@ def getVersionDifference():
     local = int(getLatestSetupPyFileFromLocal().replace(".", ""))
     logger.info("Local Version : {} Remote Version {}".format(local, remote))
     if remote > local:
-        return remote-local
+        return remote - local
     else:
-         pass
+        pass
+
 
 def overwriteLatestInstallerFile():
     import urllib2
@@ -49,11 +54,10 @@ def overwriteLatestInstallerFile():
     response = urllib2.urlopen(InstallerLiterals.installerPyGuiPath)
     data = response.read()
 
-    #Let's get the path of the installer
+    # Let's get the path of the installer
     installerPath = installGui.__file__[:-1]
 
-
-    #Replace the module
+    # Replace the module
     with open(installerPath, "w") as file:
         file.write(data)
 
@@ -70,22 +74,21 @@ def handleUpgrade():
         if os.getenv("SS_DISABLE_UPGRADE"):
             logger.warning("Upgrades disabled as environment Variable SS_DISABLE_UPGRADE is set, skipping")
             return
-        #Let's first make sure to replace the installerGui with the latest.
+        # Let's first make sure to replace the installerGui with the latest.
         # * we might restore old file if not continued from here
         # ! Caution here, this is replacing infile your local files
         # ! Always make sure to remove this line when debugging, 
         # ! It will pull from release github and override changes
         overwriteLatestInstallerFile()
 
-
         logger.info("installGui.InstallOptions.upgrade {}".format(installGui.InstallOptions.upgrade))
-        #Make sure we only show this window once per Session
+        # Make sure we only show this window once per Session
         if not installGui.InstallOptions.upgrade == 1:
             reload(installGui)
-            #If this is set to 1, it means upgrade was already installed
+            # If this is set to 1, it means upgrade was already installed
             installGui.InstallOptions.upgrade = 1
 
-            #Preserve Credentials
+            # Preserve Credentials
             current_user = user.SyncSketchUser()
 
             if current_user.is_logged_in():

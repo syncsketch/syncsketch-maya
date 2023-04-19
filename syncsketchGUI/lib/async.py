@@ -2,6 +2,7 @@ import sys
 import traceback
 from syncsketchGUI.vendor.Qt import QtWidgets, QtCore
 
+
 class WorkerSignals(QtCore.QObject):
     '''
     Defines the signals available from a running worker thread.
@@ -51,7 +52,7 @@ class Worker(QtCore.QRunnable):
         self.signals = WorkerSignals()
 
         # Add the callback to our kwargs
-        #self.kwargs['progress_callback'] = self.signals.progress
+        # self.kwargs['progress_callback'] = self.signals.progress
 
     @QtCore.Slot()
     def run(self):
