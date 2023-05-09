@@ -1177,7 +1177,7 @@ _compatibility_members = {
 
 def _apply_site_config():
     try:
-        import QtSiteConfig
+        from . import QtSiteConfig
     except ImportError:
         # If no QtSiteConfig module found, no modifications
         # to _common_members are needed.
