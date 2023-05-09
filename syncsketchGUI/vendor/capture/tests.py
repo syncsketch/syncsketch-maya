@@ -179,7 +179,7 @@ def test_apply_parsed_view_all():
             this_option = this[opt]
             other_option = other[opt]
 
-            for key, value in this_option.iteritems():
+            for key, value in this_option.items():
                 other_value = other_option[key]
 
                 if isinstance(value, float) or isinstance(other_value, float):

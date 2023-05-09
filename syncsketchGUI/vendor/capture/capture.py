@@ -11,6 +11,22 @@ import contextlib
 from maya import cmds
 from maya import mel
 
+try:
+    from contextlib import nested  # Python 2
+except ImportError:
+    from contextlib import ExitStack
+
+
+    @contextlib.contextmanager
+    def nested(*contexts):
+        """
+        Reimplementation of nested in python 3.
+        """
+        with ExitStack() as stack:
+            for ctx in contexts:
+                stack.enter_context(ctx)
+            yield contexts
+
 from syncsketchGUI import literals
 
 # TODO: Remove QT Dependency
@@ -176,7 +192,7 @@ def capture(camera=None,
                             height=height + padding,
                             off_screen=off_screen) as panel:
         cmds.setFocus(panel)
-        with contextlib.nested(
+        with nested(
                 _disabled_inview_messages(),
                 _maintain_camera(panel, camera),
                 _applied_viewport_options(viewport_options, panel),
@@ -204,8 +220,10 @@ def capture(camera=None,
                     **playblast_kwargs)
             except RuntimeError as e:
                 # This is a naive guess, but usually only happens if Quicktime libraries are missing'
+                logger.error('Error during playblast: {0}'.format(e))
                 message = 'You can choose avi from the presets, which we will automatically convert for you into a mov'
                 qt_dialogs.WarningDialog(None, literals.qtff_not_supported, message)
+                output = None
 
         return output
 
@@ -288,7 +306,7 @@ DisplayOptions = {
 }
 
 # These display options require a different command to be queried and set
-_DisplayOptionsRGB = set(["background", "backgroundTop", "backgroundBottom"])
+_DisplayOptionsRGB = {"background", "backgroundTop", "backgroundBottom"}
 
 ViewportOptions = {
     # renderer
@@ -378,7 +396,7 @@ def apply_view(panel, **options):
 
     # Display options
     display_options = options.get("display_options", {})
-    for key, value in display_options.iteritems():
+    for key, value in display_options.items():
         if key in _DisplayOptionsRGB:
             cmds.displayRGBColor(key, *value)
         else:
@@ -386,16 +404,16 @@ def apply_view(panel, **options):
 
     # Camera options
     camera_options = options.get("camera_options", {})
-    for key, value in camera_options.iteritems():
+    for key, value in camera_options.items():
         _set_attribute_if_unlocked("{0}.{1}".format(camera, key), value)
 
     # Viewport options
     viewport_options = options.get("viewport_options", {})
-    for key, value in viewport_options.iteritems():
+    for key, value in viewport_options.items():
         cmds.modelEditor(panel, edit=True, **{key: value})
 
     viewport2_options = options.get("viewport2_options", {})
-    for key, value in viewport2_options.iteritems():
+    for key, value in viewport2_options.items():
         attr = "hardwareRenderingGlobals.{0}".format(key)
         cmds.setAttr(attr, value)
 
@@ -643,14 +661,14 @@ def _applied_camera_options(options, panel):
                              "for capture: %s" % opt)
             options.pop(opt)
 
-    for opt, value in options.iteritems():
+    for opt, value in options.items():
         _set_attribute_if_unlocked(camera + "." + opt, value)
 
     try:
         yield
     finally:
         if old_options:
-            for opt, value in old_options.iteritems():
+            for opt, value in old_options.items():
                 _set_attribute_if_unlocked(camera + "." + opt, value)
 
 
@@ -736,14 +754,14 @@ def _applied_viewport2_options(options):
             options.pop(opt)
 
     # Apply settings
-    for opt, value in options.iteritems():
+    for opt, value in options.items():
         cmds.setAttr("hardwareRenderingGlobals." + opt, value)
 
     try:
         yield
     finally:
         # Restore previous settings
-        for opt, value in original.iteritems():
+        for opt, value in original.items():
             cmds.setAttr("hardwareRenderingGlobals." + opt, value)
 
 
@@ -783,7 +801,7 @@ def _maintain_camera(panel, camera):
     try:
         yield
     finally:
-        for camera, renderable in state.iteritems():
+        for camera, renderable in state.items():
             cmds.setAttr(camera + ".rnd", renderable)
 
 
@@ -831,19 +849,21 @@ def _set_attribute_if_unlocked(name, value):
 # Apply version specific settings
 #
 # --------------------------------
-
-version = mel.eval("getApplicationVersionAsFloat")
-if version > 2015:
-    Viewport2Options.update({
-        "hwFogAlpha": 1.0,
-        "hwFogFalloff": 0,
-        "hwFogDensity": 0.1,
-        "hwFogEnable": False,
-        "holdOutDetailMode": 1,
-        "hwFogEnd": 100.0,
-        "holdOutMode": True,
-        "hwFogColorR": 0.5,
-        "hwFogColorG": 0.5,
-        "hwFogColorB": 0.5,
-        "hwFogStart": 0.0,
-    })
+try:
+    version = mel.eval("getApplicationVersionAsFloat")
+    if version > 2015:
+        Viewport2Options.update({
+            "hwFogAlpha": 1.0,
+            "hwFogFalloff": 0,
+            "hwFogDensity": 0.1,
+            "hwFogEnable": False,
+            "holdOutDetailMode": 1,
+            "hwFogEnd": 100.0,
+            "holdOutMode": True,
+            "hwFogColorR": 0.5,
+            "hwFogColorG": 0.5,
+            "hwFogColorB": 0.5,
+            "hwFogStart": 0.0,
+        })
+except Exception as error:
+    print(error)
