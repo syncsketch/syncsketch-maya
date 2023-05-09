@@ -1,11 +1,10 @@
-import os
-import sys
-import logging
 import json
-from syncsketchGUI.vendor.Qt import QtCore, QtWidgets, QtWebEngineWidgets, QtWebChannel
-from syncsketchGUI.lib import user
+import logging
 
-from .. import qt_utils
+from syncsketchGUI.lib import user
+from syncsketchGUI.lib.path import get_syncsketch_url
+from syncsketchGUI.vendor.Qt import QtCore
+from syncsketchGUI.vendor.Qt import QtWebEngineWidgets, QtWebChannel
 
 logger = logging.getLogger("syncsketchGUI")
 
@@ -15,7 +14,7 @@ Otherwise when declared in logout_view function, logoutview will run out of scop
 load method runs asynchron. 
  """
 logoutview = QtWebEngineWidgets.QWebEngineView()
-logout_url = "https://syncsketch.com/app/logmeout/"
+logout_url = "{}/app/logmeout/".format(get_syncsketch_url())
 
 
 def logout_view():
@@ -103,7 +102,7 @@ class LoginView(QtWebEngineWidgets.QWebEngineView):
 
         page.qt_object.loaded.connect(self.login)
         # self.loggedIn.connect(self.update_login) # refactor outside of class
-        self.load(QtCore.QUrl("https://syncsketch.com/login/?next=/users/getToken/&simple=1"))
+        self.load(QtCore.QUrl("{}/login/?next=/users/getToken/&simple=1".format(get_syncsketch_url())))
 
         self.show()
         self.activateWindow()

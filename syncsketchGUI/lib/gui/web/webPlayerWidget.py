@@ -1,8 +1,9 @@
-from syncsketchGUI.lib import user as user
-from syncsketchGUI.vendor.Qt import QtCore
 from syncsketchGUI.vendor.Qt.QtWebKitWidgets import QWebView
 
+from syncsketchGUI.lib import user as user
+from syncsketchGUI.vendor.Qt import QtCore
 from .. import qt_utils
+from ...path import get_syncsketch_url
 
 
 class OpenPlayer(QWebView):
@@ -12,8 +13,10 @@ class OpenPlayer(QWebView):
     window_name = 'Login'
     window_label = 'Login to SyncSketch'
 
-    def __init__(self, parent, url='https://syncsketch.com/pro'):
+    def __init__(self, parent, url=None):
         super(OpenPlayer, self).__init__(parent)
+        if not url:
+            url = "{}/pro".format(get_syncsketch_url())
 
         self.parent = parent
         self.current_user = user.SyncSketchUser()

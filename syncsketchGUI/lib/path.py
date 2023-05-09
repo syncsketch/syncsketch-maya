@@ -17,6 +17,11 @@ terms_url = api_host_url + '/terms/'
 
 # ======================================================================
 # Module Functions
+def get_syncsketch_url():
+    """
+    Get the url of the syncsketch project
+    """
+    return home_url
 
 def join(*components):
     '''

@@ -7,11 +7,12 @@ import syncsketchGUI.lib.user as user
 from syncsketchGUI.vendor.Qt import QtCore
 
 from .. import qt_utils
+from ...path import get_syncsketch_url
 
 logger = logging.getLogger("syncsketchGUI")
 
 
-# empty methond to complie to web interface
+# empty method to compile to web interface
 def logout_view():
     pass
 
@@ -35,7 +36,7 @@ class WebLoginWindow(QWebView):
         self.setObjectName(self.window_name)
         self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.WindowStaysOnTopHint)
 
-        self.load(QtCore.QUrl("https://syncsketch.com/login/?next=/users/getToken/&simple=1"))
+        self.load(QtCore.QUrl("{}/login/?next=/users/getToken/&simple=1".format(get_syncsketch_url())))
 
         self.show()
         self.activateWindow()
@@ -48,7 +49,7 @@ class WebLoginWindow(QWebView):
     def changed(self):
         '''Store user tokens'''
         thisUrl = self.url().toString()
-        if thisUrl == "https://syncsketch.com/users/getToken/":
+        if thisUrl == "{}/users/getToken/".format(get_syncsketch_url()):
             command = """window.getTokenData()"""
             for _ in range(20):
                 jsonData = self.page().mainFrame().evaluateJavaScript(command)
