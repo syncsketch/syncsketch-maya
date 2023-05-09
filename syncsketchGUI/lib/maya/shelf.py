@@ -78,11 +78,11 @@ def _get_yaml_shelves():
 
 
 def _parse_shelf_item(shelf_item):
-    '''
+    """
     Get shelf item's arguments and their parameters.
     Return a dictionary with the default value if the user doesn't provide certain values.
-    '''
-    item_data = shelf_item.values()[0]
+    """
+    item_data = list(shelf_item.values())[0]
     parsed_item_data = {'enableCommandRepeat': True,  # 2015+
                         'enable': True,
                         'width': 35,
@@ -224,11 +224,11 @@ def _parse_shelf_item(shelf_item):
 
 
 def _parse_shelf_separator(shelf_separator):
-    '''
+    """
     Get shelf separator's arguments and their parameters.
     Return a dictionary with the default value if the user doesn't provide certain values.
-    '''
-    item_data = shelf_separator.values()[0]
+    """
+    item_data = list(shelf_separator.values())[0]
     parsed_item_data = {'enable': True,
                         'width': 12,
                         'height': 35,
@@ -598,7 +598,7 @@ def load(yaml_shelf_file, custom_shelf_name=None):
 
     # Create shelf items
     for shelf_item in shelf_items:
-        if 'separator' in shelf_item.keys()[0]:
+        if 'separator' in list(shelf_item.keys())[0]:
             shelf_separator_data = _parse_shelf_separator(shelf_item)
             _build_shelf_separator(shelf_separator_data, custom_shelf)
         else:

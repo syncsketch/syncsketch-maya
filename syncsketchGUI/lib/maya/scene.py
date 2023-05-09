@@ -479,7 +479,7 @@ def playblast(filepath=None, width=1280, height=720, start_frame=0, end_frame=0,
         ]
     }
 
-    for platform, settingsList in os_settings.iteritems():
+    for platform, settingsList in os_settings.items():
         if sys.platform == platform:
             for setting in settingsList:
                 rec_args["compression"] = setting["compression"]

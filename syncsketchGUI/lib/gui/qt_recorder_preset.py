@@ -87,7 +87,7 @@ class FormatPresetWindow(qt_windows.SyncSketchWindow):
         self.ui.height_spinBox.setMaximum(32000)
 
         self.ui.scaleButton_layout = QtWidgets.QHBoxLayout()
-        for key, factor in {"¼": 0.25, "½": 0.5, "¾": 0.75, "1": 1.0, "2": 2.0}.iteritems():
+        for key, factor in {"¼": 0.25, "½": 0.5, "¾": 0.75, "1": 1.0, "2": 2.0}.items():
             logger.info("key: %s\nfactor: %s" % (key, factor))
             btn = qt_regulars.ToolButton()
             btn.setText(key)

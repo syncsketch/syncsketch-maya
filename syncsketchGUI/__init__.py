@@ -1,5 +1,10 @@
 import logging
 
+try:
+    from importlib import reload
+except ImportError:
+    pass
+
 logger = logging.getLogger('syncsketchGUI')
 print("logger: {}".format(logger))
 logger.setLevel(logging.INFO)
@@ -51,7 +56,7 @@ def _reload_toolkit():
     from syncsketchGUI.lib import database
     from syncsketchGUI.lib import video
     from syncsketchGUI.lib import user
-    import gui
+    from syncsketchGUI.lib import gui
 
     reload(database)
     reload(video)

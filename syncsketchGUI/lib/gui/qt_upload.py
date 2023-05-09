@@ -192,6 +192,7 @@ class UploadWidget(QtWidgets.QWidget):
             fname = video.get_thumb(clippath)
         except:
             pass
+
         if not fname:
             imageWidget.setIcon(qt_presets.logo_icon)
         else:

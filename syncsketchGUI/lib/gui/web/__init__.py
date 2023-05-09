@@ -10,18 +10,18 @@ Unfortunately Maya2019 seems to have a bug with the QWebEngineView widget, since
 Therefore the old widget is used as default. With this implementation only >=Maya2020 uses the new widgets. 
 '''
 try:
-    from webLoginWidget import WebLoginWindow as LoginView
-    from webLoginWidget import logout_view
+    from .webLoginWidget import WebLoginWindow as LoginView
+    from .webLoginWidget import logout_view
 except ImportError:
     logger.debug("Import Latest LoginView")
-    from webLoginWidgetEngine import LoginView, logout_view
+    from .webLoginWidgetEngine import LoginView, logout_view
 else:
     logger.debug("Import Deprecated LoginView")
 
 try:
-    from webPlayerWidget import OpenPlayer as OpenPlayerView
+    from .webPlayerWidget import OpenPlayer as OpenPlayerView
 except ImportError:
     logger.debug("Import Latest PlayerView")
-    from webPlayerWidgetEngine import OpenPlayerView as OpenPlayerView
+    from .webPlayerWidgetEngine import OpenPlayerView as OpenPlayerView
 else:
     logger.debug("Import Deprecated PlayerView")

@@ -290,8 +290,8 @@ class MayaPlayblastRecorderWidget(QtWidgets.QWidget):
 
         # Update the last recorded file and save the ui state
         # To do - need to update and selc the target url when item is updated
-        if recordData.has_key('uploaded_item'):
-            logger.info("uploaded_item %s" % recordData["uploaded_item"]["id"])
+        if 'uploaded_item' in record_data:
+            logger.info("uploaded_item %s" % record_data["uploaded_item"]["id"])
 
         # self.restore_ui_state()
 
@@ -313,7 +313,7 @@ class MayaPlayblastRecorderWidget(QtWidgets.QWidget):
         format_preset_file = path.get_config_yaml(PRESET_YAML)
         data = database._parse_yaml(yaml_file=format_preset_file)
         logger.info("data: {}".format(data))
-        if data.has_key(val):
+        if val in data:
             data = data[val]
             # text = "%s | %s | %sx%s " %(data["encoding"], data["format"], data["width"], data["height"])
             text = "{} | {} | {}x{}".format(data["encoding"], data["format"], data["width"], data["height"])

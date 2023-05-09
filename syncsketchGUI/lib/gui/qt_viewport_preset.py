@@ -114,7 +114,6 @@ class ViewportPresetWindow(qt_windows.SyncSketchWindow):
         database.save_cache("current_viewport_preset", new_preset_name)
         self.populate_ui()
         self.build_screenshot()
-        event.accept()
 
     def delete_preset(self, preset_name=None):
         preset_file = path.get_config_yaml(VIEWPORT_YAML)

@@ -75,7 +75,7 @@ def apply_viewport_preset(preset_name):
 
 def cycle_viewport_presets():
     cache = path.get_config_yaml(VIEWPORT_PRESET_YAML)
-    presets = database._parse_yaml(cache).keys()
+    presets = list(database._parse_yaml(cache).keys())
     current_viewport_preset = database.read_cache('current_viewport_preset')
 
     try:
