@@ -10,7 +10,6 @@ from syncsketchGUI.lib import database
 
 from syncsketchGUI.lib.maya import scene as maya_scene
 from syncsketchGUI.settings import VIEWPORT_YAML, PRESET_YAML
-from syncsketchGUI.literals import message_is_not_connected
 
 from . import qt_regulars
 from . import qt_presets
@@ -256,7 +255,7 @@ class MayaPlayblastRecorderWidget(QtWidgets.QWidget):
             self.manual_set_range(False)
 
     def set_in_out(self, type="Time Slider"):
-        range = maya_scene.get_InOutFrames(type)
+        range = maya_scene.get_in_out_frames(type)
         self.ui_rangeIn_textEdit.setText(str(range[0]))
         self.ui_rangeOut_textEdit.setText(str(range[1]))
 
@@ -272,8 +271,8 @@ class MayaPlayblastRecorderWidget(QtWidgets.QWidget):
         # store current preset since subsequent calls will use that data exclusively
         # savedata
         self.save_ui_state()
-        recordData = syncsketchGUI.record()
-        playblast_file = recordData["playblast_file"]
+        record_data = syncsketchGUI.record()
+        playblast_file = record_data.get("playblast_file")
 
         if not playblast_file:
             self.recorded.emit(None)
@@ -283,8 +282,8 @@ class MayaPlayblastRecorderWidget(QtWidgets.QWidget):
         self.recorded.emit(playblast_file)
 
         if self.ps_upload_after_creation_checkBox.isChecked() and self.ps_upload_after_creation_checkBox.isEnabled():
-            self.uploaded.emit("update_target_from_upload = {}".format(recordData["uploaded_item"]['reviewURL']))
-            logger.info("update_target_from_upload = {}".format(recordData["uploaded_item"]['reviewURL']))
+            self.uploaded.emit("update_target_from_upload = {}".format(record_data["uploaded_item"]['reviewURL']))
+            logger.info("update_target_from_upload = {}".format(record_data["uploaded_item"]['reviewURL']))
         else:
             logger.info("Upload checkbox was not selected, returning here")
             return

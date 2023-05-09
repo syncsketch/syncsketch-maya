@@ -1,11 +1,7 @@
-from syncsketchGUI.vendor.Qt import QtWidgets, QtCore, QtGui
-
-from syncsketchGUI.lib import connection
-from syncsketchGUI.lib import user
-
-import qt_presets
-
 import logging
+
+from syncsketchGUI.lib.gui import qt_presets
+from syncsketchGUI.vendor.Qt import QtWidgets, QtCore
 
 logger = logging.getLogger("syncsketchGUI")
 
@@ -67,9 +63,9 @@ class SyncSketchWindow(QtWidgets.QMainWindow):
         self.close()
 
     def update_login_ui(self):  # TODO: Evaluate if neccessary here and maybe removed
-        '''
+        """
         Updates the UI based on whether the user is logged in
-        '''
+        """
         logger.warning("This function might become depracted in near future")
         self.current_user = user.SyncSketchUser()
         if self.current_user.is_logged_in() and connection.is_connected():

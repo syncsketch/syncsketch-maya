@@ -18,17 +18,17 @@ shelf_name = 'SyncSketch'
 # Module Utilities
 
 def _sanitize_path(raw_path):
-    '''
+    """
     Replace the backslashes in the path with the forward slashes
-    '''
+    """
     sanitized_path = raw_path.replace('\\', '/')
     return sanitized_path
 
 
 def _shorten_icon_path(icon_fullname):
-    '''
+    """
     Cut the filepath of the icon short and return only the filename
-    '''
+    """
     if not icon_fullname:
         return icon_fullname
 
@@ -36,10 +36,10 @@ def _shorten_icon_path(icon_fullname):
 
 
 def _resolve_icon_path(icon_shortname):
-    '''
+    """
     Connect the icon path with the icon name
     WARNING: This one works only when you have a pre-defined icon path
-    '''
+    """
     if not icon_shortname:
         return icon_shortname
 
@@ -51,9 +51,9 @@ def _resolve_icon_path(icon_shortname):
 
 
 def _get_yaml_shelves():
-    '''
+    """
     Get all the yaml files from the MAYA_SHELF_PATH
-    '''
+    """
     shelf_paths = os.environ.get('MAYA_SHELF_PATH')
     if not shelf_paths:
         return
@@ -274,9 +274,9 @@ def _parse_shelf_separator(shelf_separator):
 
 
 def _build_shelf_item(shelf_item_data, shelf):
-    '''
+    """
     Add shelf button based on current maya version
-    '''
+    """
     if cmds.about(apiVersion=True) >= 201600:
         # Maya 2016 and later
         cmds.shelfButton(enableCommandRepeat=shelf_item_data['enableCommandRepeat'],  # 2015+
@@ -342,9 +342,9 @@ def _build_shelf_item(shelf_item_data, shelf):
 
 
 def _build_shelf_separator(shelf_separator_data, shelf):
-    '''
+    """
     Add a seperator in the shelf based on current maya version
-    '''
+    """
     # Exit if the maya version is earlier than 2016
     # because shelves have no separator function before 2016
     if not cmds.about(apiVersion=True) >= 201600:
@@ -542,9 +542,9 @@ def _get_shelf_item_data(shelf_button):
 # Module Functions
 
 def install():
-    '''
+    """
     Dynamically create and load the shelf in maya
-    '''
+    """
     yaml_shelf_file = path.get_config_yaml(yaml_shelf)
     icon_path = path.get_image_folder()
 
@@ -552,17 +552,17 @@ def install():
 
 
 def uninstall(shelf_name=shelf_name):
-    '''
+    """
     Delete a previously created shelf created
-    '''
+    """
     if cmds.shelfLayout(shelf_name, exists=True):
         cmds.deleteUI(shelf_name)
 
 
 def load(yaml_shelf_file, custom_shelf_name=None):
-    '''
+    """
     Dynamically create and load the shelf in maya
-    '''
+    """
     if custom_shelf_name:
         shelf_name = custom_shelf_name
     else:
@@ -615,9 +615,9 @@ def load(yaml_shelf_file, custom_shelf_name=None):
 
 
 def import_shelf():
-    '''
+    """
     Import the user selected YAML shelf
-    '''
+    """
     yaml_file = cmds.fileDialog2(fileFilter='YAML Shelves(*.yaml *.yml)', fileMode=1)
     if not yaml_file:
         return
@@ -626,9 +626,9 @@ def import_shelf():
 
 
 def export_active_shelf():
-    '''
+    """
     Export the currently active shelf as a yaml file
-    '''
+    """
     shelf_top_level = mel.eval('$temp_mel_var = $gShelfTopLevel;')
     active_shelf = cmds.shelfTabLayout(shelf_top_level, query=True, selectTab=True)
     active_shelf_buttons = cmds.shelfLayout(active_shelf, query=True, childArray=True)
@@ -647,9 +647,9 @@ def export_active_shelf():
 
 
 def load_all():
-    '''
+    """
     Load all the yaml shelves from the MAYA_SHELF_PATH
-    '''
+    """
     shelves = _get_yaml_shelves()
     for shelf in shelves:
         shelf_name = os.path.split(shelf)[-1]

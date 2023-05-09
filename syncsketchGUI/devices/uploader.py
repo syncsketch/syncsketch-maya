@@ -38,10 +38,9 @@ def upload(open_after_upload=None, show_success_msg=False):
 
 
 def _upload(current_user=None, ):
-    errorLog = None
+    error_log = None
     if not current_user:
         current_user = user.SyncSketchUser()
-    username = current_user.get_name()
     upload_file = _get_current_file()
 
     if not upload_file or not os.path.isfile(upload_file):
@@ -58,21 +57,21 @@ def _upload(current_user=None, ):
     item_name = database.read_cache('target_url_item_name')
 
     # Upload To
-    current_item = selected_item
     upload_to_value = item_name
     logger.info('Selected Item: %s' % item_name)
 
     last_recorded_data = database.read_cache('last_recorded')
 
-    postData = {
+    post_data = {
         "first_frame": last_recorded_data['start_frame'],
         "last_frame": last_recorded_data['end_frame'],
     }
 
     if item_type == 'review':
+        # TODO: convert avi to mp4 before upload
         logger.info('Uploading {} to {} with review_id {}'.format(upload_file, upload_to_value, review_id))
         uploaded_item = current_user.upload_media_to_review(review_id, upload_file, noConvertFlag=True,
-                                                            itemParentId=False, data=postData)
+                                                            itemParentId=False, data=post_data)
         # logger.info("uploaded_item: {0}".format(pformat(uploaded_item)))
 
     elif item_type == 'media':
@@ -81,18 +80,18 @@ def _upload(current_user=None, ):
         logger.info("filepath %s" % upload_file)
         logger.info("Trying to upload %s to item_id %s, review %s" % (upload_file, item_id, review_id))
         uploaded_item = current_user.upload_media_to_review(review_id, upload_file, noConvertFlag=True,
-                                                            itemParentId=item_id, data=postData)
+                                                            itemParentId=item_id, data=post_data)
         logger.info(pformat(uploaded_item))
     else:
         uploaded_item = None
-        errorLog = 'You cannot upload to %s "%s" directly.\nPlease select a review in the tree widget to upload to!\n' % (
+        error_log = 'You cannot upload to %s "%s" directly.\nPlease select a review in the tree widget to upload to!\n' % (
             item_type, item_name)
 
     if not uploaded_item:
-        if not errorLog:
-            errorLog = 'No Uploaded Item returned from Syncsketch'
+        if not error_log:
+            error_log = 'No Uploaded Item returned from Syncsketch'
 
-        logger.info('ERROR: This Upload failed: %s' % (errorLog))
+        logger.info('ERROR: This Upload failed: %s' % (error_log))
         return
 
     # * this is an old call, that we should replace with an async worker
@@ -116,11 +115,11 @@ def _show_success_message(uploaded_item):
     title = 'Upload Successful'
     info_message = 'Your file has successfully been uploaded. Please follow this link:'
 
-    UploadedMediaDialog = qt_dialogs.InfoDialog(None,
-                                                title,
-                                                info_message,
-                                                uploaded_item)
-    UploadedMediaDialog.exec_()
+    uploaded_media_dialog = qt_dialogs.InfoDialog(None,
+                                                  title,
+                                                  info_message,
+                                                  uploaded_item)
+    uploaded_media_dialog.exec_()
 
 
 def _get_current_file():

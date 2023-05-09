@@ -16,21 +16,21 @@ logger = logging.getLogger("syncsketchGUI")
 
 def record(upload_after_creation=None, play_after_creation=None, show_success_msg=True):
     # This a wrapper function and if called individually should mirror all the same effect as hitting 'record' in the UI
-    recordData = {}
-    capturedFile = _record()
-    if not capturedFile:
+    record_data = {}
+    captured_file = _record()
+    if not captured_file:
         return {"playblast_file": ""}
-    logger.info("capturedFile: {}".format(capturedFile))
-    capturedFileNoExt, ext = os.path.splitext(capturedFile)
-    if capturedFileNoExt[-5:] == '.####':
-        # Reencode to quicktime
-        recordData["playblast_file"] = video.encodeToH264Mov(
-            capturedFile, output_file=capturedFileNoExt[:-5] + ".mov")
-        logger.info("reencoded File: {}".format(recordData["playblast_file"]))
-        database.dump_cache({"last_recorded_selection": recordData["playblast_file"]})
 
+    logger.info("captured_file: {}".format(captured_file))
+    captured_file_no_ext, ext = os.path.splitext(captured_file)
+    if captured_file_no_ext[-5:] == '.####':
+        # Reencode to quicktime
+        record_data["playblast_file"] = video.encodeToH264Mov(
+            captured_file, output_file=captured_file_no_ext[:-5] + ".mov")
+        logger.info("reencoded File: {}".format(record_data["playblast_file"]))
+        database.dump_cache({"last_recorded_selection": record_data["playblast_file"]})
     else:
-        recordData["playblast_file"] = capturedFile
+        record_data["playblast_file"] = captured_file
     # Post actions
 
     # To Do - post Recording script call
@@ -44,12 +44,12 @@ def record(upload_after_creation=None, play_after_creation=None, show_success_ms
 
     if upload_after_creation:
         uploaded_item = uploader.upload(open_after_upload=open_after_creation)
-        recordData["uploaded_item"] = uploaded_item
+        record_data["uploaded_item"] = uploaded_item
     else:
         if play_after_creation:
-            player.play(recordData["playblast_file"])
+            player.play(record_data["playblast_file"])
 
-    return recordData
+    return record_data
 
 
 def _record():
@@ -75,47 +75,33 @@ def _record():
     preset_name = database.read_cache('current_preset')
     preset = preset_data.get(preset_name)
 
-    start_frame, end_frame = maya_scene.get_InOutFrames(database.read_cache('current_range_type'))
+    start_frame, end_frame = maya_scene.get_in_out_frames(database.read_cache('current_range_type'))
     start_frame = database.read_cache('frame_start')
     end_frame = database.read_cache('frame_end')
 
     # setting up args for recording
-    recArgs = {
-        "show_ornaments":
-            False,
-        "start_frame":
-            start_frame,
-        "end_frame":
-            end_frame,
-        "camera":
-            database.read_cache('selected_camera'),
-        "format":
-            preset.get('format'),
-        "viewer":
-            True if database.read_cache('ps_play_after_creation_checkBox') == 'true' else False,
-        "filename":
-            filepath,
-        "width":
-            preset.get('width'),
-        "height":
-            preset.get('height'),
-        "overwrite":
-            True if database.read_cache('ps_force_overwrite_checkBox') == 'true' else False,
-        "compression":
-            preset.get('encoding'),
-        "off_screen":
-            True,
-        "sound":
-            maya_scene.get_active_sound_node()
-
+    rec_args = {
+        "show_ornaments": False,
+        "start_frame": start_frame,
+        "end_frame": end_frame,
+        "camera": database.read_cache('selected_camera'),
+        "format": preset.get('format'),
+        "viewer": True if database.read_cache('ps_play_after_creation_checkBox') == 'true' else False,
+        "filename": filepath,
+        "width": preset.get('width'),
+        "height": preset.get('height'),
+        "overwrite": True if database.read_cache('ps_force_overwrite_checkBox') == 'true' else False,
+        "compression": preset.get('encoding'),
+        "off_screen": True,
+        "sound": maya_scene.get_active_sound_node()
     }
-    logger.info("recArgs: {}".format(recArgs))
+    logger.info("rec_args: {}".format(rec_args))
 
     # read from database Settings
     playblast_file = maya_scene.playblast_with_settings(
         viewport_preset=database.read_cache('current_viewport_preset'),
         viewport_preset_yaml=VIEWPORT_PRESET_YAML,
-        **recArgs
+        **rec_args
     )
 
     return playblast_file

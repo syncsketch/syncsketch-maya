@@ -1,11 +1,12 @@
 import datetime
 import json
+import logging
 import os
 import subprocess
 import sys
 from os.path import expanduser
+
 from syncsketchGUI.lib import path
-import logging
 
 logger = logging.getLogger("syncsketchGUI")
 
@@ -49,9 +50,8 @@ def probe(filename):
         ffprobe_output = subprocess.check_output(ffprobe_command, shell=True).decode('utf-8')
         ffprobe_output = json.loads(ffprobe_output)
         return ffprobe_output
-
     except Exception as err:
-        print(u'%s' % (err))
+        logger.error("FFPROBE failed: {}".format(err))
         return
 
 
@@ -125,10 +125,12 @@ def get_thumb(filepath=None, output_file=""):
     output_file = path.sanitize(output_file)
 
     # print "Creating Thumb for %s >> %s"%(filepath,output_file)
+    logger.debug("Creating Thumb for {} >> {}".format(filepath, output_file))
     if not os.path.isfile(output_file):
         return
     else:
         return output_file
+
     '''
     ffmpeg -ss 01:23:45 -i input -vframes 1 -q:v 2 output.jpg
 

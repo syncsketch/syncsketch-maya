@@ -5,9 +5,9 @@ import tempfile
 
 
 def _get_qicon(icon_name='syncsketch_ui_100.png'):
-    '''
+    """
     Get logo path and return a QtGui.QIcon object
-    '''
+    """
     icon_fullname = path.get_icon(icon_name)
     if not icon_fullname:
         return QtGui.QIcon()
@@ -17,9 +17,9 @@ def _get_qicon(icon_name='syncsketch_ui_100.png'):
 
 
 def _get_qicon_from_url(url):
-    '''
+    """
     Get logo path and return a QtGui.QIcon object
-    '''
+    """
 
     testfile = urllib.URLopener()
     tmpname = tempfile.NamedTemporaryFile(delete=False)

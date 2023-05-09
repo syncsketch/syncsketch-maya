@@ -32,9 +32,9 @@ GREASEPENCIL_XML_NAME = 'greasePencil.xml'
 # Module Functions
 
 def get_available_compressions(format=None):
-    '''
+    """
     Get currently available compression formats in maya
-    '''
+    """
     if not format:
         if sys.platform == 'darwin':
             format = 'qt'
@@ -137,10 +137,10 @@ def get_active_editor():
     return panel.split('|')[-1]
 
 
-def get_InOutFrames(type='Time Slider'):
-    '''
+def get_in_out_frames(type='Time Slider'):
+    """
     Get Frame Range from maya
-    '''
+    """
     in_out = []
     if type == r"Highlighted":
         slider = mel.eval('$tmpVal=$gPlayBackSlider')
@@ -171,8 +171,8 @@ def get_InOutFrames(type='Time Slider'):
 
 def offset_greasepencil(original_zip_path, offset=0):
     """
-    Its not possible to mofify files in a zip file directly. Therefor we have to create a new zip file and copy
-    all images and add the modiefied xml. 
+    Its not possible to modify files in a zip file directly. Therefor we have to create a new zip file and copy
+    all images and add the modified xml.
     """
     if not offset:
         return original_zip_path
@@ -229,7 +229,7 @@ def modifyXMLData(xmlFile, offsetFrames):
     tree.write(xmlFile)
 
 
-def updateZip(zipname, filename, data):
+def update_zip(zipname, filename, data):
     # generate a temp file
     tmpfd, tmpname = tempfile.mkstemp(dir=os.path.dirname(zipname))
     os.close(tmpfd)
@@ -278,7 +278,6 @@ def apply_imageplane(filename, camera=None):
     # Get Camera Shapes
     if not camera:
         ssCamera = cmds.camera()[1]
-
     else:
         # todo: there might be another camera in this hierarchy
         ssCamera = filter((lambda x: x if "Shape" in x else None), cmds.ls(camera, dag=True))[0]
@@ -337,7 +336,7 @@ def add_extension(file, rec_args):
 
     if file_format == "avi":
         extension = "avi"
-    elif file_format == "qt":
+    elif file_format in ["qt", 'avfoundation']:
         extension = "mov"
     elif file_format == "image":
         try:
@@ -383,10 +382,10 @@ def is_file_on_disk(file_path):
 
 
 def playblast_with_settings(viewport_preset=None, viewport_preset_yaml=None, **recArgs):
-    '''
+    """
     Playblast with the user-defined settings
     recArgs are the arguments needed for the capture command
-    '''
+    """
 
     # get default viewport preset config
     if viewport_preset and viewport_preset_yaml:
@@ -432,9 +431,9 @@ def playblast_with_settings(viewport_preset=None, viewport_preset_yaml=None, **r
 
 def playblast(filepath=None, width=1280, height=720, start_frame=0, end_frame=0, view_afterward=False,
               force_overwrite=False):
-    '''
+    """
     Playblast with the pre-defined settings based on the user's OS
-    '''
+    """
     logger.info("Playblast this:")
     if not filepath:
         filepath = path.get_default_playblast_folder()
@@ -448,13 +447,14 @@ def playblast(filepath=None, width=1280, height=720, start_frame=0, end_frame=0,
             if not confirm_overwrite_dialogue(message) == 'yes':
                 return
 
-    recArgs = {
+    rec_args = {
         "width": width,
         "height": height,
         "start_frame": start_frame,
         "end_frame": end_frame
     }
-    logger.info("recargsplayblast (): {}".format(recArgs))
+    logger.info("rec_args playblast (): {}".format(rec_args))
+
     # record with OS specific Fallback Settings
     os_settings = {
         "darwin": [
@@ -476,26 +476,16 @@ def playblast(filepath=None, width=1280, height=720, start_frame=0, end_frame=0,
                 "format": 'movie',
                 "compression": '',
             }
-        ],
-        "linux2": [
-            {
-                "win32": 'qt',
-                "compression": 'H.264',
-            },
-            {
-                "format": 'movie',
-                "compression": '',
-            }
         ]
     }
 
     for platform, settingsList in os_settings.iteritems():
         if sys.platform == platform:
             for setting in settingsList:
-                recArgs["compression"] = setting["compression"]
+                rec_args["compression"] = setting["compression"]
                 try:
-                    logger.info("recArgs playblast(): {}".format(**recArgs))
-                    playblast_file = _playblast_with_settings(**recArgs)
+                    logger.info("recArgs playblast(): {}".format(rec_args))
+                    playblast_file = playblast_with_settings(**rec_args)
                     return playblast_file
 
                 except Exception as err:
@@ -503,17 +493,16 @@ def playblast(filepath=None, width=1280, height=720, start_frame=0, end_frame=0,
 
 
 # save active panel as a preset
-def save_viewport_preset(cache_file, presetName, panel=None):
+def save_viewport_preset(cache_file, preset_name, panel=None):
     if not panel:
         panel = get_active_editor()
-    data = {}
-    data[presetName] = capture.parse_view(panel)
+    data = {preset_name: capture.parse_view(panel)}
     database.dump_cache(data, cache_file)
 
 
 # save active panel as a preset
-def delete_viewport_preset(cache_file, presetName):
-    database.delete_key_from_cache(presetName, cache_file)
+def delete_viewport_preset(cache_file, preset_name):
+    database.delete_key_from_cache(preset_name, cache_file)
 
 
 # save active panel as a preset
@@ -521,15 +510,17 @@ def rename_viewport_preset(cache_file, old_preset_name, new_preset_name):
     return database.rename_key_in_cache(old_preset_name, new_preset_name, cache_file)
 
 
-def create_unique_name(existing_keys=[], new_key=None, suffix=None):
+def create_unique_name(existing_keys=None, new_key=None, suffix=None):
+    if existing_keys is None:
+        existing_keys = []
+
     if not new_key:
-        strList = filter(None, ['New', suffix])
-        new_key = ' '.join(strList)
+        str_list = filter(None, ['New', suffix])
+        new_key = ' '.join(str_list)
     if existing_keys and len(existing_keys):
         while new_key in existing_keys:
-            logger.info("key exists")
-            strList = filter(None, ['Copy of', new_key])
-            new_key = ' '.join(strList)
+            str_list = filter(None, ['Copy of', new_key])
+            new_key = ' '.join(str_list)
     return new_key
 
 
@@ -568,7 +559,9 @@ def new_viewport_preset(cache_file, preset_name=None, source_preset=None, panel=
 
 
 # apply preset to panel
-def apply_viewport_preset(cache_file, presetName, panels=[]):
+def apply_viewport_preset(cache_file, presetName, panels=None):
+    if panels is None:
+        panels = []
     options = database.read_cache(presetName, cache_file)
     if not options:
         logger.info("No preset found")
@@ -581,7 +574,7 @@ def apply_viewport_preset(cache_file, presetName, panels=[]):
 
 
 def screenshot_current_editor(cache_file, presetName, panel=None, camera=None):
-    # Nice little screentshot function from BigRoy
+    # Nice little screenshot function from BigRoy
     if not panel:
         panel = get_active_editor()
 
@@ -590,7 +583,7 @@ def screenshot_current_editor(cache_file, presetName, panel=None, camera=None):
         logger.info("No preset found")
         return
     frame = cmds.currentTime(q=1)
-    # When playblasting outside of an undo queue it seems that undoing
+    # When playblasting outside an undo queue it seems that undoing
     # actually triggers a reset to frame 0. As such we sneak in the current
     # time into the undo queue to enforce correct undoing.
     cmds.currentTime(frame, update=True)
@@ -636,7 +629,7 @@ def get_maya_main_window():
             return obj
 
 
-def getShapeNodes(obj):
+def get_shape_nodes(obj):
     howManyShapes = 0
     getShape = maya.cmds.listRelatives(obj, shapes=True)
     if (getShape == None):
@@ -647,26 +640,26 @@ def getShapeNodes(obj):
 
 
 def get_render_resolution():
-    '''
-    Returns resolution (widht, height) in current render settings
-    '''
+    """
+    Returns resolution (width, height) in current render settings
+    """
     width = cmds.getAttr("defaultResolution.width")
     height = cmds.getAttr("defaultResolution.height")
     return (width, height)
 
 
 def get_playblast_format():
-    '''
+    """
     Returns the currently selected format in mayas playblast settings.
-    '''
+    """
     return cmds.optionVar(query="playblastFormat")
 
 
 def get_playblast_encoding():
-    '''
+    """
     Returns the encoding setting used for the last playblast.
     Unfortunately it doesnt return the currently selected setting in the playblast menu.
-    '''
+    """
     return cmds.optionVar(query="playblastCompression")
 
 

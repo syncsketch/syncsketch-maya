@@ -1,19 +1,16 @@
+import logging
 import webbrowser
 
-from syncsketchGUI.vendor.Qt import QtCore, QtGui, QtWidgets
-
+from syncsketchGUI.installScripts.maintenance import get_version_difference
 from syncsketchGUI.lib import path, user
-from syncsketchGUI.literals import message_is_not_loggedin, message_is_not_connected
 from syncsketchGUI.lib.connection import is_connected
-from syncsketchGUI.installScripts.maintenance import getVersionDifference
-
-from . import web
+from syncsketchGUI.literals import message_is_not_loggedin, message_is_not_connected
+from syncsketchGUI.vendor.Qt import QtCore, QtWidgets
+from . import qt_dialogs
 from . import qt_presets
 from . import qt_regulars
-from . import qt_dialogs
 from . import qt_utils
-
-import logging
+from . import web
 
 logger = logging.getLogger("syncsketchGUI")
 
@@ -76,7 +73,7 @@ class MenuWidget(QtWidgets.QWidget):
         self.logged_in.connect(self.update_login_ui)
 
     def _restore_ui_state(self):
-        self._ui_pb_upgrade.show() if getVersionDifference() else self._ui_pb_upgrade.hide()
+        self._ui_pb_upgrade.show() if get_version_difference() else self._ui_pb_upgrade.hide()
 
     def _create_label_login(self):
         label_login = QtWidgets.QLabel()
@@ -140,9 +137,9 @@ class MenuWidget(QtWidgets.QWidget):
         self._ui_label_status.update(message, kwargs)
 
     def upgrade_plugin(self):
-        from syncsketchGUI.installScripts.maintenance import handleUpgrade
+        from syncsketchGUI.installScripts.maintenance import handle_upgrade
         # attach the upgrader to the mainWindow so it doesn't go out of scope
-        self.installer = handleUpgrade()
+        self.installer = handle_upgrade()
 
     def disconnect_account(self):
         current_user = user.SyncSketchUser()
@@ -164,12 +161,11 @@ class MenuWidget(QtWidgets.QWidget):
         Updates the UI based on whether the user is logged in
         '''
         current_user = user.SyncSketchUser()
-        logger.info("CurrentUser: {}".format(current_user))
-        logger.info("isLoggedin: {}".format(current_user.is_logged_in()))
+        user_is_logged_in = current_user.is_logged_in()
+        _is_connected = is_connected()
+        logger.info("current_user: '{}', is_logged_inL '{}".format(current_user, user_is_logged_in))
 
-        if current_user.is_logged_in() and is_connected():
-            logger.info(
-                "current_user.is_logged_in() {} is_connected() {} ".format(current_user.is_logged_in(), is_connected()))
+        if user_is_logged_in and _is_connected:
             username = current_user.get_name()
             self._ui_label_login.setText("Logged into SyncSketch as \n%s" % username)
             self._ui_label_login.setStyleSheet("color: white; font-size: 11px;")
@@ -177,8 +173,7 @@ class MenuWidget(QtWidgets.QWidget):
             self._ui_pb_signup.hide()
             self._ui_pb_logout.show()
             self.isloggedIn(loggedIn=True)
-
-        elif not is_connected():
+        elif not _is_connected:
             self._ui_label_status.update(message_is_not_connected, color=qt_presets.error_color)
             logger.info("\nNot connected to SyncSketch ...")
 

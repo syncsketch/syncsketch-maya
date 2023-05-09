@@ -2,7 +2,7 @@ import codecs
 import os
 import yaml
 import logging
-import logging
+
 
 logger = logging.getLogger("syncsketchGUI")
 from syncsketchGUI.lib import path
@@ -14,19 +14,19 @@ from syncsketchGUI.settings import CACHE_YAML
 # Module Utilities
 
 def _parse_yaml(yaml_file=CACHE_YAML):
-    '''
+    """
     Parse the given yaml file
-    '''
+    """
     if not yaml_file:
         _show_error('Please provide valid yaml file.')
-        return
+        raise RuntimeError('Please provide valid yaml file.')
 
     # cache_file = path.get_config_yaml(yaml_file)
     if not os.path.isfile(yaml_file):
         raise RuntimeError('Please provide valid yaml file.')
 
     with open(yaml_file, 'r') as stream:
-        data = yaml.load(stream)
+        data = yaml.safe_load(stream)
 
     return data
 
@@ -36,9 +36,9 @@ def _parse_yaml(yaml_file=CACHE_YAML):
 
 
 def dump_cache(data, yaml_file=CACHE_YAML):
-    '''
+    """
     Dump a dictionary data into the yaml_file
-    '''
+    """
 
     cache_file = path.get_config_yaml(yaml_file)
 
@@ -64,9 +64,9 @@ def dump_cache(data, yaml_file=CACHE_YAML):
 
 
 def rename_key_in_cache(old_key, new_key, yaml_file=CACHE_YAML):
-    '''
+    """
     Delete the key value pair from the yaml_file
-    '''
+    """
     cache_file = path.get_config_yaml(yaml_file)
 
     if os.path.isfile(cache_file):
@@ -88,9 +88,9 @@ def rename_key_in_cache(old_key, new_key, yaml_file=CACHE_YAML):
 
 
 def delete_key_from_cache(key, yaml_file=CACHE_YAML):
-    '''
+    """
     Delete the key value pair from the yaml_file
-    '''
+    """
     cache_file = path.get_config_yaml(yaml_file)
     if os.path.isfile(cache_file):
         parsed_data = _parse_yaml(cache_file)
@@ -105,9 +105,9 @@ def delete_key_from_cache(key, yaml_file=CACHE_YAML):
 
 
 def read_cache(key, yaml_file=CACHE_YAML):
-    '''
+    """
     Get the value of a key from the yaml_file
-    '''
+    """
     cache_file = path.get_config_yaml(yaml_file)
     if os.path.isfile(cache_file):
         parsed_data = _parse_yaml(cache_file)
@@ -119,9 +119,9 @@ def read_cache(key, yaml_file=CACHE_YAML):
 
 
 def save_cache(key, value, yaml_file=CACHE_YAML):
-    '''
+    """
     Set the value of a key from the yaml_file
-    '''
+    """
     data = {key: value}
 
     cache_file = path.get_config_yaml(yaml_file)
@@ -141,9 +141,11 @@ def save_cache(key, value, yaml_file=CACHE_YAML):
         yaml.safe_dump(data, f_out, default_flow_style=False)
 
 
-def save_last_recorded(data=[]):
-    '''
+def save_last_recorded(data=None):
+    """
     Set the last_recorded key and value
-    '''
+    """
+    if data is None:
+        data = []
 
     dump_cache({'last_recorded': data})

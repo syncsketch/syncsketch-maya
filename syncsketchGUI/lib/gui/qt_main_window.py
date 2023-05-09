@@ -6,7 +6,7 @@ from syncsketchGUI.vendor.Qt import QtCore, QtGui, QtWidgets
 from syncsketchGUI.lib import user
 from syncsketchGUI.literals import message_is_not_connected
 
-from syncsketchGUI.installScripts.maintenance import getLatestSetupPyFileFromLocal
+from syncsketchGUI.installScripts.maintenance import get_latest_setup_py_file_from_local
 
 from . import qt_browser
 from . import qt_menu
@@ -36,7 +36,7 @@ class MenuWindow(qt_windows.SyncSketchWindow):
         self.installer = None
 
         self.setMaximumSize(700, 650)
-        self.setWindowTitle("Syncsketch - Version: {}".format(getLatestSetupPyFileFromLocal()))
+        self.setWindowTitle("Syncsketch - Version: {}".format(get_latest_setup_py_file_from_local()))
 
         self._create_ui()
         self._layout_ui()
@@ -108,10 +108,9 @@ class MenuWindow(qt_windows.SyncSketchWindow):
             self._ui_menu.set_status('Playblast file [{}] is created.'.format(playblast_filename))
             self._ui_upload.update_last_recorded()
         else:
-            self._ui_menu.set_status('Playblast failed. %s' % message_is_not_connected, color=qt_presets.error_color)
+            self._ui_menu.set_status('Playblast failed.', color=qt_presets.error_color)
 
     QtCore.Slot(str)
-
     def target_changed(self, targetdata):
         ui_to_toggle = [
             self._ui_upload.ui_upload_pushButton,
@@ -129,7 +128,7 @@ class MenuWindow(qt_windows.SyncSketchWindow):
             qt_utils.enable_interface(ui_to_toggle, False)
             self._ui_menu.set_status(
                 'Please select a review to upload to, using the tree widget or by entering a SyncSketch link',
-                color=warning_color)
+                color=qt_presets.warning_color)
             self._ui_upload.ui_upload_pushButton.setText("CANNOT UPLOAD\nSelect a target to upload to(right panel)")
 
     QtCore.Slot(dict)
@@ -145,16 +144,13 @@ class MenuWindow(qt_windows.SyncSketchWindow):
     def _restore_ui(self):
         logger.info("restoring ui state")
 
-    def retrievePanelData(self):
+    def retrieve_panel_data(self):
         begin = time.time()
-
-        logger.warn("Use of deprecated function retrievePanelData")
-
+        logger.warning("Use of deprecated function retrievePanelData")
         current_user = user.SyncSketchUser()
 
         try:
             self.account_data = current_user.get_account_data()
-
         except Exception as err:
             self.account_data = None
             logger.info("err: {}".format(err))
@@ -172,5 +168,5 @@ class MenuWindow(qt_windows.SyncSketchWindow):
             logger.info("Error: No SyncSketch account data found.")
             return
 
-        logger.info("Account preperation took: {0}".format(time.time() - begin))
+        logger.info("Account preparation took: {0}".format(time.time() - begin))
         return self.account_data

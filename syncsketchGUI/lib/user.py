@@ -1,16 +1,14 @@
 import getpass
+import logging
 import os
-
-import yaml
-import syncsketch
-import requests
 import time
-
-from syncsketchGUI.lib import database
-from syncsketchGUI.lib import path
 from os.path import expanduser
 
-import logging
+import requests
+import syncsketch
+import yaml
+
+from syncsketchGUI.lib import database, path
 
 logger = logging.getLogger("syncsketchGUI")
 
@@ -25,26 +23,26 @@ yaml_file = 'syncsketch_user.yaml'
 
 
 def _merge_dictionaries(*dictionaries):
-    '''
+    """
     Given any number of dicts, shallow copy and merge into a new dict,
     precedence goes to key value pairs in latter dicts.
-    '''
-    result_dictionary = dict()
+    """
+    result_dictionary = {}
     for dictionary in dictionaries:
         result_dictionary.update(dictionary)
     return result_dictionary
 
 
 def _set_to_yaml_user(key, value):
-    '''
+    """
     Set the given dictionary to the user's local yaml file
-    '''
+    """
     yaml_path = path.get_config_yaml(yaml_file)
 
     if not os.path.isfile(yaml_path):
         open(yaml_path, 'w')
 
-    existing_data = dict()
+    existing_data = {}
     user_data = {str(key): str(value)}
     logger.info("yamlpath: {} ".format(yaml_path))
     # logger.info("userdata: {} ".format(user_data)) # Dont do this! Or sensible Data in the Output
@@ -61,17 +59,17 @@ def _set_to_yaml_user(key, value):
 
 
 def _get_from_yaml_user(key):
-    '''
+    """
     Get the given key's value from the user's local yaml file
-    '''
+    """
     yaml_path = path.get_config_yaml(yaml_file)
     if not os.path.isfile(yaml_path):
         return
 
     user_data = database._parse_yaml(yaml_path)
+
     return user_data.get(key)
 
-    return response.json()
 
 
 def download_file(url, fileName):
@@ -89,18 +87,20 @@ def download_file(url, fileName):
 # Module Classes
 
 class SyncSketchUser():
-    '''
+    """
     Class to store all user data
-    '''
-    # Class Variables
-    name = None
-    os_user = None
-    api_key = None
-    password = None
-    host_data = None
-    token = None
+    """
 
-    api_host = path.api_host_url
+    def __init__(self):
+        self.name = None
+        self.os_user = None
+        self.selfapi_key = None
+        self.password = None
+        self.host_data = None
+        self.token = None
+
+        # api_host = path.api_host_url
+        self.api_host = path.get_syncsketch_url()
 
     # Set Functions
     def set_name(self, name):
@@ -167,8 +167,7 @@ class SyncSketchUser():
 
     def logout(self):
 
-        r = requests.get('%s/app/logmeout/' % (self.api_host))
-        result = r.text
+        requests.get('%s/app/logmeout/' % (self.api_host))
 
         # resetting the yaml file
         self.set_name('')
@@ -186,12 +185,13 @@ class SyncSketchUser():
             logger.warning('Please login first.')
             return
 
-        account_data = dict()
-        account_data['projects'] = list()
-        account_data['reviews'] = list()
-        account_data['media'] = list()
+        account_data = {'projects': [], 'reviews': [], 'media': []}
 
-        tree_data = self.host_data.getTree(withItems=withItems)
+        try:
+            tree_data = self.host_data.getTree(withItems=withItems)
+        except Exception as error:
+            logger.warning('Fail to obtain connet to the server, error: {}'.format(error))
+            return
 
         # Return statement without indirection, pls remove
         return tree_data
@@ -221,7 +221,7 @@ class SyncSketchUser():
 
     def get_media_data_from_id(self, media_id):
         self.auto_login()
-        media_data = self.host_data.getAnnotations(media_id)
+        media_data = self.host_data.get_annotations(media_id)
         return media_data
 
     def get_item_info(self, media_id):
@@ -232,17 +232,19 @@ class SyncSketchUser():
         if not self.host_data:
             logger.warning('Please login first.')
             return
-        return self.host_data.getMedia({'id': media_id})
+        return self.host_data.get_media({'id': media_id})
 
-    def upload_media_to_review(self, review_id, filepath, noConvertFlag=False, itemParentId=False, data={}):
+    def upload_media_to_review(self, review_id, filepath, noConvertFlag=False, itemParentId=False, data=None):
+        if data is None:
+            data = {}
         self.auto_login()
         if not self.host_data:
             logger.warning('Please login first.')
             return
 
-        uploaded_item = self.host_data.addMedia(review_id, filepath, noConvertFlag=noConvertFlag,
-                                                itemParentId=itemParentId)
-        uploaded_item = self.host_data.updateItem(uploaded_item["id"], data)
+        uploaded_item = self.host_data.add_media(review_id, filepath, noConvertFlag=noConvertFlag,
+                                                 itemParentId=itemParentId)
+        uploaded_item = self.host_data.update_item(uploaded_item["id"], data)
         return uploaded_item
 
     def update_item(self, item_id, filepath, data=None):
@@ -257,7 +259,7 @@ class SyncSketchUser():
             logger.warning('Please login first.')
             return
 
-        return self.host_data.updateItem(item_id, data)
+        return self.host_data.update_item(item_id, data)
 
     # Todo set path properly
     def download_greasepencil(self, reviewId, itemId):
@@ -279,7 +281,7 @@ class SyncSketchUser():
             return
 
         baseDir = "{0}".format(expanduser('~'))
-        file = self.host_data.getGreasePencilOverlays(reviewId, itemId, baseDir)
+        file = self.host_data.get_grease_pencil_overlays(reviewId, itemId, baseDir)
         logger.info("Downloaded Greasepencil file to {}".format(file))
         return file
 
@@ -289,7 +291,7 @@ class SyncSketchUser():
             logger.warning('Please login first.')
             return
 
-        media = self.host_data.getMedia({'id': itemId})
+        media = self.host_data.get_media({'id': itemId})
 
         logger.info("itemId: {} ".format(itemId))
         logger.info("media: {} ".format(media))
@@ -314,7 +316,7 @@ class SyncSketchUser():
             logger.warning('Please login first.')
             return
 
-        media = self.host_data.getMedia({'id': item_id})
+        media = self.host_data.get_media({'id': item_id})
         video_url = media['objects'][0]['url']
         filename = video_url.split(str(item_id) + '/')[1].split("?")[0]
         local_dir = "{0}".format(expanduser('~'))

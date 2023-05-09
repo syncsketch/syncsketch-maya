@@ -2,7 +2,6 @@ import uuid
 
 from maya import OpenMaya as om
 from maya import cmds
-from maya import mel
 from syncsketchGUI.lib import user, path
 
 from syncsketchGUI.lib import database
@@ -30,10 +29,10 @@ def _show_error(message):
 
 
 def _sanitize_mel_command(mel_command_string):
-    '''
+    """
     If the given MEL command has quotes,
     put escape slashes before each quotation
-    '''
+    """
     if not isinstance(mel_command_string, str):
         return
 
@@ -43,27 +42,28 @@ def _sanitize_mel_command(mel_command_string):
 
 
 def _get_main_menu_bar():
-    '''
+    """
     Get maya's main menu bar
-    '''
+    """
     main_menu_bar = 'MayaWindow'
     return main_menu_bar
 
 
 def _remove_special_characters(string):
-    '''
-    Remove all the non alpha numeric characters from the string
-    '''
+    """
+    Remove all the non-alphanumeric characters from the string
+    """
     sanitized_string = ''.join(e for e in string if e.isalnum())
     return sanitized_string
 
 
 def _make_object_name(string):
-    '''
+    """
     Convert the given string into a python usable object name.
     If non ascii characters are found, generate a uuid
     and attach it behind the string 'MenuItem'
-    '''
+
+    """
     if string:
         string = _remove_special_characters(string)
         string = string.encode('ascii', 'ignore')
@@ -78,9 +78,9 @@ def _make_object_name(string):
 
 
 def _add_menu_top(menu_top_label):
-    '''
+    """
     Check if the menu top already exist and create one if it doesn't
-    '''
+    """
     main_menu_bar = _get_main_menu_bar()
     menu_top_object = _make_object_name(menu_top_label)
 
@@ -95,9 +95,9 @@ def _add_menu_top(menu_top_label):
 
 
 def _delete_menu_top(menu_top_label):
-    '''
+    """
     Check if the menu top already exist and create one if it doesn't
-    '''
+    """
     main_menu_bar = _get_main_menu_bar()
     menu_top_object = _make_object_name(menu_top_label)
 
@@ -179,15 +179,14 @@ def _add_menu_item_option(menu_item_label, menu_item_command, menu_item_parent_l
 
 
 def _populate_menus(menu_data, menu_parent):
-    '''
+    """
     Populate the pre-existing menu tops with sub menus and menu items
     menu_data = Dictionary parsed from yaml
-    '''
+    """
     if not isinstance(menu_data, list):
         return
 
     for item in menu_data:
-
         # If the value is a list, the item has submenu
         if isinstance(item.values()[0], list):
             menu_label = item.keys()[0]
@@ -228,9 +227,9 @@ def _populate_menus(menu_data, menu_parent):
 # Module Functions
 
 def delete_menu():
-    '''
+    """
     Delete the menu tops based on the yaml file
-    '''
+    """
     # Parse the yaml file and get the menu items as a dictionary
     yaml_path = path.get_config_yaml(yaml_file)
     data = database._parse_yaml(yaml_path)
@@ -248,9 +247,9 @@ def delete_menu():
 
 
 def build_menu():
-    '''
+    """
     Build and populate the menus based on the yaml file
-    '''
+    """
     # Parse the yaml file and get the menu items as a dictionary
     yaml_path = path.get_config_yaml(yaml_file)
     data = database._parse_yaml(yaml_path)
@@ -310,10 +309,10 @@ def build_menu():
 
 
 def refresh_menu_state():
-    '''
+    """
     If before_login is the given state, some parts of the menu will be greyed out.
     If after_login, all parts of the menu will be enabled and accessible.
-    '''
+    """
     current_user = user.SyncSketchUser()
     username = current_user.get_name()
 
