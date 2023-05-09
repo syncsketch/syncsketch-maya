@@ -84,7 +84,7 @@ def _add_menu_top(menu_top_label):
     main_menu_bar = _get_main_menu_bar()
     menu_top_object = _make_object_name(menu_top_label)
 
-    if mel.eval('menu -exists {}'.format(menu_top_object)):
+    if cmds.menu(menu_top_object, exists=True):
         cmds.deleteUI(menu_top_object, menu=True)
 
     menu_top = cmds.menu(menu_top_object,
@@ -101,7 +101,7 @@ def _delete_menu_top(menu_top_label):
     main_menu_bar = _get_main_menu_bar()
     menu_top_object = _make_object_name(menu_top_label)
 
-    if mel.eval('menu -exists {}'.format(menu_top_object)):
+    if cmds.menu(menu_top_object, exists=True):
         cmds.deleteUI(menu_top_object, menu=True)
 
 
@@ -109,7 +109,7 @@ def _add_menu(menu_label, menu_parent_label):
     menu_object = _make_object_name(menu_label)
     menu_parent_object = _make_object_name(menu_parent_label)
 
-    if mel.eval('menuItem -exists {}'.format(menu_object)):
+    if cmds.menuItem(menu_object, exists=True):
         cmds.deleteUI(menu_object, menuItem=True)
 
     menu = cmds.menuItem(menu_object,
@@ -124,7 +124,7 @@ def _add_divider(divider_label, divider_parent_label):
     divider_object = _make_object_name(divider_label)
     divider_parent_object = _make_object_name(divider_parent_label)
 
-    if mel.eval('menuItem -exists {}'.format(divider_object)):
+    if cmds.menuItem(divider_object, exists=True):
         cmds.deleteUI(divider_object, menuItem=True)
 
     divider = cmds.menuItem(divider_object,
@@ -138,7 +138,7 @@ def _add_menu_item(menu_item_label, menu_item_command, menu_item_parent_label):
     menu_item_object = _make_object_name(menu_item_label)
     menu_item_parent_object = _make_object_name(menu_item_parent_label)
 
-    if mel.eval('menuItem -exists {}'.format(menu_item_object)):
+    if cmds.menuItem(menu_item_object, exists=True):
         cmds.deleteUI(menu_item_object, menuItem=True)
 
     if not menu_item_command:
@@ -159,7 +159,7 @@ def _add_menu_item_option(menu_item_label, menu_item_command, menu_item_parent_l
     menu_item_object = _make_object_name(menu_item_label)
     menu_item_parent_object = _make_object_name(menu_item_parent_label)
 
-    if mel.eval('menuItem -exists {}'.format(menu_item_object)):
+    if cmds.menuItem(menu_item_object, exists=True):
         cmds.deleteUI(menu_item_object, menuItem=True)
 
     if not menu_item_command:
@@ -219,17 +219,9 @@ def _populate_menus(menu_data, menu_parent):
                                                   menu_item_command,
                                                   menu_item_parent_label)
 
-            # When the command was added in python command,
-            # it's being interpreted as a python command
-            # like cmds.somecommand(), but we want MEL command.
-            # So, editing the menu item in MEL would
-            # make maya interpret the command as a MEL command.
             menu_item_command = _sanitize_mel_command(menu_item_command)
             if menu_item_command:
-                mel_command = 'menuItem -edit -command "{}" {}' \
-                    .format(menu_item_command,
-                            menu_item_object)
-                mel.eval(mel_command)
+                cmds.menuItem(menu_item_object, command=menu_item_command, edit=True, sourceType='mel')
 
 
 # ======================================================================
