@@ -2,6 +2,8 @@ import logging
 import webbrowser
 import re
 
+from ..path import get_syncsketch_url, parse_url_data
+
 logger = logging.getLogger("syncsketchGUI")
 
 from syncsketchGUI.vendor.Qt import QtCore, QtGui, QtWidgets
@@ -21,8 +23,6 @@ USER_ACCOUNT_DATA = None
 class ReviewBrowserWidget(QtWidgets.QWidget):
     title = "ReviewBrowser"
     target_changed = QtCore.Signal(dict)  # dict: target_data
-
-    ######## Public ############
 
     def __init__(self, *args, **kwargs):
         super(ReviewBrowserWidget, self).__init__(*args, **kwargs)
@@ -88,8 +88,6 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
         self._tree.setCurrentItem(media_item, 1)
         self._tree.scrollToItem(media_item)
         logger.info("Selected Media Item: {}".format(media_item))
-
-    ######## Private ############
 
     def _cache_user(self):
         self.current_user = user.SyncSketchUser()
@@ -288,7 +286,6 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
         return treewidget_item
 
     def _expand_item_callback(self, target):
-
         """
         Select the item that is in the expanded hierarchy
         which triggers the load of items.
@@ -450,17 +447,18 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
             item_type = item.data(2, QtCore.Qt.EditRole)
         logger.info("get data for item: item_data {} item_type {}".format(item_data, item_type))
 
-        review_base_url = "https://syncsketch.com/sketch/"
-        current_data = {}
-        current_data['upload_to_value'] = str()
-        current_data['breadcrumb'] = str()
-        current_data['target_url_type'] = item_type
-        current_data['review_id'] = str()
-        current_data['media_id'] = str()
-        current_data['target_url'] = None
-        current_data['name'] = item_data.get('name')
-        current_data['target_url_item_name'] = item.text(0)
-        current_data['description'] = item_data.get('description')
+        review_base_url = "{}/sketch/".format(get_syncsketch_url())
+        current_data = {
+            'upload_to_value': str(),
+            'breadcrumb': str(),
+            'target_url_type': item_type,
+            'review_id': str(),
+            'media_id': str(),
+            'target_url': None,
+            'name': item_data.get('name'),
+            'target_url_item_name': item.text(0),
+            'description': item_data.get('description')
+        }
 
         if item_type == 'project':
             review_url = '{}{}'.format(path.project_url, item_data.get('id'))
@@ -531,58 +529,3 @@ def get_current_item_from_ids(tree, payload=None):
         iterator += 1
 
     logger.info("Item not found while iterating")
-
-
-def parse_url_data(link=database.read_cache('upload_to_value')):
-    '''
-    simple url parser that extract uuid, review_id and revision_id
-    '''
-    # url = 'https://www.syncsketch.com/sketch/bff609f9cbac/#711273/637821'
-    #       https://syncsketch.com/sketch/bff609f9cbac#711680
-
-    # Remove reduntant path and check if it's expected
-    logger.info("link parser: {}".format(link))
-    if not link:
-        logger.info("Link isn't a link: {}".format(link))
-        return
-
-    baseUrl = 'https://syncsketch.com/sketch/'
-
-    # Remove leading forward slash
-    if link[-1] == "/":
-        link = link[:-1]
-
-    # Remove www
-    link = link.replace("www.", "")
-
-    data = {"uuid": 0, "id": 0, "revision_id": 0}
-    # Add a slash so we don't need to chase two different cases
-    if not link.split("#")[0][-1] == "/":
-        link = "/#".join(link.split("#"))
-        logger.info("Modified link: {}".format(link))
-
-    if not link[0:len(baseUrl)] == baseUrl:
-        logger.info("URL need's to start with: {}".format(baseUrl))
-        return data
-
-    # Find UUID
-    payload = link[len(baseUrl):].split("/")
-
-    if len(link) > 0:
-        uuidPart = (re.findall(r"([a-fA-F\d]{12})", payload[0]))
-        if uuidPart:
-            data['uuid'] = uuidPart[0]
-        else:
-            print("link need's to be of the form https://www.syncsketch.com/sketch/bff609f9cbac/ got {}".format(link))
-    # Find ID
-    if len(payload) > 1:
-        if payload[1].startswith("#"):
-            data['id'] = payload[1][1:]
-        else:
-            print("link need's to be of the form https://www.syncsketch.com/sketch/bff609f9cbac/#711273 got {}".format(
-                link))
-
-    if len(payload) > 3:
-        pass
-        # handle revision
-    return data

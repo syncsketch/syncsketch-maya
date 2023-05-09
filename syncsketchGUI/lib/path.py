@@ -70,10 +70,75 @@ def make_url_offlineMode(url):
     # https://syncsketch.com/sketch/806b718865d3#1127977
     # https://syncsketch.com/sketch/806b718865d3?offlineMode=1#
 
-    offlineUrl = url.replace("/#", "?offlineMode=1#")
-    if offlineUrl == url:
-        offlineUrl = url.replace("#", "?offlineMode=1#")
-    return offlineUrl
+    offline_url = url.replace("/#", "?offlineMode=1#")
+    if offline_url == url:
+        offline_url = url.replace("#", "?offlineMode=1#")
+    return offline_url
+
+
+def parse_url_data(link=None):
+    """
+    simple url parser that extract uuid, review_id and revision_id
+    """
+    # url = 'https://www.syncsketch.com/sketch/bff609f9cbac/#711273/637821'
+    #       https://syncsketch.com/sketch/bff609f9cbac#711680
+
+    # Remove redundant path and check if it's expected
+    if link is None:
+        link = database.read_cache('upload_to_value')
+
+    logger.info("link parser: {}".format(link))
+    if not link:
+        logger.info("Link isn't a link: {}".format(link))
+        return
+
+    # [2023-04-28 13:30:24 - qt_browser.py:437 - INFO - Update Target from URL: http://localhost:8000/sketch/MDM3ZTE5NTJj#125 ]
+    # [2023-04-28 13:30:24 - path.py:104 - INFO - link parser: http://localhost:8000/sketch/MDM3ZTE5NTJj#125]
+    # [2023-04-28 13:30:24 - path.py:124 - INFO - Modified link: http://localhost:8000/sketch/MDM3ZTE5NTJj/#125]
+    # link need's to be of the form https://www.syncsketch.com/sketch/bff609f9cbac/ got http://localhost:8000/sketch/MDM3ZTE5NTJj/#125
+
+    # baseUrl = 'https://syncsketch.com/sketch/'
+    # baseUrl = 'http://localhost:8000/sketch/'
+    baseUrl = "{}/sketch/".format(get_syncsketch_url())
+
+    # Remove leading forward slash
+    if link[-1] == "/":
+        link = link[:-1]
+
+    # Remove www
+    link = link.replace("www.", "")
+
+    data = {"uuid": 0, "id": 0, "revision_id": 0}
+    # Add a slash so we don't need to chase two different cases
+    if not link.split("#")[0][-1] == "/":
+        link = "/#".join(link.split("#"))
+        logger.info("Modified link: {}".format(link))
+
+    if not link[0:len(baseUrl)] == baseUrl:
+        logger.info("URL need's to start with: {}".format(baseUrl))
+        return data
+
+    # Find UUID
+    payload = link[len(baseUrl):].split("/")
+
+    if len(link) > 0:
+        uuidPart = (re.findall(r"([a-zA-Z\d]{12})", payload[0]))
+        if uuidPart:
+            data['uuid'] = uuidPart[0]
+        else:
+            print("link need's to be of the form https://www.syncsketch.com/sketch/bff609f9cbac/ got {}".format(link))
+    # Find ID
+    if len(payload) > 1:
+        if payload[1].startswith("#"):
+            data['id'] = payload[1][1:]
+        else:
+            print("link need's to be of the form https://www.syncsketch.com/sketch/bff609f9cbac/#711273 got {}".format(
+                link))
+
+    if len(payload) > 3:
+        pass
+        # handle revision
+    return data
 
 
 def validate_email_address(email_address):
