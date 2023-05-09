@@ -1,6 +1,6 @@
 - shelfButton:
     annotation: Main Menu
-    command: import syncsketchGUI; syncsketchGUI.show_menu_window ()
+    command: import syncsketchGUI; syncsketchGUI.show_menu_window()
     image: syncsketch_ui_100.png
     image1: syncsketch_ui_100.png
     image2: syncsketch_ui_150.png
@@ -10,7 +10,7 @@
 
 - shelfButton:
     annotation: Record
-    command: import syncsketchGUI; syncsketchGUI.reload_toolkit (); syncsketchGUI.record ()
+    command: import syncsketchGUI; syncsketchGUI.record()
     image: icon_record_100.png
     image1: icon_record_100.png
     image2: icon_record_150.png
@@ -20,7 +20,7 @@
 
 - shelfButton:
     annotation: Play
-    command: import syncsketchGUI; syncsketchGUI.reload_toolkit (); syncsketchGUI.play ()
+    command: import syncsketchGUI; syncsketchGUI.play()
     image: icon_play_100.png
     image1: icon_play_100.png
     image2: icon_play_150.png
@@ -30,7 +30,7 @@
 
 - shelfButton:
     annotation: Upload
-    command: import syncsketchGUI; syncsketchGUI.reload_toolkit (); syncsketchGUI.upload ()
+    command: import syncsketchGUI;syncsketchGUI.upload()
     image: icon_upload_100.png
     image1: icon_upload_100.png
     image2: icon_upload_150.png
@@ -41,7 +41,7 @@
 
 - shelfButton:
     annotation: Download
-    command: import syncsketchGUI; syncsketchGUI.reload_toolkit (); syncsketchGUI.show_download_window ()
+    command: import syncsketchGUI; syncsketchGUI.show_download_window()
     image: icon_download_100.png
     image1: icon_download_100.png
     image2: icon_download_150.png
