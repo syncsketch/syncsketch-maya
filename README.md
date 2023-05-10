@@ -1,6 +1,7 @@
-[![Join the chat at https://gitter.im/syncsketch-maya/community](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/syncsketch-maya/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-![maya2017](https://img.shields.io/badge/Maya2017-tested-brightgreen.svg)
-![maya2018](https://img.shields.io/badge/Maya2018-tested-brightgreen.svg)
+![maya2020](https://img.shields.io/badge/Maya2020-tested-brightgreen.svg)
+![maya2022](https://img.shields.io/badge/Maya2022-tested-brightgreen.svg)
+![maya2023](https://img.shields.io/badge/Maya2023-tested-brightgreen.svg)
+![maya2024](https://img.shields.io/badge/Maya2024-tested-brightgreen.svg)
 
 # About this Maya plug-in
 The syncsketch-maya plugin which will allow you to 
@@ -17,7 +18,7 @@ See a good use case, demonstrated by Zeina Masri on how to animate from referenc
 ### Drag & Drop
 
 The easiest way to install this application is to ...
-1. Click this File Link > [installCrossPlatform.mel](https://github.com/syncsketch/syncsketch-maya/releases/download/release/installCrossPlatformGUI.mel#install) < to download the installation mel file.
+1. Click this File Link > [installCrossPlatform.py](syncsketchGUI/installScripts/installGui.py) < to download the installation Python file.
 2. Drag drop it from the browser into a maya-viewport. 
 This will automatically install all the dependencies without requiring admin priviliges into your user-directory.
 3. Hit 'Install' and on Allow this process to run python (hit 'Allow' in the popup)
@@ -57,6 +58,8 @@ syncsketchGUI.install_shelf()`
 
 __Note__: Manual install expects you to have `ffmpeg` and `pip` already installed and set-up correctly.
 
+# Enviroment variables
+`SS_DISABLE_UPGRADE`
 
 # Contributing
 

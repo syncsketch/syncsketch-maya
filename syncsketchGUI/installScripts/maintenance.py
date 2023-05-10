@@ -1,45 +1,64 @@
-import pkg_resources
-import syncsketchGUI
-import os
-import urllib2
-import sys
-
 import logging
+import os
+import sys
+import uuid
 
-logger = logging.getLogger("syncsketchGUI")
+try:
+    # python3
+    from urllib.request import urlopen
+except ImportError:
+    # python2
+    from urllib2 import urlopen
+
+try:
+    # python3
+    from importlib import reload
+except ImportError:
+    pass
 
 from syncsketchGUI.installScripts import installGui
 from syncsketchGUI.lib import user as user
 
+logger = logging.getLogger("syncsketchGUI")
+
 
 class InstallerLiterals(object):
-    versionTag = os.getenv("SS_DEV") or "release"
-    setupPyPath = 'https://raw.githubusercontent.com/syncsketch/syncsketch-maya/{}/setup.py'.format(versionTag)
-    installerPyGuiPath = 'https://raw.githubusercontent.com/syncsketch/syncsketch-maya/{}/syncsketchGUI/installScripts/installGui.py'.format(
-        versionTag)
+    version_tag = os.getenv("SS_DEV") or "release"
+    if os.environ.get("SYNCSKETCH_GUI_SOURCE_PATH"):
+        setup_py_path = 'file:///{}/setup.py'.format(os.environ.get("SYNCSKETCH_GUI_SOURCE_PATH"))
+        installer_py_gui_path = "file:///{}/syncsketchGUI/installScripts/installGui.py".format(
+            os.environ.get("SYNCSKETCH_GUI_SOURCE_PATH"))
+    else:
+        setup_py_path = 'https://raw.githubusercontent.com/syncsketch/syncsketch-maya/{}/setup.py'.format(version_tag)
+        installer_py_gui_path = 'https://raw.githubusercontent.com/syncsketch/syncsketch-maya/{}/syncsketchGUI/installScripts/installGui.py'.format(
+            version_tag)
 
 
-def getLatestSetupPyFileFromRepo():
+def get_latest_setup_py_file_from_repo():
     """Parses latest setup.py's version number"""
-    response = urllib2.urlopen(InstallerLiterals.setupPyPath)
-    html = response.read()
-    return html.split("version = '")[1].split("',")[0]
+    response = urlopen(InstallerLiterals.setup_py_path).read()
+    if response:
+        html = response.decode()
+        # TODO: more robust version finding
+        return html.split("version='")[1].split("',")[0]
+    else:
+        logger.warning("Could not find latest setup.py file from repo")
+        return -1
 
 
-def getLatestSetupPyFileFromLocal():
+def get_latest_setup_py_file_from_local():
     """Checks locally installed packages version number"""
     import pkg_resources
     # reload module to make sure we have loaded the latest live install
     reload(pkg_resources)
-    local = pkg_resources.get_distribution(
-        "syncSketchGUI").version
+    local = pkg_resources.get_distribution("syncSketchGUI").version
     return local
 
 
-def getVersionDifference():
+def get_version_difference():
     """Returns the difference between local Package and latest Remote"""
-    remote = int(getLatestSetupPyFileFromRepo().replace(".", ""))
-    local = int(getLatestSetupPyFileFromLocal().replace(".", ""))
+    remote = int(get_latest_setup_py_file_from_repo().replace(".", ""))
+    local = int(get_latest_setup_py_file_from_local().replace(".", ""))
     logger.info("Local Version : {} Remote Version {}".format(local, remote))
     if remote > local:
         return remote - local
@@ -47,59 +66,68 @@ def getVersionDifference():
         pass
 
 
-def overwriteLatestInstallerFile():
-    import urllib2
-    logger.info("Attempting to replace installGui.py with release {}".format(InstallerLiterals.installerPyGuiPath))
-    """Parses latest setup.py's version number"""
-    response = urllib2.urlopen(InstallerLiterals.installerPyGuiPath)
-    data = response.read()
+def download_latest_installer():
+    import tempfile
 
-    # Let's get the path of the installer
-    installerPath = installGui.__file__[:-1]
+    logger.info("Downloading latest installGui.py from release {}".format(InstallerLiterals.installer_py_gui_path))
 
-    # Replace the module
-    with open(installerPath, "w") as file:
+    response = urlopen(InstallerLiterals.installer_py_gui_path)
+    data = response.read().decode('utf-8')
+
+    temp_install_file = os.path.join(tempfile.gettempdir(), "installGui_{}.py".format(uuid.uuid4().hex[:8]))
+    # write to temp file
+    with open(temp_install_file, "w") as file:
         file.write(data)
 
+    return temp_install_file
 
-def handleUpgrade():
+
+def handle_upgrade():
     """[summary]
 
     Returns:
         [SyncSketchInstaller] -- [Instance of the Upgrade UI]
     """
     # * Check for Updates and load Upgrade UI if Needed
-    if getVersionDifference():
-        logger.info("YOU ARE {} VERSIONS BEHIND".format(getVersionDifference()))
+    version_difference = get_version_difference()
+    logger.debug("version_difference {}".format(version_difference))
+    if version_difference:
+        logger.info("You are {} versions behind".format(version_difference))
         if os.getenv("SS_DISABLE_UPGRADE"):
             logger.warning("Upgrades disabled as environment Variable SS_DISABLE_UPGRADE is set, skipping")
             return
-        # Let's first make sure to replace the installerGui with the latest.
-        # * we might restore old file if not continued from here
-        # ! Caution here, this is replacing infile your local files
-        # ! Always make sure to remove this line when debugging, 
-        # ! It will pull from release github and override changes
-        overwriteLatestInstallerFile()
 
         logger.info("installGui.InstallOptions.upgrade {}".format(installGui.InstallOptions.upgrade))
         # Make sure we only show this window once per Session
         if not installGui.InstallOptions.upgrade == 1:
-            reload(installGui)
+            temp_install_file = download_latest_installer()
+
+            if sys.version_info.major == 3:
+                import importlib.util
+                spec = importlib.util.spec_from_file_location("installGui", temp_install_file)
+                installGui_latest = importlib.util.module_from_spec(spec)
+                # sys.modules["installGui-1.2.1"] = foo
+                spec.loader.exec_module(installGui_latest)
+            elif sys.version_info.major == 2:
+                import imp
+                installGui_latest = imp.load_source("installGui", temp_install_file)
+
             # If this is set to 1, it means upgrade was already installed
-            installGui.InstallOptions.upgrade = 1
+            installGui_latest.InstallOptions.upgrade = 1
 
             # Preserve Credentials
             current_user = user.SyncSketchUser()
 
             if current_user.is_logged_in():
-                installGui.InstallOptions.tokenData['username'] = current_user.get_name()
-                installGui.InstallOptions.tokenData['token'] = current_user.get_token()
-                installGui.InstallOptions.tokenData['api_key'] = current_user.get_api_key()
-            logger.info("Showing installer")
-            Installer = installGui.SyncSketchInstaller()
-            Installer.showit()
+                installGui_latest.InstallOptions.tokenData['username'] = current_user.get_name()
+                installGui_latest.InstallOptions.tokenData['token'] = current_user.get_token()
+                installGui_latest.InstallOptions.tokenData['api_key'] = current_user.get_api_key()
 
-            return Installer
+            logger.info("Showing installer")
+            installer = installGui_latest.SyncSketchInstaller()
+            installer.showit()
+
+            return installer
         else:
             logger.info("Installer Dismissed, will be activated in the next maya session again")
 

@@ -1,12 +1,9 @@
-import logging
 import importlib
+import logging
 
-from .lib import path
 from .lib import database
-from .lib import user
-
+from .lib import path
 from .lib.gui import qt_utils
-
 from .settings import CACHE_YAML, VIEWPORT_PRESET_YAML
 
 logger = logging.getLogger("syncsketchGUI")
@@ -14,7 +11,7 @@ logger = logging.getLogger("syncsketchGUI")
 
 def record():
     from .devices import recoder
-    recoder.record()
+    return recoder.record()
 
 
 def play():
@@ -24,7 +21,7 @@ def play():
 
 def upload():
     from .devices import uploader
-    uploader.upload()
+    return uploader.upload()
 
 
 def install_shelf():
@@ -115,31 +112,24 @@ def show_viewport_preset_window():
     _show_persistent_widget(qt_viewport_preset.ViewportPresetWindow)
 
 
-# FIXME
+def playblast():
+    from .devices import recoder
+    return recoder.record(upload_after_creation=False, play_after_creation=None, show_success_msg=True)
+
+
+def playblast_with_options():
+    import syncsketchGUI
+    syncsketchGUI.show_menu_window()
+
+
 def playblast_and_upload():
-    from .lib.gui import qt_dialogs
-    from syncsketchGUI.lib.maya import scene as maya_scene
-    filepath = maya_scene.playblast()
-    if not filepath:
-        return
+    from .devices import recoder
+    return recoder.record(upload_after_creation=True, play_after_creation=False, show_success_msg=True)
 
-    webm_file = video.convert_to_webm(filepath)
-    if not webm_file:
-        return
 
-    user_input = gui.InputDialog()
-    if not user_input.response:
-        return
-
-    if not uploaded_media_url:
-        return
-
-    title = 'Upload Successful'
-    info_message = 'Your file has successfully been uploaded. Please follow this link:'
-
-    UploadedMediaDialog = qt_dialogs.InfoDialog(title=title, info_text=info_message,
-                                                media_url=uploaded_media_url.json()['reviewURL'])
-    UploadedMediaDialog.exec_()
+def playblast_and_upload_with_options():
+    import syncsketchGUI
+    syncsketchGUI.show_menu_window()
 
 
 def _show_persistent_widget(widget_cls):
