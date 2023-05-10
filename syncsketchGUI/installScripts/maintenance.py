@@ -1,7 +1,10 @@
 import logging
 import os
+import re
 import sys
 import uuid
+
+from maya import OpenMayaUI as omui
 
 try:
     # python3
@@ -16,6 +19,9 @@ try:
 except ImportError:
     pass
 
+from syncsketchGUI.vendor.Qt import QtWidgets
+from syncsketchGUI.vendor.Qt import QtCompat
+
 from syncsketchGUI.installScripts import installGui
 from syncsketchGUI.lib import user as user
 
@@ -25,13 +31,24 @@ logger = logging.getLogger("syncsketchGUI")
 class InstallerLiterals(object):
     version_tag = os.getenv("SS_DEV") or "release"
     if os.environ.get("SYNCSKETCH_GUI_SOURCE_PATH"):
-        setup_py_path = 'file:///{}/setup.py'.format(os.environ.get("SYNCSKETCH_GUI_SOURCE_PATH"))
+        setup_py_path = 'file:///{}/syncsketchGUI/version.py'.format(os.environ.get("SYNCSKETCH_GUI_SOURCE_PATH"))
         installer_py_gui_path = "file:///{}/syncsketchGUI/installScripts/installGui.py".format(
             os.environ.get("SYNCSKETCH_GUI_SOURCE_PATH"))
     else:
-        setup_py_path = 'https://raw.githubusercontent.com/syncsketch/syncsketch-maya/{}/setup.py'.format(version_tag)
+        setup_py_path = 'https://raw.githubusercontent.com/syncsketch/syncsketch-maya/{}/syncsketchGUI/version.py'.format(
+            version_tag)
         installer_py_gui_path = 'https://raw.githubusercontent.com/syncsketch/syncsketch-maya/{}/syncsketchGUI/installScripts/installGui.py'.format(
             version_tag)
+
+
+def _parse_version_py_content(version_py_content):
+    try:
+        version = re.match(r'.*__version__ = \"(.*?)\"', version_py_content, re.DOTALL).group(1)
+    except Exception as error:
+        print("Error: {}".format(error))
+        version = "1.0.0"
+
+    return version
 
 
 def get_latest_setup_py_file_from_repo():
@@ -39,8 +56,7 @@ def get_latest_setup_py_file_from_repo():
     response = urlopen(InstallerLiterals.setup_py_path).read()
     if response:
         html = response.decode()
-        # TODO: more robust version finding
-        return html.split("version='")[1].split("',")[0]
+        return _parse_version_py_content(html)
     else:
         logger.warning("Could not find latest setup.py file from repo")
         return -1
@@ -48,11 +64,8 @@ def get_latest_setup_py_file_from_repo():
 
 def get_latest_setup_py_file_from_local():
     """Checks locally installed packages version number"""
-    import pkg_resources
-    # reload module to make sure we have loaded the latest live install
-    reload(pkg_resources)
-    local = pkg_resources.get_distribution("syncSketchGUI").version
-    return local
+    import syncsketchGUI
+    return syncsketchGUI.__version__
 
 
 def get_version_difference():
@@ -80,6 +93,10 @@ def download_latest_installer():
         file.write(data)
 
     return temp_install_file
+
+
+def get_maya_ui_parent():
+    return QtCompat.wrapInstance(int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
 
 
 def handle_upgrade():
@@ -124,8 +141,8 @@ def handle_upgrade():
                 installGui_latest.InstallOptions.tokenData['api_key'] = current_user.get_api_key()
 
             logger.info("Showing installer")
-            installer = installGui_latest.SyncSketchInstaller()
-            installer.showit()
+            installer = installGui_latest.InstallerUI(get_maya_ui_parent())
+            installer.show()
 
             return installer
         else:

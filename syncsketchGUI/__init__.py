@@ -37,6 +37,8 @@ from .actions import show_download_window
 from .actions import cycle_viewport_presets
 from .actions import show_viewport_preset_window
 
+from .version import __version__
+
 
 def reload_toolkit():
     """

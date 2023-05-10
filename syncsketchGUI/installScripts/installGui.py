@@ -1,6 +1,7 @@
 import glob
 import os
 import platform
+import re
 import shutil
 import logging
 import subprocess
@@ -47,8 +48,6 @@ else:
 
 from maya import OpenMayaUI as omui
 
-_VERSION = "1.2.5"
-
 INSTALL_SSGUI_ONLY = False
 VERSION_TAG = os.getenv("SS_DEV") or "release"
 
@@ -56,7 +55,27 @@ if os.environ.get("SYNCSKETCH_GUI_SOURCE_PATH"):
     # SYNCSKETCH_GUI_SOURCE_PATH = "C:/Users/andreaswetteborn/dev/src/syncsketch-maya"
     SYNCSKETCH_GUI_SOURCE_PATH = os.environ.get("SYNCSKETCH_GUI_SOURCE_PATH")
 else:
-    SYNCSKETCH_GUI_SOURCE_PATH = "https://github.com/syncsketch/syncsketch-maya/archive/{}.zip".format(VERSION_TAG)
+    SYNCSKETCH_GUI_SOURCE_PATH = "git+https://github.com/syncsketch/syncsketch-maya.git@{}".format(VERSION_TAG)
+
+
+def _get_install_version():
+    if SYNCSKETCH_GUI_SOURCE_PATH.startswith("git+"):
+        url = "https://raw.githubusercontent.com/syncsketch/syncsketch-maya/{}/syncsketchGUI/version.py".format(
+            VERSION_TAG)
+    else:
+        url = "file:///{}/syncsketchGUI/version.py".format(SYNCSKETCH_GUI_SOURCE_PATH)
+
+    try:
+        version_py_content = urlopen(url).read().decode()
+        version = re.match(r'.*__version__ = \"(.*?)\"', version_py_content, re.DOTALL).group(1)
+    except Exception as error:
+        print("Error: {}".format(error))
+        raise Exception("Could not get version from {}. Installation aborted!".format(url))
+
+    return version
+
+
+_VERSION = _get_install_version()
 
 FFMPEG_API_ENDPOINT = "https://ffbinaries.com/api/v1/version/4.4.1"
 
@@ -325,7 +344,7 @@ class InstallerUI(QDialog):
             repoButton = LinkButton("Github Repo", link=SYNCSKETCH_MAYA_PLUGIN_REPO_URL)
             infoLayout.addWidget(repoButton, 0)
 
-            documentationButton = LinkButton("Documentation", link=syncsketch_maya_plugin_docs_url)
+            documentationButton = LinkButton("Documentation", link=SYNCSKETCH_MAYA_PLUGIN_DOCS_URL)
             infoLayout.addWidget(documentationButton, 0)
         else:
             from syncsketchGUI.installScripts.maintenance import (
@@ -662,7 +681,7 @@ class InstallThread(QThread):
                     raise Exception("Unsupported Python version: {}".format(sys.version_info))
 
             # * By using target, pip show won't find this package anymore
-            LOG.debug("install_folder_path", install_folder_path)
+            LOG.debug("install_folder_path: {}".format(install_folder_path))
             if os.path.isdir(install_folder_path):
                 try:
                     shutil.rmtree(install_folder_path, ignore_errors=True)
@@ -679,7 +698,7 @@ class InstallThread(QThread):
 
             LOG.info("Dependencies installed")
 
-            os.environ["MAYA_PLUG_IN_PATH"] = ":".join([module_plugin_path, os.environ.get("MAYA_PLUG_IN_PATH", "")])
+            os.environ["MAYA_PLUG_IN_PATH"] = ";".join([module_plugin_path, os.environ.get("MAYA_PLUG_IN_PATH", "")])
             LOG.info("Added module plugin path [{}] to MAYA_PLUG_IN_PATH".format(module_plugin_path))
 
             self._prepend_to_sys_path(module_script_path)
