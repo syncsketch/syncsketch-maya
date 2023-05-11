@@ -3,12 +3,8 @@
 ![maya2023](https://img.shields.io/badge/Maya2023-tested-brightgreen.svg)
 ![maya2024](https://img.shields.io/badge/Maya2024-tested-brightgreen.svg)
 
-#### The Maya plug-in is not currently compatible with Maya 2022.  We plan to update our architecture to support it but we do not yet have a schedule for the release. 
-
-#### Upvote the feature request on our feedback site to help prioritize Maya plugin development: https://feedback.syncsketch.com/feature-requests/p/maya-plugin
-
 The syncsketch-maya plugin which will allow you to 
-- upload videos and plablasts to syncsketch in seconds, skipping any conversion process
+- upload videos and playblasts to syncsketch in seconds, skipping any conversion process
 - download notes and image annotations from syncsketch back to maya, adjust parameters such like frame offset etc
 - manage your viewport presets for recording
 
@@ -21,9 +17,9 @@ See a good use case, demonstrated by Zeina Masri on how to animate from referenc
 ### Drag & Drop
 
 The easiest way to install this application is to ...
-1. Click this File Link > [installCrossPlatform.py](https://github.com/syncsketch/syncsketch-maya/releases/download/release/installGui.py) < to download the installation Python file.
+1. Click this File Link > [installGui.py](https://github.com/syncsketch/syncsketch-maya/releases/download/release/installGui.py) < to download the installation Python file.
 2. Drag drop it from the browser into a maya-viewport. 
-This will automatically install all the dependencies without requiring admin priviliges into your user-directory.
+This will automatically install all the dependencies without requiring admin privileges into the current version of Maya's modules folder.
 3. Hit 'Install' and on Allow this process to run python (hit 'Allow' in the popup)
 4. Start SyncSketch UI
 5. Log-In with your SyncSketch Credentials.
@@ -40,29 +36,37 @@ import os
 os.environ['SS_DEV'] = 'dev'
 ```
 
-2) Download [installCrossPlatform.mel-DEV](https://github.com/syncsketch/syncsketch-maya/releases/download/dev/installGui.py) and drag it into your maya-viewport.
+2) Download [installGui.py](https://github.com/syncsketch/syncsketch-maya/releases/download/dev/installGui.py) and drag it into your maya-viewport.
 
 ### Manual (Experienced user)
 
 
-If you are familiar with python and pip, you can go for a manual installation  and follow these steps:
+If you are familiar with python and pip, you can go for a manual installation and follow these steps:
 
 1. Install the Syncsketch-API + extras
- 
-> `pip2.7.exe install --upgrade --user https://github.com/syncsketch/python-api/archive/v1.0.4.zip pyyaml requests[security]`
+``` 
+pip install --upgrade --user  "syncsketch>1,<2.0" "requests>2,<2.28.0" "pyyaml>5,<6.0"`
+```
 
 2. Install the Syncsketch-GUI
- 
-> `pip2.7.exe install --upgrade --target=C:\Users\USERNAME\Documents\maya\2018\scripts https://github.com/syncsketch/syncsketchGUI/archive/release.zip`
+
+Use pip to install the latest release of the Maya Syncsketch plugin from Github. Update the target path to the Maya script folder for the current version of Maya you are using.
+```
+pip install --upgrade --target=C:\Users\USERNAME\Documents\maya\2018\scripts https://github.com/syncsketch/syncsketchGUI/archive/release.zip
+```
 
 3. Open Maya & Install the maya Shelf from the script editor:
-> `import syncsketchGUI
-syncsketchGUI.install_shelf()`
+```python
+import syncsketchGUI
+syncsketchGUI.install_shelf()
+```
 
-__Note__: Manual install expects you to have `ffmpeg` and `pip` already installed and set-up correctly.
 
-# Enviroment variables
-`SS_DISABLE_UPGRADE`
+__Note__: Manual installation expects you to have `ffmpeg` and `pip` already installed and set-up correctly.
+
+# Environment variables
+`SS_DISABLE_UPGRADE` - If this environment variable is set, the plugin will not check for updates on startup.
+`SS_DEV` - If this environment variable is set to `dev`, the plugin will install the latest dev release instead of the latest stable release.
 
 # Contributing
 
