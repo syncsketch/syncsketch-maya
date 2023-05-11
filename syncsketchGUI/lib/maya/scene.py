@@ -25,7 +25,10 @@ import logging
 
 logger = logging.getLogger("syncsketchGUI")
 
+GREASE_PENCIL_XML = 'greasePencil.xml'
+
 GREASEPENCIL_XML_NAME = 'greasePencil.xml'
+
 
 
 # ======================================================================
@@ -229,6 +232,23 @@ def modifyXMLData(xmlFile, offsetFrames):
     tree.write(xmlFile)
 
 
+def add_frame_offset_to_grease_pencil_zip(zipname, offset=0):
+    if not offset:
+        return zipname
+
+    with zipfile.ZipFile(zipname, mode='r', compression=zipfile.ZIP_DEFLATED) as zf:
+        zipFileXML = zf.open(GREASE_PENCIL_XML)
+        try:
+            xml_data_with_offset = _create_xml_data_with_offset(zipFileXML, offset)
+        finally:
+            zipFileXML.close()
+
+    _remove_greace_pencil_xml_from_zip(zipname)
+    _add_data_as_greace_pencil_xml_to_zip(zipname, xml_data_with_offset)
+
+    return path.sanitize(zipname)
+
+
 def update_zip(zipname, filename, data):
     # generate a temp file
     tmpfd, tmpname = tempfile.mkstemp(dir=os.path.dirname(zipname))
@@ -242,13 +262,48 @@ def update_zip(zipname, filename, data):
                 if item.filename != filename:
                     zout.writestr(item, zin.read(item.filename))
 
+
+def _add_data_as_greace_pencil_xml_to_zip(zipname, data):
+    # now add filename with its new data
+    with zipfile.ZipFile(zipname, mode='a', compression=zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr(GREASE_PENCIL_XML, data)
+
+
+def _remove_greace_pencil_xml_from_zip(zipname):
+    # generate a temp file
+    tmpfd, tmpname = tempfile.mkstemp(dir=os.path.dirname(zipname))
+    os.close(tmpfd)
+
+    # create a temp copy of the archive without filename
+    with zipfile.ZipFile(zipname, 'r') as zin:
+        with zipfile.ZipFile(tmpname, 'w') as zout:
+            zout.comment = zin.comment  # preserve the comment
+            for item in zin.infolist():
+                if item.filename != GREASE_PENCIL_XML:
+                    zout.writestr(item, zin.read(item.filename))
+
     # replace with the temp archive
     os.remove(zipname)
     os.rename(tmpname, zipname)
 
-    # now add filename with its new data
-    with zipfile.ZipFile(zipname, mode='a', compression=zipfile.ZIP_DEFLATED) as zf:
-        zf.writestr(filename, data)
+
+def _create_xml_data_with_offset(xmlFile, offsetFrames):
+    tree = ET.parse(xmlFile)
+    root = tree.getroot()
+    for neighbor in root.iter('frame'):
+        current_frame = int(neighbor.attrib.get('time'))
+        neighbor.set('time', str(current_frame + offsetFrames))
+
+    # Generate temp file name for modified xml file
+    tmpname = tempfile.TemporaryFile()
+    try:
+        tree.write(tmpname)
+        tmpname.seek(0)
+        data = tmpname.read()
+    finally:
+        tmpname.close()
+
+    return data
 
 
 def apply_greasepencil(filename, clear_existing_frames=False):
