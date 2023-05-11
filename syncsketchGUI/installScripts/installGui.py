@@ -242,10 +242,13 @@ class IconButton(QPushButton):
             return QPixmap(self.icon)
 
 
-class InstallerUI(QDialog):
-    def __init__(self, parent, *args, **kwargs):
+class SyncSketchInstaller(QDialog):
+    def __init__(self, parent=None, *args, **kwargs):
 
-        super(InstallerUI, self).__init__(*args, **kwargs)
+        if parent is None:
+            parent = get_maya_ui_parent()
+
+        super(SyncSketchInstaller, self).__init__(parent=parent, *args, **kwargs)
 
         size = [350, 300]
         name = "Syncsketch Maya Installer"
@@ -274,6 +277,10 @@ class InstallerUI(QDialog):
         self.install_button.clicked.connect(self.__syncsketch_install)
         self.closeButton.clicked.connect(self.__close_button)
         self.launch_button.clicked.connect(self.__launch_button)
+
+    def showit(self):
+        # keep for backwards compatibility
+        self.show()
 
     def clean(self):
         if Resources.GIFDEVICE.isOpen():
@@ -357,7 +364,7 @@ class InstallerUI(QDialog):
             self.upgrade_info = QLabel(u"Upgrading from {} to {}".format(from_version, to_version))
             self.upgrade_info.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
             self.upgrade_info.setMargin(5)
-            self.upgrade_info.setStyleSheet("QLabel {color: #00c899; font: 16pt}")
+            self.upgrade_info.setStyleSheet("QLabel {color: #00c899; font: 14pt}")
             self.outer.addWidget(self.upgrade_info)
 
         spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -754,7 +761,7 @@ def main():
     global _INSTALLER
     LOG.info("running SyncSketchInstaller Standalone")
 
-    _INSTALLER = InstallerUI(get_maya_ui_parent())
+    _INSTALLER = SyncSketchInstaller(get_maya_ui_parent())
     _INSTALLER.show()
 
 

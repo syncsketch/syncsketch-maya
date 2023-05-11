@@ -141,7 +141,7 @@ def handle_upgrade():
                 installGui_latest.InstallOptions.tokenData['api_key'] = current_user.get_api_key()
 
             logger.info("Showing installer")
-            installer = installGui_latest.InstallerUI(get_maya_ui_parent())
+            installer = installGui_latest.SyncSketchInstaller(get_maya_ui_parent())
             installer.show()
 
             return installer
