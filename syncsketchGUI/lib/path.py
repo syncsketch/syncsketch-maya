@@ -213,7 +213,7 @@ def get_ffmpeg_folder():
     Get the full path of the ffmpeg tool folder
     """
     root_folder = get_root_folder()
-    ffmpeg_folder = os.path.join(root_folder, 'ffmpeg')
+    ffmpeg_folder = os.path.join(os.path.dirname(root_folder), 'ffmpeg')
     ffmpeg_folder = sanitize(ffmpeg_folder)
     return ffmpeg_folder
 
