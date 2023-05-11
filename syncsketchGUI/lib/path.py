@@ -11,7 +11,7 @@ home_url = os.environ.get('SYNCSKETCH_URL', "https://www.syncsketch.com").rstrip
 project_url = home_url + '/pro/#project/'
 contact_url = home_url + '/contact/'
 signup_url = home_url + '/register/'
-support_url = 'https://support.syncsketch.com/article/62-maya-syncsketch-integration'
+support_url = 'https://support.syncsketch.com/hc/en-us/sections/12590164701069-Maya'
 terms_url = home_url + '/terms/'
 
 
