@@ -18,7 +18,7 @@ See a good use case, demonstrated by Zeina Masri on how to animate from referenc
 ### Drag & Drop
 
 The easiest way to install this application is to ...
-1. Click this File Link > [installCrossPlatform.py](syncsketchGUI/installScripts/installGui.py?raw=1) < to download the installation Python file.
+1. Click this File Link > [installCrossPlatform.py](https://github.com/syncsketch/syncsketch-maya/releases/download/release/installGui.py) < to download the installation Python file.
 2. Drag drop it from the browser into a maya-viewport. 
 This will automatically install all the dependencies without requiring admin priviliges into your user-directory.
 3. Hit 'Install' and on Allow this process to run python (hit 'Allow' in the popup)
@@ -37,7 +37,7 @@ import os
 os.environ['SS_DEV'] = 'dev'
 ```
 
-2) Download [installCrossPlatform.mel-DEV](https://github.com/syncsketch/syncsketch-maya/releases/download/dev/installCrossPlatformGUI.mel#install) and drag it into your maya-viewport.
+2) Download [installCrossPlatform.mel-DEV](https://github.com/syncsketch/syncsketch-maya/releases/download/dev/installGui.py) and drag it into your maya-viewport.
 
 ### Manual (Experienced user)
 
