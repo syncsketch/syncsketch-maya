@@ -24,3 +24,8 @@ setup(
         "pyyaml>5,<6.0"
     ],
 )
+
+# This to be backward compatible with older versions (<1.3.0) of the plugin. They will fail on launch if this is
+# not found. The specific version does not matter in this case, it just has be larger than 1.2.1. That will trigger
+# and upgrade to the latest version.
+# version = '1.3.0',
