@@ -244,24 +244,22 @@ class IconButton(QPushButton):
 
 class SyncSketchInstaller(QDialog):
     def __init__(self, parent=None, *args, **kwargs):
-
         if parent is None:
             parent = get_maya_ui_parent()
-
         super(SyncSketchInstaller, self).__init__(parent=parent, *args, **kwargs)
 
-        size = [350, 300]
+        size = [400, 350]
         name = "Syncsketch Maya Installer"
 
         width = size[0]
         height = size[1]
         desktop = QApplication.desktop()
-        screenNumber = desktop.screenNumber(QCursor.pos())
-        screenRect = desktop.screenGeometry(screenNumber)
-        widthCenter = screenRect.width() / 2 - width / 2
-        heightCenter = screenRect.height() / 2 - height / 2
+        screen_number = desktop.screenNumber(QCursor.pos())
+        screen_rect = desktop.screenGeometry(screen_number)
+        width_center = screen_rect.width() / 2 - width / 2
+        height_center = screen_rect.height() / 2 - height / 2
         self.setMinimumSize(QSize(*size))
-        self.setGeometry(QRect(widthCenter, heightCenter, width, height))
+        self.setGeometry(QRect(width_center, height_center, width, height))
         self.setWindowIcon(Resources.Olaf)
 
         self.setObjectName(name)
@@ -270,12 +268,11 @@ class SyncSketchInstaller(QDialog):
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
         self.setWindowFlags(Qt.Tool)
-        self.setFixedSize(QSize(*size))
 
         self._create_layout()
 
         self.install_button.clicked.connect(self.__syncsketch_install)
-        self.closeButton.clicked.connect(self.__close_button)
+        self.close_button.clicked.connect(self.__close_button)
         self.launch_button.clicked.connect(self.__launch_button)
 
     def showit(self):
@@ -300,7 +297,8 @@ class SyncSketchInstaller(QDialog):
         self.movie = QMovie()
         device = None
         if not Resources.GIFDEVICE.isOpen():
-            print('Resources.GIFDEVICE successfully opened: {0}'.format(Resources.GIFDEVICE.open(QIODevice.ReadOnly)))
+            LOG.debug(
+                'Resources.GIFDEVICE successfully opened: {0}'.format(Resources.GIFDEVICE.open(QIODevice.ReadOnly)))
             if Resources.GIFDEVICE.isOpen():
                 device = Resources.GIFDEVICE
         else:
@@ -308,26 +306,27 @@ class SyncSketchInstaller(QDialog):
             device = Resources.GIFDEVICE
         self.movie.setDevice(Resources.GIFDEVICE)
 
-        self.animatedGif = QLabel()
+        self.animated_gif = QLabel()
 
-        self.animatedGif.setMovie(self.movie)
-        self.animatedGif.setMaximumHeight(24)
-        self.animatedGif.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-        self.animatedGif.setScaledContents(True)
-        self.animatedGif.setMaximumWidth(24)
+        self.animated_gif.setMovie(self.movie)
+        self.animated_gif.setMaximumHeight(24)
+        self.animated_gif.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        self.animated_gif.setScaledContents(True)
+        self.animated_gif.setMaximumWidth(24)
         self.movie.start()
 
         logo = QLabel()
-        smallLogo = Resources.companyLogo.scaled(240, 110, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        small_logo = Resources.companyLogo.scaled(240, 110, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
-        logo.setPixmap(smallLogo)
+        logo.setPixmap(small_logo)
         logo.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
         logo.setMargin(15)
         self.outer.addWidget(logo, 0)
         self.subtext = QLabel(
             u"Update Available: Would you like to upgrade to the latest?"
             if InstallOptions.upgrade
-            else "SyncSketch Integration for Maya [{} cut]".format(VERSION_TAG)
+            else "SyncSketch Integration for Maya [{} cut]".format(VERSION_TAG),
+            objectName='subtext'
         )
         self.outer.addWidget(self.subtext)
         self.subtext.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
@@ -337,22 +336,22 @@ class SyncSketchInstaller(QDialog):
         palette.setColor(self.backgroundRole(), "#2b353b")
         self.setPalette(palette)
 
-        infoLayout = QHBoxLayout()
-        infoLayout.addStretch()
-        infoLayout.setContentsMargins(0, 0, 0, 0)
-        infoLayout.setSpacing(0)
-        self.outer.addLayout(infoLayout, 0)
-        infoLayout.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
+        info_layout = QHBoxLayout()
+        info_layout.addStretch()
+        info_layout.setContentsMargins(0, 0, 0, 0)
+        info_layout.setSpacing(0)
+        self.outer.addLayout(info_layout, 0)
+        info_layout.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
 
         if not InstallOptions.upgrade:
-            tutorialButton = LinkButton("Tutorial Video", link=SYNCSKETCH_MAYA_PLUGIN_VIDEO_URL)
-            infoLayout.addWidget(tutorialButton, 0)
+            tutorial_button = LinkButton("Tutorial Video", link=SYNCSKETCH_MAYA_PLUGIN_VIDEO_URL)
+            info_layout.addWidget(tutorial_button, 0)
 
-            repoButton = LinkButton("Github Repo", link=SYNCSKETCH_MAYA_PLUGIN_REPO_URL)
-            infoLayout.addWidget(repoButton, 0)
+            repo_button = LinkButton("Github Repo", link=SYNCSKETCH_MAYA_PLUGIN_REPO_URL)
+            info_layout.addWidget(repo_button, 0)
 
-            documentationButton = LinkButton("Documentation", link=SYNCSKETCH_MAYA_PLUGIN_DOCS_URL)
-            infoLayout.addWidget(documentationButton, 0)
+            documentation_button = LinkButton("Documentation", link=SYNCSKETCH_MAYA_PLUGIN_DOCS_URL)
+            info_layout.addWidget(documentation_button, 0)
         else:
             try:
                 from syncsketchGUI.installScripts.maintenance import (
@@ -366,21 +365,21 @@ class SyncSketchInstaller(QDialog):
                 upgrade_text = u"Upgrading from {} to {}".format(from_version, to_version)
             except Exception as error:
                 # for backwards compatibility, old versions of maintenance.py have different methods to get version info
-                print("Error while trying to get version info: {}".format(error))
+                LOG.warning("Error while trying to get version info: {}".format(error))
                 upgrade_text = u"Upgrading to latest version"
 
-            self.upgrade_info = QLabel(upgrade_text)
+            self.upgrade_info = QLabel(upgrade_text, objectName='upgradeInfo')
             self.upgrade_info.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
             self.upgrade_info.setMargin(5)
-            self.upgrade_info.setStyleSheet("QLabel {color: #00c899; font: 14pt}")
+            self.upgrade_info.setStyleSheet("QLabel#upgradeInfo {color: #00c899; font: 14pt}")
             self.outer.addWidget(self.upgrade_info)
 
         spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.outer.addItem(spacer)
 
-        self.installShelf = QCheckBox("Create Syncsketch Shelf (recommended)", self)
-        self.installShelf.setChecked(True)
-        self.installShelf.stateChanged.connect(partial(self.check_box_changed, "installShelf"))
+        self.install_shelf = QCheckBox("Create Syncsketch Shelf (recommended)", self)
+        self.install_shelf.setChecked(True)
+        self.install_shelf.stateChanged.connect(partial(self.check_box_changed, "installShelf"))
         subLayout2 = QVBoxLayout()
         subLayout2.setContentsMargins(0, 0, 0, 0)
         subLayout2.setSpacing(0)
@@ -388,20 +387,23 @@ class SyncSketchInstaller(QDialog):
 
         self.outer.addLayout(subLayout2, 0)
         spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Expanding)
-        infoLayout.addItem(spacer)
+        info_layout.addItem(spacer)
 
         ButtonLayout = QHBoxLayout()
         ButtonLayout.setAlignment(Qt.AlignCenter)
-        ButtonLayout.addWidget(self.installShelf, 0)
+        ButtonLayout.addWidget(self.install_shelf, 0)
 
         ButtonLayout.addStretch()
         self.outer.addLayout(ButtonLayout)
         self.install_button = IconButton("Upgrade" if InstallOptions.upgrade else "Install", highlight=True)
+
         self.launch_button = IconButton("Launch Syncsketch UI", highlight=True, success=True)
         self.launch_button.hide()
-        self.closeButton = IconButton(" Close", icon=Resources.closeIcon)
 
-        # ButtonLayout.addWidget(self.closeButton)
+        self.close_button = IconButton("Close", success=True)
+        self.close_button.hide()
+
+        ButtonLayout.addWidget(self.close_button)
         ButtonLayout.addWidget(self.launch_button)
         ButtonLayout.addWidget(self.install_button)
         ButtonLayout.setAlignment(Qt.AlignCenter)
@@ -410,29 +412,34 @@ class SyncSketchInstaller(QDialog):
         self.progressLayout = QHBoxLayout()
         self.progressLayout.setAlignment(Qt.AlignCenter)
 
-        self.waitLabel = QLabel()
-        self.waitLabel.setText("Installing, please wait ...")
-        self.progressLayout.addWidget(self.animatedGif)
-        self.progressLayout.addWidget(self.waitLabel)
+        self.wait_label = QLabel()
+        self.wait_label.setText("Installing, please wait ...")
+        self.progressLayout.addWidget(self.animated_gif)
+        self.progressLayout.addWidget(self.wait_label)
 
         self.progressLayout.addStretch()
         self.outer.addLayout(self.progressLayout)
-        self.animatedGif.hide()
-        self.waitLabel.hide()
+        self.animated_gif.hide()
+        self.wait_label.hide()
 
     def done(self, msg):
-        # print("done: {}".format(msg))
         self.launch_button.show()
-        self.closeButton.hide()
-        self.animatedGif.hide()
-        self.waitLabel.hide()
+        self.close_button.hide()
+        self.animated_gif.hide()
+        self.wait_label.hide()
 
-        if InstallOptions.upgrade == 1:
+        if InstallOptions.upgrade:
             restore_credentials_file()
-            self.installer.upgrade_info.setText("Upgrade Successful")
-            self.subtext.setText(".")
-            self.upgrade_info.setStyleSheet("QLabel {color: #00a17b; font: 16pt}")
+
+            self.subtext.setText("Upgrade Successful")
+            self.subtext.setStyleSheet("QLabel#subtext {color: #00a17b; font: 16pt}")
+
+            self.upgrade_info.setText("Please restart Maya to complete the upgrade.")
+            self.upgrade_info.setStyleSheet("QLabel#upgradeInfo {color: darkgray; font: 12pt}")
+            self.upgrade_info.setWordWrap(True)
+
             self.launch_button.hide()
+            self.close_button.show()
 
         # Install the Shelf
         if InstallOptions.install_shelf:
@@ -449,21 +456,20 @@ class SyncSketchInstaller(QDialog):
 
     def error(self, msg):
         LOG.error("error callback: {0}".format(msg))
-        # self.installer.upgradeInfo.setText("Errors")
-        self.subtext.setText(msg)
-        # self.installer.closeButton.hide()
-        # self.installer.closeButton.show()
-        self.animatedGif.hide()
-        self.waitLabel.hide()
-        # self.installer.upgrade_info.setText("Error during installation:")
+
+        self.animated_gif.hide()
+        self.wait_label.hide()
+        self.launch_button.hide()
+
         self.subtext.setText("Error during installation:")
-        # self.installer.closeButton.sh()
+        self.subtext.setStyleSheet("QLabel#subtext {color: orangered; font: 14pt}")
 
-        # TODO: add some error messages
-        # print("error callback Done")
+        self.upgrade_info.setText(
+            "Error: {}\n\nSee the Maya Script Editor for more information".format(msg))
+        self.upgrade_info.setStyleSheet("QLabel#upgradeInfo {color: darkgray; font: 10pt}")
+        self.upgrade_info.setWordWrap(True)
 
-        # print python path, split by line
-        # print("\n".join(sys.path))
+        self.close_button.show()
 
     def create_good_defaults(self):
         """
@@ -489,10 +495,10 @@ class SyncSketchInstaller(QDialog):
 
     def __syncsketch_install(self):
         self.install_button.hide()
-        self.closeButton.hide()
-        self.installShelf.hide()
-        self.animatedGif.show()
-        self.waitLabel.show()
+        self.close_button.hide()
+        self.install_shelf.hide()
+        self.animated_gif.show()
+        self.wait_label.show()
         self.myThread = InstallThread()
         # self.connect(self.myThread, SIGNAL("finished()"), self.done)
         self.myThread.success.connect(self.done)
