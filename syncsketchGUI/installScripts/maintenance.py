@@ -123,7 +123,6 @@ def handle_upgrade():
                 import importlib.util
                 spec = importlib.util.spec_from_file_location("installGui", temp_install_file)
                 installGui_latest = importlib.util.module_from_spec(spec)
-                # sys.modules["installGui-1.2.1"] = foo
                 spec.loader.exec_module(installGui_latest)
             elif sys.version_info.major == 2:
                 import imp

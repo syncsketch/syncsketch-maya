@@ -52,7 +52,6 @@ INSTALL_SSGUI_ONLY = False
 VERSION_TAG = os.getenv("SS_DEV") or "release"
 
 if os.environ.get("SYNCSKETCH_GUI_SOURCE_PATH"):
-    # SYNCSKETCH_GUI_SOURCE_PATH = "C:/Users/andreaswetteborn/dev/src/syncsketch-maya"
     SYNCSKETCH_GUI_SOURCE_PATH = os.environ.get("SYNCSKETCH_GUI_SOURCE_PATH")
 else:
     SYNCSKETCH_GUI_SOURCE_PATH = "git+https://github.com/syncsketch/syncsketch-maya.git@{}".format(VERSION_TAG)
@@ -734,14 +733,16 @@ class InstallThread(QThread):
             except Exception as e:
                 print(e)
 
-            cmd = "{mayapy} -m pip install --upgrade --no-deps --target={target} {package_path}".format(
-                mayapy=mayapy_path, target=module_script_path, package_path=SYNCSKETCH_GUI_SOURCE_PATH
-            )
+            if SYNCSKETCH_GUI_SOURCE_PATH.startswith("git+"):
+                cmd = "{mayapy} -m pip install --upgrade --no-deps --target={target} {package_path}".format(
+                    mayapy=mayapy_path, target=module_script_path, package_path=SYNCSKETCH_GUI_SOURCE_PATH
+                )
+            else:
+                # for testing purposes, install from local source as an editable package
+                cmd = "{mayapy} -m pip install --upgrade --no-deps --editable {package_path}".format(
+                    mayapy=mayapy_path, package_path=SYNCSKETCH_GUI_SOURCE_PATH
+                )
 
-            # ### for testing
-            # cmd = "{mayapy} -m pip install --upgrade --no-deps --editable {package_path}".format(
-            #     mayapy=mayapy_path, package_path=SYNCSKETCH_GUI_SOURCE_PATH
-            # )
             _run_subprocess(cmd, "Failed to install SyncsketchGUI")
 
             # Install Maya Mod File
