@@ -354,14 +354,22 @@ class SyncSketchInstaller(QDialog):
             documentationButton = LinkButton("Documentation", link=SYNCSKETCH_MAYA_PLUGIN_DOCS_URL)
             infoLayout.addWidget(documentationButton, 0)
         else:
-            from syncsketchGUI.installScripts.maintenance import (
-                get_latest_setup_py_file_from_local,
-                get_latest_setup_py_file_from_repo,
-            )
+            try:
+                from syncsketchGUI.installScripts.maintenance import (
+                    get_latest_setup_py_file_from_local,
+                    get_latest_setup_py_file_from_repo,
+                )
 
-            from_version = get_latest_setup_py_file_from_local()
-            to_version = get_latest_setup_py_file_from_repo()
-            self.upgrade_info = QLabel(u"Upgrading from {} to {}".format(from_version, to_version))
+                from_version = get_latest_setup_py_file_from_local()
+                to_version = get_latest_setup_py_file_from_repo()
+
+                upgrade_text = u"Upgrading from {} to {}".format(from_version, to_version)
+            except Exception as error:
+                # for backwards compatibility, old versions of maintenance.py have different methods to get version info
+                print("Error while trying to get version info: {}".format(error))
+                upgrade_text = u"Upgrading to latest version"
+
+            self.upgrade_info = QLabel(upgrade_text)
             self.upgrade_info.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
             self.upgrade_info.setMargin(5)
             self.upgrade_info.setStyleSheet("QLabel {color: #00c899; font: 14pt}")
