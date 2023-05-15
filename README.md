@@ -66,6 +66,7 @@ __Note__: Manual installation expects you to have `ffmpeg` and `pip` already ins
 
 # Environment variables
 `SS_DISABLE_UPGRADE` - If this environment variable is set, the plugin will not check for updates on startup.
+
 `SS_DEV` - If this environment variable is set to `dev`, the plugin will install the latest dev release instead of the latest stable release.
 
 # Contributing
