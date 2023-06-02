@@ -12,6 +12,7 @@ from syncsketchGUI.lib.maya import scene as maya_scene
 from syncsketchGUI.devices import downloader
 
 from . import qt_windows
+from . import qt_presets
 from . import qt_regulars
 from . import qt_dialogs
 from ..path import parse_url_data
@@ -28,6 +29,8 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
 
     def __init__(self, parent=None):
         super(DownloadWindow, self).__init__(parent=parent)
+        self.maya_version = maya_scene.get_current_maya_version()
+
         self.decorate_ui()
         self.align_to_center(self.parent)
 
@@ -41,7 +44,7 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
 
         try:
             target_media_id = int(database.read_cache('target_media_id'))
-            logger.info("target_media_id: {}".format(target_media_id))
+            logger.debug("target_media_id: {}".format(target_media_id))
         except Exception as e:
             logger.info(e)
             return
@@ -62,7 +65,7 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
         current_user = user.SyncSketchUser()
 
         if not current_user.is_logged_in():
-            logger.info("You are not logged in, please use the syncsketchGUI to log in first")
+            logger.warning("You are not logged in, please use the syncsketchGUI to log in first")
             return
 
         cleanUrl = parse_url_data(text)
@@ -74,7 +77,7 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
             thumb_url = item['objects'][0]['thumbnail_url']
             self.ui.thumbnail_pushButton.set_icon_from_url(thumb_url)
         else:
-            logger.info("The URL is not accessible {} with  id {} doesn't exist".format(text, media_id))
+            logger.error("The URL is not accessible {} with  id {} doesn't exist".format(text, media_id))
 
     def decorate_ui(self):
         self.ui.ui_greasepencilDownload_layout = QtWidgets.QVBoxLayout()
@@ -113,13 +116,20 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
         self.ui.downloadGP_application_layout.addWidget(self.ui.downloadGP_application_comboBox, 0, 2)
         self.ui.downloadGP_application_layout.setColumnStretch(2, 1)
 
-        self.ui.ui_downloadGP_pushButton = qt_regulars.Button()
-        self.ui.ui_downloadGP_pushButton.clicked.connect(self.download_greasepencil)
-        self.ui.ui_downloadGP_pushButton.setText("Download\nGrease Pencil")
         self.ui.ui_downloadVideoAnnotated_pushButton = qt_regulars.Button()
         self.ui.ui_downloadVideoAnnotated_pushButton.clicked.connect(self.download_video_annotated)
         self.ui.ui_downloadVideoAnnotated_pushButton.setText("Download\nAnnotated Video")
 
+        if self.maya_version >= 2023:
+            self._blue_pencil_options_ui()
+        else:
+            self._grease_pencil_options_ui()
+
+    def _grease_pencil_options_ui(self):
+        self.ui.ui_downloadGP_pushButton = qt_regulars.Button()
+        self.ui.ui_downloadGP_pushButton.clicked.connect(self.download_greasepencil)
+        self.ui.ui_downloadGP_pushButton = qt_regulars.Button()
+        self.ui.ui_downloadGP_pushButton.setText("Download\nGrease Pencil")
         self.ui.download_buttons_layout = QtWidgets.QHBoxLayout()
         self.ui.download_buttons_layout.addWidget(self.ui.ui_downloadGP_pushButton)
         self.ui.download_buttons_layout.addWidget(self.ui.ui_downloadVideoAnnotated_pushButton)
@@ -130,22 +140,73 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
         self.ui.ui_downloadGP_layout.addLayout(self.ui.downloadGP_range_layout)
         self.ui.ui_downloadGP_layout.addLayout(self.ui.downloadGP_application_layout)
         self.ui.ui_downloadGP_layout.addLayout(self.ui.download_buttons_layout)
-
         self.lay_main.addWidget(self.ui.ui_downloadGP_groupbox)
+
+    def _blue_pencil_options_ui(self):
+        self.ui.download_tabs = QtWidgets.QTabWidget()
+        # Blue Pencil Tab
+        self.ui.download_sketches_tab = QtWidgets.QWidget()
+        self.ui.download_tabs.addTab(self.ui.download_sketches_tab, "Blue Pencil")
+        # Download Sketches button
+        self.ui.ui_download_sketches_button = qt_regulars.Button()
+        self.ui.ui_download_sketches_button.setText("Download Sketches")
+        self.ui.ui_download_sketches_button.clicked.connect(self.download_sketches)
+        # Path to downloaded sketches and copy buttoin
+        self.ui.download_sketches_path = qt_regulars.LineEdit()
+        self.ui.copy_sketches_path_button = qt_regulars.ToolButton(self, qt_presets.copy_icon)
+        self.ui.copy_sketches_path_button.clicked.connect(self.copy_sketches_path)
+        self.ui.sketches_path_layout = QtWidgets.QVBoxLayout()
+        self.ui.sketches_path_label = QtWidgets.QLabel("Path to downloaded sketches:")
+        self.ui.sketches_path_layout.addWidget(self.ui.sketches_path_label)
+        self.ui.sketches_path_copy_layout = QtWidgets.QHBoxLayout()
+        self.ui.sketches_path_copy_layout.addWidget(self.ui.download_sketches_path)
+        self.ui.sketches_path_copy_layout.addWidget(self.ui.copy_sketches_path_button)
+        self.ui.sketches_path_layout.addLayout(self.ui.sketches_path_copy_layout)
+        # Import Blue Pencil button
+        self.ui.import_blue_pencil = qt_regulars.Button()
+        self.ui.import_blue_pencil.setText("Import as Blue Pencil Layer")
+        self.ui.import_blue_pencil.clicked.connect(self.import_bluepencil)
+        # Blue Pencil Tab Layout
+        self.ui.sketches_groupbox_layout = QtWidgets.QVBoxLayout()
+        self.ui.download_sketches_tab.setLayout(self.ui.sketches_groupbox_layout)
+        self.ui.sketches_groupbox_layout.addWidget(self.ui.ui_download_sketches_button)
+        self.ui.sketches_groupbox_layout.addLayout(self.ui.sketches_path_layout)
+        self.ui.sketches_groupbox_layout.addWidget(self.ui.import_blue_pencil)
+        # Video Tab
+        self.ui.download_video_tab = QtWidgets.QWidget()
+        self.ui.download_tabs.addTab(self.ui.download_video_tab, "Annotated Video")
+        self.ui.video_groupbox_layout = QtWidgets.QVBoxLayout()
+        self.ui.download_video_tab.setLayout(self.ui.video_groupbox_layout)
+        self.ui.ui_downloadVideoAnnotated_pushButton.setText("Download Annotated Video")
+        self.ui.video_groupbox_layout.addWidget(self.ui.ui_downloadVideoAnnotated_pushButton)
+        self.lay_main.addWidget(self.ui.download_tabs)
 
     def download_greasepencil(self):
         """Downloads the greasepencil """
         downloaded_greasepencile_path = downloader.download_greasepencil()
         offset = int(self.ui.ui_downloadGP_rangeIn_textEdit.value())
         if downloaded_greasepencile_path:
-            if offset is not 0:
+            if offset != 0:
                 logger.info("Offsetting by {} frames".format(offset))
                 downloaded_greasepencile_path = maya_scene.add_frame_offset_to_grease_pencil_zip(
                     downloaded_greasepencile_path,
                     offset)
             maya_scene.apply_greasepencil(downloaded_greasepencile_path, clear_existing_frames=True)
         else:
-            logger.info("Error: Could not download grease pencil file...")
+            logger.error("Error: Could not download grease pencil file...")
+
+    def download_sketches(self):
+        downloaded_sketches_path = downloader.download_greasepencil()
+        self.ui.download_sketches_path.setText(downloaded_sketches_path)
+
+    def copy_sketches_path(self):
+        # copy path to clipboard
+        clipboard = QtWidgets.QApplication.clipboard()
+        clipboard.setText(self.ui.download_sketches_path.text())
+
+    def import_bluepencil(self):
+        # open file dialog to import blue pencil frames from zip
+        maya_scene.import_bluepencil()
 
     def download_video_annotated(self):
         """Downloads the annoated video"""

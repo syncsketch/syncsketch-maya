@@ -30,6 +30,10 @@ GREASE_PENCIL_XML = 'greasePencil.xml'
 # ======================================================================
 # Module Functions
 
+def get_current_maya_version():
+    return int(str(cmds.about(apiVersion=True))[:4])
+
+
 def get_available_compressions(format=None):
     """
     Get currently available compression formats in maya
@@ -299,6 +303,11 @@ def apply_greasepencil(filename, clear_existing_frames=False):
     cmds.modelEditor(active_panel, edit=True, greasePencils=True)
 
     pm.greasePencilCtx(ctxName, edit=True, importArchive=filename)
+
+
+def import_bluepencil():
+    cmds.loadPlugin("bluePencil", quiet=True)
+    cmds.bluePencilFrame(importFrames=True)
 
 
 def apply_imageplane(filename, camera=None):

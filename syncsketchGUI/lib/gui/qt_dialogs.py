@@ -46,13 +46,12 @@ class StatusDialog(QtWidgets.QMessageBox):
     Customized dialog to show the progress without the progress bar
     """
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, title='', message=''):
         super(StatusDialog, self).__init__(parent)
-
-        self.setIcon(QtWidgets.QMessageBox.Warning)
+        self.setIcon(QtWidgets.QMessageBox.Information)
         self.setWindowIcon(qt_presets.logo_icon)
-        self.setWindowTitle('title')
-        self.setText('message')
+        self.setWindowTitle(title)
+        self.setText(message)
         self.exec_()
 
 

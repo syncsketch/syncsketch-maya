@@ -3,3 +3,5 @@ message_is_not_loggedin = "Please sign into your account by clicking 'Log-In' or
 message_is_not_connected = "WARNING: Could not connect to SyncSketch. It looks like you may not have an internet connection?"
 qtff_not_supported = "QuickTime File Format not supported."
 quicktime_install_instructions = "Please install QuickTime in order to use this feature."
+blue_pencil_not_supported = "Blue Pencil not supported"
+blue_pencil_apply_instructions = "Annotations has been downloaded to\n\n{}\n\nUse the Blue Pencil menu to import the frames."
