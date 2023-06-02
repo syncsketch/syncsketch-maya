@@ -335,22 +335,25 @@ class SyncSketchInstaller(QDialog):
         palette.setColor(self.backgroundRole(), "#2b353b")
         self.setPalette(palette)
 
-        info_layout = QHBoxLayout()
-        info_layout.addStretch()
-        info_layout.setContentsMargins(0, 0, 0, 0)
-        info_layout.setSpacing(0)
-        self.outer.addLayout(info_layout, 0)
-        info_layout.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
+        self.info_widget = QWidget()
+        self.info_layout = QHBoxLayout()
+        self.info_widget.setLayout(self.info_layout)
+        self.info_layout.addStretch()
+        self.info_layout.setContentsMargins(0, 0, 0, 0)
+        self.info_layout.setSpacing(0)
+        self.outer.addWidget(self.info_widget, 0)
+        self.info_layout.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
 
         if not InstallOptions.upgrade:
             tutorial_button = LinkButton("Tutorial Video", link=SYNCSKETCH_MAYA_PLUGIN_VIDEO_URL)
-            info_layout.addWidget(tutorial_button, 0)
+            self.info_layout.addWidget(tutorial_button, 0)
 
             repo_button = LinkButton("Github Repo", link=SYNCSKETCH_MAYA_PLUGIN_REPO_URL)
-            info_layout.addWidget(repo_button, 0)
+            self.info_layout.addWidget(repo_button, 0)
 
             documentation_button = LinkButton("Documentation", link=SYNCSKETCH_MAYA_PLUGIN_DOCS_URL)
-            info_layout.addWidget(documentation_button, 0)
+            self.info_layout.addWidget(documentation_button, 0)
+            upgrade_text = ""
         else:
             try:
                 from syncsketchGUI.installScripts.maintenance import (
@@ -367,11 +370,14 @@ class SyncSketchInstaller(QDialog):
                 LOG.warning("Error while trying to get version info: {}".format(error))
                 upgrade_text = u"Upgrading to latest version"
 
-            self.upgrade_info = QLabel(upgrade_text, objectName='upgradeInfo')
-            self.upgrade_info.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
-            self.upgrade_info.setMargin(5)
-            self.upgrade_info.setStyleSheet("QLabel#upgradeInfo {color: #00c899; font: 14pt}")
-            self.outer.addWidget(self.upgrade_info)
+        self.upgrade_info = QLabel(upgrade_text, objectName='upgradeInfo')
+        self.upgrade_info.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
+        self.upgrade_info.setMargin(5)
+        self.upgrade_info.setStyleSheet("QLabel#upgradeInfo {color: #00c899; font: 14pt}")
+        self.outer.addWidget(self.upgrade_info)
+
+        if not InstallOptions.upgrade:
+            self.upgrade_info.hide()
 
         spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.outer.addItem(spacer)
@@ -386,7 +392,7 @@ class SyncSketchInstaller(QDialog):
 
         self.outer.addLayout(subLayout2, 0)
         spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Expanding)
-        info_layout.addItem(spacer)
+        self.info_layout.addItem(spacer)
 
         ButtonLayout = QHBoxLayout()
         ButtonLayout.setAlignment(Qt.AlignCenter)
@@ -459,15 +465,17 @@ class SyncSketchInstaller(QDialog):
         self.animated_gif.hide()
         self.wait_label.hide()
         self.launch_button.hide()
+        self.info_widget.hide()
 
         self.subtext.setText("Error during installation:")
         self.subtext.setStyleSheet("QLabel#subtext {color: orangered; font: 14pt}")
 
         self.upgrade_info.setText(
-            "Error: {}\n\nSee the Maya Script Editor for more information".format(msg))
+            "Error:\n{}\n\nSee the Maya Script Editor for more information".format(msg))
         self.upgrade_info.setStyleSheet("QLabel#upgradeInfo {color: darkgray; font: 10pt}")
         self.upgrade_info.setWordWrap(True)
 
+        self.upgrade_info.show()
         self.close_button.show()
 
     def create_good_defaults(self):
@@ -755,7 +763,7 @@ class InstallThread(QThread):
 
         except Exception as e:
             LOG.error(e)
-            self.error.emit(e)
+            self.error.emit(str(e))
             errors = True
         finally:
             # Remove our temporary directory
