@@ -83,7 +83,7 @@ SYNCSKETCH_MAYA_PLUGIN_VIDEO_URL = "https://vimeo.com/syncsketch/integrationmaya
 SYNCSKETCH_MAYA_PLUGIN_DOCS_URL = "https://support.syncsketch.com/article/62-maya-syncsketch-integration"
 
 # ensure package that are compatible with both python2 and python3
-PY_REQUIREMENTS = ["requests>2,<2.28.0", "syncsketch>1,<2.0", "pyyaml>5,<6.0"]
+PY_REQUIREMENTS = ['"requests>2,<2.28.0"', '"syncsketch>1,<2.0"', '"pyyaml>5,<6.0"']
 
 
 def _get_configured_log():
@@ -599,7 +599,7 @@ def _install_maya_mod_file():
 def _run_subprocess(cmd, error_msg=None):
     LOG.debug("Calling command in subprocess: {0}".format(cmd))
     try:
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         stdout, stderr = proc.communicate()
     except Exception as e:
         if error_msg:
@@ -643,14 +643,12 @@ class InstallThread(QThread):
                     " ")
                 _run_subprocess(cmd, "Failed to download pip installer")
         else:
-            # this should be using secure https, but we should be fine for now
-            # as we are only reading data, but might be a possible mid attack
             response = urlopen("https://bootstrap.pypa.io/pip/2.7/get-pip.py")
             data = response.read()
             with open(pip_installer, "w") as f:
                 f.write(data)
         # Install pip
-        cmd = "{0} {1} --user pip".format(mayapy_path, pip_installer)
+        cmd = "\"{0}\" \"{1}\" --user pip".format(mayapy_path, pip_installer)
         _run_subprocess(cmd, "Failed to install Pip")
 
         return tmpdir, delete_tmpdir
@@ -680,9 +678,9 @@ class InstallThread(QThread):
         module_plugin_path = os.path.join(module_script_path, "syncsketchGUI", "plug-ins")
 
         if not os.path.exists(module_script_path):
-            os.makedirs(module_script_path)
+            os.makedirs(module_script_path, exist_ok=True)
         if not os.path.exists(module_site_packages_path):
-            os.makedirs(module_site_packages_path)
+            os.makedirs(module_site_packages_path, exist_ok=True)
 
         LOG.info("module_script_path: {0}".format(module_script_path))
         LOG.info("module_site_packages_path: {0}".format(module_site_packages_path))
@@ -693,7 +691,7 @@ class InstallThread(QThread):
         try:
             if not INSTALL_SSGUI_ONLY:
                 if sys.version_info.major == 3:
-                    cmd = "{0} -m ensurepip --upgrade".format(mayapy_path)
+                    cmd = "\"{0}\" -m ensurepip --upgrade".format(mayapy_path)
                     _run_subprocess(cmd, "Failed to install Pip")
                 elif sys.version_info.major == 2 and sys.version_info.minor == 7:
                     tmpdir, delete_tmpdir = self._install_pip_py27(tmpdir, delete_tmpdir, mayapy_path)
@@ -711,8 +709,8 @@ class InstallThread(QThread):
 
             # Install Dependencies
             LOG.info("Installing dependencies [{}] ...".format(PY_REQUIREMENTS))
-            cmd = "{pip} -m pip install --target={target} {packages}".format(
-                pip=mayapy_path, target=module_site_packages_path, packages=" ".join(PY_REQUIREMENTS))
+            cmd = "\"{mayapy}\" -m pip install --target=\"{target}\" {packages}".format(
+                mayapy=mayapy_path, target=module_site_packages_path, packages=" ".join(PY_REQUIREMENTS))
             if not INSTALL_SSGUI_ONLY:
                 _run_subprocess(cmd, "Failed to install dependencies")
 
@@ -734,12 +732,12 @@ class InstallThread(QThread):
                 print(e)
 
             if SYNCSKETCH_GUI_SOURCE_PATH.startswith("git+"):
-                cmd = "{mayapy} -m pip install --upgrade --no-deps --target={target} {package_path}".format(
+                cmd = "\"{mayapy}\" -m pip install --upgrade --no-deps --target=\"{target}\" \"{package_path}\"".format(
                     mayapy=mayapy_path, target=module_script_path, package_path=SYNCSKETCH_GUI_SOURCE_PATH
                 )
             else:
                 # for testing purposes, install from local source as an editable package
-                cmd = "{mayapy} -m pip install --upgrade --no-deps --editable {package_path}".format(
+                cmd = "\"{mayapy}\" -m pip install --upgrade --no-deps --editable \"{package_path}\"".format(
                     mayapy=mayapy_path, package_path=SYNCSKETCH_GUI_SOURCE_PATH
                 )
 
