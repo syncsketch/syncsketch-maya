@@ -14,7 +14,7 @@ logger = logging.getLogger("syncsketchGUI")
 
 
 def upload(open_after_upload=None, show_success_msg=False):
-    logger.info("open_after_upload Url: {}".format(open_after_upload))
+    logger.debug("open_after_upload Url: {}".format(open_after_upload))
     uploaded_item = _upload()
 
     if not uploaded_item:
@@ -25,13 +25,11 @@ def upload(open_after_upload=None, show_success_msg=False):
 
     if open_after_upload:
         url = path.make_url_offlineMode(uploaded_item['reviewURL'])
-        logger.info("Url: {}".format(url))
-        logger.info("Uploaded Item: {}".format(uploaded_item))
-        logger.info("Opening Url: {}".format(uploaded_item['reviewURL']))
+        logger.debug("url: {}, uploaded_item: {}, reviewURL: {}".format(url, uploaded_item, uploaded_item['reviewURL']))
         webbrowser.open(url, new=2, autoraise=True)
 
     if not open_after_upload:
-        logger.info("uploaded_item: {}".format(uploaded_item))
+        logger.debug("uploaded_item: {}".format(uploaded_item))
         _show_success_message(path.make_url_offlineMode(uploaded_item['reviewURL']))
 
     return uploaded_item
@@ -48,7 +46,7 @@ def _upload(current_user=None, ):
 
     # Try to upload to the last uploaded address first
     selected_item = database.read_cache('treewidget_selection')
-    logger.info("selected_item: {0}".format(selected_item))
+    logger.debug("selected_item: {0}".format(selected_item))
 
     # ToDo rename media_id to item_id
     item_type = database.read_cache('target_url_type')
@@ -58,7 +56,7 @@ def _upload(current_user=None, ):
 
     # Upload To
     upload_to_value = item_name
-    logger.info('Selected Item: %s' % item_name)
+    logger.debug('Selected Item: {}'.format(item_name))
 
     last_recorded_data = database.read_cache('last_recorded')
 
@@ -75,23 +73,20 @@ def _upload(current_user=None, ):
         # logger.info("uploaded_item: {0}".format(pformat(uploaded_item)))
 
     elif item_type == 'media':
-        logger.info('Updating item {} with file {}'.format(upload_to_value, upload_file))
-        logger.info("item id %s" % item_id)
-        logger.info("filepath %s" % upload_file)
-        logger.info("Trying to upload %s to item_id %s, review %s" % (upload_file, item_id, review_id))
+        logger.info("Trying to upload {} to item_id {}, review {}".format(upload_file, item_id, review_id))
         uploaded_item = current_user.upload_media_to_review(review_id, upload_file, noConvertFlag=True,
                                                             itemParentId=item_id, data=post_data)
         logger.info(pformat(uploaded_item))
     else:
         uploaded_item = None
-        error_log = 'You cannot upload to %s "%s" directly.\nPlease select a review in the tree widget to upload to!\n' % (
+        error_log = 'You cannot upload to {} "{}" directly.\nPlease select a review in the tree widget to upload to!\n'.format(
             item_type, item_name)
 
     if not uploaded_item:
         if not error_log:
             error_log = 'No Uploaded Item returned from Syncsketch'
 
-        logger.info('ERROR: This Upload failed: %s' % (error_log))
+        logger.error('ERROR: This Upload failed: {}'.format(error_log))
         return
 
     # * this is an old call, that we should replace with an async worker
@@ -100,7 +95,7 @@ def _upload(current_user=None, ):
     review_url = review_data.get('reviewURL')
     # uploaded_media_url = '{}'.format(review_url)
     uploaded_media_url = '{}#{}'.format(review_url, uploaded_item['id'])
-    logger.info("review_data: {}".format(review_data))
+    logger.debug("review_data: {}".format(review_data))
     logger.info('Upload successful. Uploaded item {} to {}'.format(upload_file, uploaded_media_url))
 
     if 'none' in uploaded_media_url.lower():

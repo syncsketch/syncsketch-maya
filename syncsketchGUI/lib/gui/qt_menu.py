@@ -157,13 +157,13 @@ class MenuWidget(QtWidgets.QWidget):
         webbrowser.open(path.signup_url)
 
     def update_login_ui(self):  # TODO: Evaluate if neccessary here and maybe remove
-        '''
+        """
         Updates the UI based on whether the user is logged in
-        '''
+        """
         current_user = user.SyncSketchUser()
         user_is_logged_in = current_user.is_logged_in()
         _is_connected = is_connected()
-        logger.info("current_user: '{}', is_logged_inL '{}".format(current_user, user_is_logged_in))
+        logger.info("current_user: '{}', is_logged_in: '{}'".format(current_user.name, user_is_logged_in))
 
         if user_is_logged_in and _is_connected:
             username = current_user.get_name()

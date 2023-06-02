@@ -44,7 +44,7 @@ class MenuWindow(qt_windows.SyncSketchWindow):
         self._restore_ui()
 
     def closeEvent(self, event):
-        logger.info("Closing Window")
+        logger.debug("Closing Window")
         event.accept()
 
     def _create_ui(self):

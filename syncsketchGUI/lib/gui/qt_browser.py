@@ -57,7 +57,7 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
         url = self._sanitize(url)
 
         url_payload = parse_url_data(url)  # FIXME
-        logger.info("url_payload: {} ".format(url_payload))
+        logger.debug("url_payload: {} ".format(url_payload))
 
         if not url_payload:
             return
@@ -66,7 +66,7 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
 
         if not media_item:
 
-            logger.info("Cant find Media Item. Try to find Review Item and repopulate, then try again.")
+            logger.debug("Cant find Media Item. Try to find Review Item and repopulate, then try again.")
 
             review_url_payload = {
                 "uuid": url_payload["uuid"],
@@ -79,7 +79,7 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
                 logger.warning("Cant find Media and Review Item with payload: {}".format(url_payload))
                 return
             else:
-                logger.info("Found Review Item: {}".format(review_item))
+                logger.debug("Found Review Item: {}".format(review_item))
 
             self._populate_review_item(review_item)
 
@@ -87,7 +87,7 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
 
         self._tree.setCurrentItem(media_item, 1)
         self._tree.scrollToItem(media_item)
-        logger.info("Selected Media Item: {}".format(media_item))
+        logger.debug("Selected Media Item: {}".format(media_item))
 
     def _cache_user(self):
         self.current_user = user.SyncSketchUser()
@@ -95,10 +95,10 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
             self._is_logged_in = True
         else:
             self._is_logged_in = False
-        logger.info("Cache login status for user: {}".format(self._is_logged_in))
+        logger.debug("Cache login status for user: {}".format(self._is_logged_in))
 
     def _clear(self):
-        logger.info("Clear Browser Widget")
+        logger.debug("Clear Browser Widget")
         self._tree.clear()
         self._ui_line_target.clear()
         self._ui_thumbnail_item_preview.clear()
@@ -190,10 +190,10 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
         account_data = self.current_user.get_account_data(withItems=False)
 
         if not account_data:
-            logger.info("No account_data found")
+            logger.warning("No account_data found")
             return
 
-        logger.info("account_data: {}".format(account_data))
+        logger.debug("account_data: {}".format(account_data))
         for account in account_data:
             account_treeWidgetItem = self._build_widget_item(parent=self._tree,
                                                              item_name=account.get('name'),
@@ -291,24 +291,25 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
         which triggers the load of items.
         """
 
-        logger.info("Expanding treewidget: {}".format(target))
+        logger.debug("Expanding treewidget: {}".format(target))
         selected_item = target
         # convert qmodelindex into a treewidget item
         item = target  # self.ui.browser_treeWidget.itemFromIndex(selected_item)
         try:
-            logger.info("item.text {} selected_item {}".format(item.data(0, QtCore.Qt.EditRole),
-                                                               item.data(1, QtCore.Qt.EditRole)))
+            logger.debug("item.text {} selected_item {}".format(item.data(0, QtCore.Qt.EditRole),
+                                                                item.data(1, QtCore.Qt.EditRole)))
         except Exception as e:
-            logger.info("Exception: ".format(e))
+            logger.debug("Exception: ".format(e))
+
         item_type = item.data(2, QtCore.Qt.EditRole)
         if item_type == "review":
-            logger.info("item_type is a review, expanding")
+            logger.debug("item_type is a review, expanding")
             if item.childCount() == 1 and not item.child(0).data(0, QtCore.Qt.EditRole):
-                logger.info("Only single empty dummy item, delete and load childs")
+                logger.debug("Only single empty dummy item, delete and load childs")
                 item.takeChildren()
                 self._populate_review_item(item)
         else:
-            logger.info("Not a review, nothing to expand")
+            logger.debug("Not a review, nothing to expand")
 
             # User keeps pressing expand, so let's reload
             # * consolidate
@@ -316,8 +317,7 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
             # item.setSelected(True)
 
     def _update_target_from_item_callback(self, current_item, previous_item):
-
-        logger.info("Browser Target changed. Signal emitted.")
+        logger.debug("Browser Target changed. Signal emitted.")
         target_data = self._get_target_data(current_item)
         self.target_changed.emit(target_data)
 
@@ -325,7 +325,7 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
 
         target_url = target_data["target_url"]
         self._ui_line_target.setText(target_url)
-        logger.info("Set target_lineEdit to {}".format(target_url))
+        logger.debug("Set target_lineEdit to {}".format(target_url))
 
         ui_to_toggle = [
             self._ui_pb_copy_url,
@@ -354,7 +354,7 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
 
         if target_type == "media":
             thumbURL = self.current_user.get_item_info(item_data['media_id'])['objects'][0]['thumbnail_url']
-            logger.info("thumbURL: {}".format(thumbURL))
+            logger.debug("thumbURL: {}".format(thumbURL))
             self._ui_thumbnail_item_preview.set_icon_from_url(thumbURL)
 
         else:
@@ -404,7 +404,7 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
         database.dump_cache({'upload_to_value': target_data['target_url']})
 
     def _download_callback(self):
-        logger.info("Download pressed")
+        logger.debug("Download pressed")
         # self.validate_review_url()
         actions.show_download_window()
         return
@@ -415,7 +415,7 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
 
         target_data = self._get_target_data(selected_item)
         offline_url = path.make_url_offlineMode(target_data["target_url"])
-        logger.info("Opening Url: {} ".format(offline_url))
+        logger.debug("Opening Url: {} ".format(offline_url))
         if offline_url:
             webbrowser.open(offline_url)
 
@@ -432,9 +432,9 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
     def _update_target_from_cache(self):
         link = database.read_cache('upload_to_value')
         if not link:
-            logger.info("Cache for 'upload_to_value' doesnt exist")
+            logger.debug("Cache for 'upload_to_value' doesnt exist")
             return
-        logger.info("Update Target from URL: {} ".format(link))
+        logger.debug("Update Target from URL: {} ".format(link))
         self.update_target_from_url(link)
 
     def _get_target_data(self, item):
@@ -445,7 +445,7 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
         else:
             item_data = item.data(1, QtCore.Qt.EditRole)
             item_type = item.data(2, QtCore.Qt.EditRole)
-        logger.info("get data for item: item_data {} item_type {}".format(item_data, item_type))
+        logger.debug("get data for item: item_data {} item_type {}".format(item_data, item_type))
 
         review_base_url = "{}/sketch/".format(get_syncsketch_url())
         current_data = {
@@ -480,7 +480,7 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
             # current_data['target_url'] = '{}#{}'.format(review_base_url + str(current_data['review_id']), current_data['media_id'])
             current_data['target_url'] = '{0}{1}#{2}'.format(review_base_url, item_data.get('uuid'),
                                                              item_data.get('id'))
-            logger.info("current_data['target_url'] {}".format(current_data['target_url']))
+            logger.debug("current_data['target_url'] {}".format(current_data['target_url']))
 
         while item.parent():
             current_data['breadcrumb'] = ' > '.join([item.text(0), current_data['upload_to_value']])
@@ -489,13 +489,13 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
         if current_data['breadcrumb'].split(' > ')[-1] == '':
             current_data['breadcrumb'] = current_data['upload_to_value'].rsplit(' > ', 1)[0]
 
-        logger.info("upload_to_value :{} ".format(current_data['upload_to_value']))
+        logger.debug("upload_to_value :{} ".format(current_data['upload_to_value']))
 
         return current_data
 
 
 def get_current_item_from_ids(tree, payload=None):
-    logger.info("payload: {}".format(payload))
+    logger.debug("payload: {}".format(payload))
     searchValue = ''
     searchType = ''
 
@@ -506,17 +506,17 @@ def get_current_item_from_ids(tree, payload=None):
     if payload['uuid'] and payload['id']:
         searchType = 'id'
         searchValue = int(payload['id'])
-        logger.info("both payload['uuid'] and payload['id'] set {}".format(payload['uuid'], payload['id']))
+        logger.debug("both payload['uuid'] and payload['id'] set {}".format(payload['uuid'], payload['id']))
 
     # Got only uuid, it's a review
     elif payload['uuid']:
         searchType = 'uuid'
         searchValue = payload['uuid']
-        logger.info("payload['uuid'] set: {}".format(payload['uuid']))
+        logger.debug("payload['uuid'] set: {}".format(payload['uuid']))
 
     # Nothing useful found return
     else:
-        logger.info("No uuid or id in payload, aborting")
+        logger.debug("No uuid or id in payload, aborting")
         return
 
     iterator = QtWidgets.QTreeWidgetItemIterator(tree, QtWidgets.QTreeWidgetItemIterator.All)

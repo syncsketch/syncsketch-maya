@@ -1,7 +1,6 @@
 from syncsketchGUI.vendor.Qt import QtWidgets, QtCore, QtGui
 
 from syncsketchGUI.lib import path
-from syncsketchGUI.lib import user
 from syncsketchGUI.lib import database
 
 from . import qt_presets
@@ -94,17 +93,18 @@ class Button(QtWidgets.QPushButton):
             self.setIcon(icon)
         self.setMouseTracking(True)
         self.setMinimumSize(40, 40)
-        self.setStyleSheet("color: %s" % color)
+        self.setStyleSheet("color: {}".format(color))
 
     def enterEvent(self, event):
         return
-        self.setStyleSheet("margin: 0; background: %s; padding: 10px; border-radius: 4px; border: 0; color: %s;" % (
+        self.setStyleSheet("margin: 0; background: {}; padding: 10px; border-radius: 4px; border: 0; color: {};".format(
             self.hoverColor, self.color))
 
     def leaveEvent(self, event):
         return
-        self.setStyleSheet("margin: 0; background: %s; padding: 10px; border-radius: 4px; border: 0; color: %s;" % (
-            self.bgColor, self.color))
+        self.setStyleSheet(
+            "margin: 0; background: {}; padding: 10px; border-radius: 4px; border: 0; color: {};".format(self.bgColor,
+                                                                                                         self.color))
 
 
 class GridLayout(QtWidgets.QGridLayout):
@@ -161,13 +161,15 @@ class ComboBox(QtWidgets.QComboBox):
 
     def enterEvent(self, event):
         return
-        self.setStyleSheet("margin: 0; background: %s; padding: 5px; border-radius: 4px; border: 0; color: %s;" % (
-            self.hoverColor, self.color))
+        self.setStyleSheet(
+            "margin: 0; background: {}; padding: 5px; border-radius: 4px; border: 0; color: {};".format(self.hoverColor,
+                                                                                                        self.color))
 
     def leaveEvent(self, event):
         return
-        self.setStyleSheet("margin: 0; background: %s; padding: 5px; border-radius: 4px; border: 0; color: %s;" % (
-            self.bgColor, self.color))
+        self.setStyleSheet(
+            "margin: 0; background: {}; padding: 5px; border-radius: 4px; border: 0; color: {};".format(self.bgColor,
+                                                                                                        self.color))
 
 
 class ToolButton(QtWidgets.QPushButton):

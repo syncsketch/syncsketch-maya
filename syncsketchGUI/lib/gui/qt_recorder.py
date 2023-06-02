@@ -243,7 +243,7 @@ class MayaPlayblastRecorderWidget(QtWidgets.QWidget):
         self.cameras = [active_cam]
         self.cameras += maya_scene.get_available_cameras()
         self.ui_cameraPreset_comboBox.addItems(self.cameras)
-        logger.info("maya_scene.get_current_camera(): {}".format(maya_scene.get_current_camera()))
+        logger.debug("maya_scene.get_current_camera(): {}".format(maya_scene.get_current_camera()))
         self.ui_cameraPreset_comboBox.set_combobox_index(selection=value, default=maya_scene.get_current_camera())
 
     def set_rangeFromComboBox(self):
@@ -312,7 +312,7 @@ class MayaPlayblastRecorderWidget(QtWidgets.QWidget):
         database.dump_cache({'current_preset': val})
         format_preset_file = path.get_config_yaml(PRESET_YAML)
         data = database._parse_yaml(yaml_file=format_preset_file)
-        logger.info("data: {}".format(data))
+        logger.debug("data: {}".format(data))
         if val in data:
             data = data[val]
             # text = "%s | %s | %sx%s " %(data["encoding"], data["format"], data["width"], data["height"])
@@ -336,7 +336,6 @@ class MayaPlayblastRecorderWidget(QtWidgets.QWidget):
         preset_viewport_window.show()
 
     def update_current_camera(self):
-        logger.info("updating Camera")
         value = self.ui_cameraPreset_comboBox.currentText()
         if not value or not len(value) or value == 'null':
             value = database.read_cache('selected_camera')
