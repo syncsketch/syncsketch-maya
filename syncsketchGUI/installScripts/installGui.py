@@ -114,19 +114,19 @@ def get_mayapy_path():
     else:
         raise Exception("Unsupported platform: {}".format(Literals.PLATFORM))
 
-    return mayapy_path
+    return os.path.normpath(mayapy_path)
 
 
 def get_maya_module_path():
     maya_module_path = os.path.join(os.environ["MAYA_APP_DIR"], str(MAYA_API_VERSION), "modules")
-    return maya_module_path
+    return os.path.normpath(maya_module_path)
 
 
 def get_install_folder_path():
     maya_module_path = get_maya_module_path()
     install_path = os.path.join(maya_module_path, "syncsketch-{}".format(_VERSION))
 
-    return install_path
+    return os.path.normpath(install_path)
 
 
 class InstallOptions(object):
