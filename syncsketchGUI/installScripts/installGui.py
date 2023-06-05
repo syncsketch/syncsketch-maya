@@ -10,6 +10,7 @@ import tempfile
 import webbrowser
 import zipfile
 from functools import partial
+import ssl
 
 import json
 
@@ -17,11 +18,10 @@ from maya import cmds
 
 try:
     # python3
-    from urllib.request import urlopen, urlretrieve, Request
+    from urllib.request import urlopen, Request
 except ImportError:
     # python2
     from urllib2 import urlopen, Request
-    from urllib import urlretrieve
 
 try:
     # python3
@@ -34,6 +34,11 @@ try:
 except Exception as error:
     print("Error: {}".format(error))
     MAYA_API_VERSION = 2022
+
+# Mac does not have certificates installed by default, so we need to disable SSL verification
+unverified_ssl_context = ssl.create_default_context()
+unverified_ssl_context.check_hostname = False
+unverified_ssl_context.verify_mode = ssl.CERT_NONE
 
 # cant use Qt.py as we have not installed requirements yet
 if MAYA_API_VERSION >= 2017:
@@ -63,9 +68,8 @@ def _get_install_version():
             VERSION_TAG)
     else:
         url = "file:///{}/syncsketchGUI/version.py".format(SYNCSKETCH_GUI_SOURCE_PATH)
-
     try:
-        version_py_content = urlopen(url).read().decode()
+        version_py_content = urlopen(url, context=unverified_ssl_context).read().decode()
         version = re.match(r'.*__version__ = \"(.*?)\"', version_py_content, re.DOTALL).group(1)
     except Exception as error:
         print("Error: {}".format(error))
@@ -453,8 +457,11 @@ class SyncSketchInstaller(QDialog):
             install_shelf()
 
         # Load Plugin And Autoload it
-        cmds.loadPlugin("SyncSketchPlugin")
-        cmds.pluginInfo("SyncSketchPlugin", edit=True, autoload=True)
+        try:
+            cmds.loadPlugin("SyncSketchPlugin")
+            cmds.pluginInfo("SyncSketchPlugin", edit=True, autoload=True)
+        except RuntimeError as error:
+            LOG.error("Error while loading plugin: {}".format(error))
 
         # Create Default's for current OS
         self.create_good_defaults()
@@ -543,7 +550,7 @@ def download_and_install_ffmpeg_to_disc(platform=None, move_to_location=None):
 
     _platform = platform_mapping[platform]
 
-    response = urlopen(Request(FFMPEG_API_ENDPOINT, headers={"User-Agent": ""}))
+    response = urlopen(Request(FFMPEG_API_ENDPOINT, headers={"User-Agent": ""}), context=unverified_ssl_context)
     ffmpeg_resp = json.load(response)
 
     ffmpeg_url = ffmpeg_resp["bin"][_platform]["ffmpeg"]
@@ -575,9 +582,10 @@ def _make_temp_path(name):
     return os.path.join(tmpdir, name)
 
 
-def _download_to_path(url, path):
-    LOG.info("Download from {} to {}".format(url, path))
-    local_filename, headers = urlretrieve(url, path)
+def _download_to_path(source_url, save_to_path):
+    LOG.info("Download from {} to {}".format(source_url, save_to_path))
+    with urlopen(source_url, context=unverified_ssl_context) as response, open(save_to_path, 'wb') as out_file:
+        shutil.copyfileobj(response, out_file)
 
 
 def _extract_zip_file(zip_path, extracted_path):
