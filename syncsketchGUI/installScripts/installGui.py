@@ -471,7 +471,7 @@ class SyncSketchInstaller(QDialog):
         self.subtext.setStyleSheet("QLabel#subtext {color: orangered; font: 14pt}")
 
         self.upgrade_info.setText(
-            "Error:\n{}\n\nSee the Maya Script Editor for more information".format(msg))
+            "{}\n\nSee the Maya Script Editor for more information".format(msg))
         self.upgrade_info.setStyleSheet("QLabel#upgradeInfo {color: darkgray; font: 10pt}")
         self.upgrade_info.setWordWrap(True)
 
@@ -594,14 +594,18 @@ def _find_bin_path(directory, name):
 
 
 def _install_maya_mod_file():
-    mod_folder = get_maya_module_path()
-    mod_file = os.path.join(mod_folder, "syncsketch-{version}.mod".format(version=_VERSION))
-
+    mod_file = _get_mod_file_path()
     LOG.info("Installing Maya Mod File to {}".format(mod_file))
     with open(mod_file, "w") as f:
         f.write("+ syncsketch {version} .\syncsketch-{version} \n".format(version=_VERSION))
         f.write("MAYA_PLUG_IN_PATH +:= scripts\syncsketchGUI\plug-ins \n".format(version=_VERSION))
         f.write("PYTHONPATH +:= site-packages \n".format(version=_VERSION))
+
+
+def _get_mod_file_path():
+    mod_folder = get_maya_module_path()
+    mod_file = os.path.join(mod_folder, "syncsketch-{version}.mod".format(version=_VERSION))
+    return mod_file
 
 
 def _run_subprocess(cmd, error_msg=None):
@@ -680,6 +684,17 @@ class InstallThread(QThread):
 
         mayapy_path = get_mayapy_path()
         install_folder_path = get_install_folder_path()
+        maya_mod_file_path = _get_mod_file_path()
+
+        if os.path.exists(install_folder_path) or os.path.exists(maya_mod_file_path):
+            msg = "Version {} is already installed, skipping installation.".format(_VERSION)
+            LOG.info(msg)
+            LOG.info(
+                ("If you want to reinstall, "
+                 "please delete the folder {} and the file {} "
+                 "and then run the installer again.").format(install_folder_path, maya_mod_file_path))
+            self.error.emit(msg)
+            return
 
         module_script_path = os.path.join(install_folder_path, "scripts")
         module_site_packages_path = os.path.join(install_folder_path, "site-packages")
