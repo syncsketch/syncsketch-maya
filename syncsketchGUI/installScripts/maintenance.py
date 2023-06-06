@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import re
@@ -8,10 +9,10 @@ from maya import OpenMayaUI as omui
 
 try:
     # python3
-    from urllib.request import urlopen
+    from urllib.request import urlopen, Request
 except ImportError:
     # python2
-    from urllib2 import urlopen
+    from urllib2 import urlopen, Request
 
 try:
     # python3
@@ -29,7 +30,16 @@ logger = logging.getLogger("syncsketchGUI")
 
 
 class InstallerLiterals(object):
-    version_tag = os.getenv("SS_DEV") or "release"
+    # version_tag = os.getenv("SS_DEV") or "release"
+    if os.getenv("SS_DEV"):
+        version_tag = os.getenv("SS_DEV")
+    else:
+        # get version tag from latest release from GitHub
+        req = Request('https://github.com/syncsketch/syncsketch-maya/releases/latest')
+        req.add_header('Accept', 'application/json')
+        content = json.loads(urlopen(req).read())
+        version_tag = content['tag_name']
+
     if os.environ.get("SYNCSKETCH_GUI_SOURCE_PATH"):
         setup_py_path = 'file:///{}/syncsketchGUI/version.py'.format(os.environ.get("SYNCSKETCH_GUI_SOURCE_PATH"))
         installer_py_gui_path = "file:///{}/syncsketchGUI/installScripts/installGui.py".format(
