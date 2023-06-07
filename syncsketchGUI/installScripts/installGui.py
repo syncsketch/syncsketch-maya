@@ -67,11 +67,12 @@ else:
 if os.environ.get("SYNCSKETCH_GUI_SOURCE_PATH"):
     SYNCSKETCH_GUI_SOURCE_PATH = os.environ.get("SYNCSKETCH_GUI_SOURCE_PATH")
 else:
-    SYNCSKETCH_GUI_SOURCE_PATH = "git+https://github.com/syncsketch/syncsketch-maya.git@{}".format(VERSION_TAG)
+    SYNCSKETCH_GUI_SOURCE_PATH = "https://github.com/syncsketch/syncsketch-maya/archive/refs/tags/{}.zip".format(
+        VERSION_TAG)
 
 
 def _get_install_version():
-    if SYNCSKETCH_GUI_SOURCE_PATH.startswith("git+"):
+    if SYNCSKETCH_GUI_SOURCE_PATH.startswith("https"):
         url = "https://raw.githubusercontent.com/syncsketch/syncsketch-maya/{}/syncsketchGUI/version.py".format(
             VERSION_TAG)
     else:
@@ -770,7 +771,7 @@ class InstallThread(QThread):
             except Exception as e:
                 print(e)
 
-            if SYNCSKETCH_GUI_SOURCE_PATH.startswith("git+"):
+            if SYNCSKETCH_GUI_SOURCE_PATH.startswith("https"):
                 cmd = "\"{mayapy}\" -m pip install --upgrade --no-deps --target=\"{target}\" \"{package_path}\"".format(
                     mayapy=mayapy_path, target=module_script_path, package_path=SYNCSKETCH_GUI_SOURCE_PATH
                 )
