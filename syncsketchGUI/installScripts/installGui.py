@@ -9,6 +9,7 @@ import sys
 import tempfile
 import webbrowser
 import zipfile
+from contextlib import closing
 from functools import partial
 import ssl
 
@@ -594,7 +595,7 @@ def _make_temp_path(name):
 
 def _download_to_path(source_url, save_to_path):
     LOG.info("Download from {} to {}".format(source_url, save_to_path))
-    with urlopen(source_url, context=unverified_ssl_context) as response, open(save_to_path, 'wb') as out_file:
+    with closing(urlopen(source_url, context=unverified_ssl_context)) as response, open(save_to_path, 'wb') as out_file:
         shutil.copyfileobj(response, out_file)
 
 
