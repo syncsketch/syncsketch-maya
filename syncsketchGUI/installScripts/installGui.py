@@ -470,7 +470,8 @@ class SyncSketchInstaller(QDialog):
             cmds.loadPlugin("SyncSketchPlugin")
             cmds.pluginInfo("SyncSketchPlugin", edit=True, autoload=True)
         except RuntimeError as error:
-            LOG.error("Error while loading plugin: {}".format(error))
+            LOG.error("Error while loading plugin: '{}'. MAYA_PLUG_IN_PATH: {}".format(
+                error, os.environ.get("MAYA_PLUG_IN_PATH")))
 
         # Create Default's for current OS
         self.create_good_defaults()
@@ -756,7 +757,9 @@ class InstallThread(QThread):
 
             LOG.info("Dependencies installed")
 
-            os.environ["MAYA_PLUG_IN_PATH"] = ";".join([module_plugin_path, os.environ.get("MAYA_PLUG_IN_PATH", "")])
+            # pathsep is ; on windows and : on linux/macOS
+            os.environ["MAYA_PLUG_IN_PATH"] = os.pathsep.join(
+                [module_plugin_path, os.environ.get("MAYA_PLUG_IN_PATH", "")])
             LOG.info("Added module plugin path [{}] to MAYA_PLUG_IN_PATH".format(module_plugin_path))
 
             self._prepend_to_sys_path(module_script_path)
