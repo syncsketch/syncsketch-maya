@@ -718,13 +718,20 @@ class InstallThread(QThread):
         module_site_packages_path = os.path.join(install_folder_path, "site-packages")
         module_plugin_path = os.path.join(module_script_path, "syncsketchGUI", "plug-ins")
 
-        if not os.path.exists(module_script_path):
-            os.makedirs(module_script_path, exist_ok=True)
-        if not os.path.exists(module_site_packages_path):
-            os.makedirs(module_site_packages_path, exist_ok=True)
+        try:
+            if not os.path.exists(module_script_path):
+                os.makedirs(module_script_path)
 
-        LOG.info("module_script_path: {0}".format(module_script_path))
-        LOG.info("module_site_packages_path: {0}".format(module_site_packages_path))
+            if not os.path.exists(module_site_packages_path):
+                os.makedirs(module_site_packages_path)
+
+            LOG.info("module_script_path: {0}".format(module_script_path))
+            LOG.info("module_site_packages_path: {0}".format(module_site_packages_path))
+        except Exception as e:
+            msg = "Failed to create folder(s): {}".format(e)
+            LOG.error(msg)
+            self.error.emit(msg)
+            return
 
         ffmpeg_bin_folder_path = os.path.join(install_folder_path, "ffmpeg", "bin")
         Literals.SYNCSKETCH_INSTALL_PATH = os.path.join(module_script_path, "syncsketchGUI")
