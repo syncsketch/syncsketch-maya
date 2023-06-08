@@ -2,9 +2,11 @@ import json
 import logging
 import os
 import re
+import ssl
 import sys
 import uuid
 
+import certifi
 from maya import OpenMayaUI as omui
 
 try:
@@ -29,16 +31,28 @@ from syncsketchGUI.lib import user as user
 logger = logging.getLogger("syncsketchGUI")
 
 
+def _get_version_tag_from_latest_release():
+    # get version tag from latest release from GitHub
+    try:
+        req = Request('https://github.com/syncsketch/syncsketch-maya/releases/latest')
+        req.add_header('Accept', 'application/json')
+        content = json.loads(urlopen(req, context=ssl.create_default_context(cafile=certifi.where())).read())
+        version_tag = content['tag_name']
+    except Exception as error:
+        logger.warning("Could not get latest release from GitHub: {}".format(error))
+
+        # first version that has `version.py`, this will prevent an error, but the update will not be able to run.
+        version_tag = "v1.3.0"
+
+    return version_tag
+
+
 class InstallerLiterals(object):
     # version_tag = os.getenv("SS_DEV") or "release"
     if os.getenv("SS_DEV"):
         version_tag = os.getenv("SS_DEV")
     else:
-        # get version tag from latest release from GitHub
-        req = Request('https://github.com/syncsketch/syncsketch-maya/releases/latest')
-        req.add_header('Accept', 'application/json')
-        content = json.loads(urlopen(req).read())
-        version_tag = content['tag_name']
+        version_tag = _get_version_tag_from_latest_release()
 
     if os.environ.get("SYNCSKETCH_GUI_SOURCE_PATH"):
         setup_py_path = 'file:///{}/syncsketchGUI/version.py'.format(os.environ.get("SYNCSKETCH_GUI_SOURCE_PATH"))
@@ -63,7 +77,8 @@ def _parse_version_py_content(version_py_content):
 
 def get_latest_setup_py_file_from_repo():
     """Parses latest setup.py's version number"""
-    response = urlopen(InstallerLiterals.setup_py_path).read()
+    response = urlopen(InstallerLiterals.setup_py_path,
+                       context=ssl.create_default_context(cafile=certifi.where())).read()
     if response:
         html = response.decode()
         return _parse_version_py_content(html)
@@ -91,16 +106,21 @@ def get_version_difference():
 
 def download_latest_installer():
     import tempfile
-
     logger.info("Downloading latest installGui.py from release {}".format(InstallerLiterals.installer_py_gui_path))
 
-    response = urlopen(InstallerLiterals.installer_py_gui_path)
-    data = response.read().decode('utf-8')
+    try:
+        response = urlopen(InstallerLiterals.installer_py_gui_path,
+                           context=ssl.create_default_context(cafile=certifi.where()))
+        data = response.read().decode('utf-8')
 
-    temp_install_file = os.path.join(tempfile.gettempdir(), "installGui_{}.py".format(uuid.uuid4().hex[:8]))
-    # write to temp file
-    with open(temp_install_file, "w") as file:
-        file.write(data)
+        temp_install_file = os.path.join(tempfile.gettempdir(), "installGui_{}.py".format(uuid.uuid4().hex[:8]))
+        # write to temp file
+        with open(temp_install_file, "w") as file:
+            file.write(data)
+
+    except Exception as error:
+        logger.warning("Could not download latest installer, aborting upgrade. Error: {}".format(error))
+        temp_install_file = None
 
     return temp_install_file
 
@@ -128,6 +148,8 @@ def handle_upgrade():
         # Make sure we only show this window once per Session
         if not installGui.InstallOptions.upgrade == 1:
             temp_install_file = download_latest_installer()
+            if not temp_install_file:
+                return
 
             if sys.version_info.major == 3:
                 import importlib.util
