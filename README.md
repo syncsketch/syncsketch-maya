@@ -64,6 +64,31 @@ syncsketchGUI.install_shelf()
 
 __Note__: Manual installation expects you to have `ffmpeg` and `pip` already installed and set-up correctly.
 
+# Uninstall
+To uninstall, make sure to close Maya and then delete the folder and file corresponding to the version you want to 
+uninstall from **`$MAYA_APP_DIR\<maya_version>\modules`**. 
+See [Maya help](https://help.autodesk.com/view/MAYAUL/2024/ENU/?guid=GUID-228CCA33-4AFE-4380-8C3D-18D23F7EAC72) 
+for more details on **MAYA_APP_DIR.**
+
+For example, on Windows to uninstall version 1.3.0 of the Maya Syncsketch plugin from Maya 2022, 
+where you replace `<user>` with your username:
+
+Windows:
+```shell
+# delete the following folder
+C:\Users\<user>\Documents\maya\2022\modules\syncsketch-1.3.0
+# delete this file
+C:\Users\<user>\Documents\maya\2022\modules\syncsketch-1.3.0.mod
+```
+
+MacOS:
+```shell
+# delete the following folder
+/Users/<user>/Library/Preferences/Autodesk/maya/2020/modules/syncsketch-1.3.0
+# delete this file
+/Users/<user>/Library/Preferences/Autodesk/maya/2020/modules/syncsketch-1.3.0.mod
+```
+
 # Environment variables
 `SS_DISABLE_UPGRADE` - If this environment variable is set, the plugin will not check for updates on startup.
 
