@@ -669,15 +669,14 @@ class InstallThread(QThread):
         pip_installer = os.path.join(tmpdir, "get-pip.py")
         if Literals.PLATFORM == "Darwin":
             if not INSTALL_SSGUI_ONLY:
-                cmd = "curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o {0}".format(
-                    pip_installer).split(
-                    " ")
+                cmd = "curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o \"{0}\"".format(pip_installer)
                 _run_subprocess(cmd, "Failed to download pip installer")
         else:
             response = urlopen("https://bootstrap.pypa.io/pip/2.7/get-pip.py")
             data = response.read()
             with open(pip_installer, "w") as f:
                 f.write(data)
+
         # Install pip
         cmd = "\"{0}\" \"{1}\" --user pip".format(mayapy_path, pip_installer)
         _run_subprocess(cmd, "Failed to install Pip")
