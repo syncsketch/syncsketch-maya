@@ -94,6 +94,18 @@ MacOS:
 
 `SS_DEV` - If this environment variable is set to `dev`, the plugin will install the latest dev release instead of the latest stable release.
 
+# Know Issues
+ ### Installer crashes running in Maya 2020 
+
+Ths is due to a bug in OpenSSL affecting certain generations of Intel CPUs. See https://www.intel.com/content/www/us/en/developer/articles/troubleshooting/openssl-sha-crash-bug-requires-application-update.html for more details.
+Workaround is to set the environment variable `OPENSSL_ia32cap` to `:~0x20000000` before running the Maya. This can be done in the `Maya.env` file in your `MAYA_APP_DIR` folder. For example, on Windows, you would add the following line to `C:\Users\<user>\Documents\maya\2020\Maya.env`:
+
+Maya.env
+```
+OPENSSL_ia32cap=:~0x20000000
+```
+
+
 # Contributing
 
 ### Fork and send pull request
