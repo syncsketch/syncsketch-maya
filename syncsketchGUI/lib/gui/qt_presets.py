@@ -1,14 +1,19 @@
+import logging
+import tempfile
+
+import requests
+
 from syncsketchGUI.lib import path
 from syncsketchGUI.vendor.Qt import QtGui
 
-try:
-    # python3
-    from urllib.request import URLopener
-except ImportError:
-    # python2
-    from urllib import URLopener
+# try:
+#     # python3
+#     from urllib.request import URLopener
+# except ImportError:
+#     # python2
+#     from urllib import URLopener
 
-import tempfile
+logger = logging.getLogger("syncsketchGUI")
 
 
 def _get_qicon(icon_name='syncsketch_ui_100.png'):
@@ -27,16 +32,18 @@ def _get_qicon_from_url(url):
     """
     Get logo path and return a QtGui.QIcon object
     """
-
-    testfile = URLopener()
     tmpname = tempfile.NamedTemporaryFile(delete=False)
     try:
-        thumb = testfile.retrieve(url, tmpname.name)
-    except:
+        icon_request = requests.get(url, stream=True)
+        with open(tmpname.name, 'wb') as file_handle:
+            for chunk in icon_request.iter_content(chunk_size=1024):
+                file_handle.write(chunk)
+        icon_fullname = tmpname.name
+    except Exception as e:
+        logger.error("error downloading from url: {}".format(url))
         icon_fullname = path.get_icon('syncsketch_ui_100.png')
-        pass
-    qicon = _get_qicon(tmpname.name)
-    # lets remove the temp image file after we have the qicon file in memory
+
+    qicon = _get_qicon(icon_fullname)
 
     return qicon
 
