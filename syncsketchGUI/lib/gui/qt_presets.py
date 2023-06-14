@@ -6,13 +6,6 @@ import requests
 from syncsketchGUI.lib import path
 from syncsketchGUI.vendor.Qt import QtGui
 
-# try:
-#     # python3
-#     from urllib.request import URLopener
-# except ImportError:
-#     # python2
-#     from urllib import URLopener
-
 logger = logging.getLogger("syncsketchGUI")
 
 
@@ -44,7 +37,6 @@ def _get_qicon_from_url(url):
         icon_fullname = path.get_icon('syncsketch_ui_100.png')
 
     qicon = _get_qicon(icon_fullname)
-
     return qicon
 
 
