@@ -127,9 +127,9 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
 
     def _grease_pencil_options_ui(self):
         self.ui.ui_downloadGP_pushButton = qt_regulars.Button()
-        self.ui.ui_downloadGP_pushButton.clicked.connect(self.download_greasepencil)
-        self.ui.ui_downloadGP_pushButton = qt_regulars.Button()
         self.ui.ui_downloadGP_pushButton.setText("Download\nGrease Pencil")
+        self.ui.ui_downloadGP_pushButton.clicked.connect(self.download_greasepencil)
+
         self.ui.download_buttons_layout = QtWidgets.QHBoxLayout()
         self.ui.download_buttons_layout.addWidget(self.ui.ui_downloadGP_pushButton)
         self.ui.download_buttons_layout.addWidget(self.ui.ui_downloadVideoAnnotated_pushButton)
