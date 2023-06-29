@@ -77,14 +77,19 @@ def _parse_version_py_content(version_py_content):
 
 def get_latest_setup_py_file_from_repo():
     """Parses latest setup.py's version number"""
-    response = urlopen(InstallerLiterals.setup_py_path,
-                       context=ssl.create_default_context(cafile=certifi.where())).read()
+    try:
+        response = urlopen(InstallerLiterals.setup_py_path,
+                           context=ssl.create_default_context(cafile=certifi.where())).read()
+    except Exception as error:
+        logger.warning("Could not get latest version from GitHub: {}".format(error))
+        return "1.0.0"
+
     if response:
         html = response.decode()
         return _parse_version_py_content(html)
     else:
-        logger.warning("Could not find latest setup.py file from repo")
-        return -1
+        logger.warning("Could not find latest setup.py file on GitHub")
+        return "1.0.0"
 
 
 def get_latest_setup_py_file_from_local():
