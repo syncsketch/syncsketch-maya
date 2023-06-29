@@ -25,11 +25,11 @@ except ImportError:
 from syncsketchGUI.vendor.Qt import QtWidgets
 from syncsketchGUI.vendor.Qt import QtCompat
 
-from syncsketchGUI.installScripts import installGui
 from syncsketchGUI.lib import user as user
 
 logger = logging.getLogger("syncsketchGUI")
 
+UPGRADE_DISMISSED = False
 
 def _get_version_tag_from_latest_release():
     # get version tag from latest release from GitHub
@@ -135,6 +135,7 @@ def handle_upgrade():
     Returns:
         [SyncSketchInstaller] -- [Instance of the Upgrade UI]
     """
+    global UPGRADE_DISMISSED
     # * Check for Updates and load Upgrade UI if Needed
     version_difference = get_version_difference()
     logger.debug("version_difference {}".format(version_difference))
@@ -144,9 +145,9 @@ def handle_upgrade():
             logger.warning("Upgrades disabled as environment Variable SS_DISABLE_UPGRADE is set, skipping")
             return
 
-        logger.info("installGui.InstallOptions.upgrade {}".format(installGui.InstallOptions.upgrade))
         # Make sure we only show this window once per Session
-        if not installGui.InstallOptions.upgrade == 1:
+        if not UPGRADE_DISMISSED:
+            UPGRADE_DISMISSED = True
             temp_install_file = download_latest_installer()
             if not temp_install_file:
                 return
