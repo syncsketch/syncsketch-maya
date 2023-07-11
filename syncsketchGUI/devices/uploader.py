@@ -44,6 +44,8 @@ def _upload(current_user=None, ):
     if not upload_file or not os.path.isfile(upload_file):
         return
 
+    file_ext = upload_file.split('.')[-1]
+
     # Try to upload to the last uploaded address first
     selected_item = database.read_cache('treewidget_selection')
     logger.debug("selected_item: {0}".format(selected_item))
@@ -65,16 +67,19 @@ def _upload(current_user=None, ):
         "last_frame": last_recorded_data['end_frame'],
     }
 
-    if item_type == 'review':
-        # TODO: convert avi to mp4 before upload
-        logger.info('Uploading {} to {} with review_id {}'.format(upload_file, upload_to_value, review_id))
-        uploaded_item = current_user.upload_media_to_review(review_id, upload_file, noConvertFlag=True,
-                                                            itemParentId=False, data=post_data)
-        # logger.info("uploaded_item: {0}".format(pformat(uploaded_item)))
+    logger.warning("file_ext: {}".format(file_ext))
+    no_convert_flag = True
+    if file_ext == 'avi':
+        # TODO: convert avi to mp4 before upload, for faster upload
+        no_convert_flag = False
 
+    if item_type == 'review':
+        logger.info('Uploading {} to {} with review_id {}'.format(upload_file, upload_to_value, review_id))
+        uploaded_item = current_user.upload_media_to_review(review_id, upload_file, noConvertFlag=no_convert_flag,
+                                                            itemParentId=False, data=post_data)
     elif item_type == 'media':
         logger.info("Trying to upload {} to item_id {}, review {}".format(upload_file, item_id, review_id))
-        uploaded_item = current_user.upload_media_to_review(review_id, upload_file, noConvertFlag=True,
+        uploaded_item = current_user.upload_media_to_review(review_id, upload_file, noConvertFlag=no_convert_flag,
                                                             itemParentId=item_id, data=post_data)
         logger.info(pformat(uploaded_item))
     else:
@@ -93,7 +98,6 @@ def _upload(current_user=None, ):
     review_data = current_user.get_review_data_from_id(review_id)
 
     review_url = review_data.get('reviewURL')
-    # uploaded_media_url = '{}'.format(review_url)
     uploaded_media_url = '{}#{}'.format(review_url, uploaded_item['id'])
     logger.debug("review_data: {}".format(review_data))
     logger.info('Upload successful. Uploaded item {} to {}'.format(upload_file, uploaded_media_url))
