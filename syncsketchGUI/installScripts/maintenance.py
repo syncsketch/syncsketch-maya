@@ -25,11 +25,11 @@ except ImportError:
 from syncsketchGUI.vendor.Qt import QtWidgets
 from syncsketchGUI.vendor.Qt import QtCompat
 
-from syncsketchGUI.installScripts import installGui
 from syncsketchGUI.lib import user as user
 
 logger = logging.getLogger("syncsketchGUI")
 
+UPGRADE_DISMISSED = False
 
 def _get_version_tag_from_latest_release():
     # get version tag from latest release from GitHub
@@ -77,14 +77,19 @@ def _parse_version_py_content(version_py_content):
 
 def get_latest_setup_py_file_from_repo():
     """Parses latest setup.py's version number"""
-    response = urlopen(InstallerLiterals.setup_py_path,
-                       context=ssl.create_default_context(cafile=certifi.where())).read()
+    try:
+        response = urlopen(InstallerLiterals.setup_py_path,
+                           context=ssl.create_default_context(cafile=certifi.where())).read()
+    except Exception as error:
+        logger.warning("Could not get latest version from GitHub: {}".format(error))
+        return "1.0.0"
+
     if response:
         html = response.decode()
         return _parse_version_py_content(html)
     else:
-        logger.warning("Could not find latest setup.py file from repo")
-        return -1
+        logger.warning("Could not find latest setup.py file on GitHub")
+        return "1.0.0"
 
 
 def get_latest_setup_py_file_from_local():
@@ -135,6 +140,7 @@ def handle_upgrade():
     Returns:
         [SyncSketchInstaller] -- [Instance of the Upgrade UI]
     """
+    global UPGRADE_DISMISSED
     # * Check for Updates and load Upgrade UI if Needed
     version_difference = get_version_difference()
     logger.debug("version_difference {}".format(version_difference))
@@ -144,9 +150,9 @@ def handle_upgrade():
             logger.warning("Upgrades disabled as environment Variable SS_DISABLE_UPGRADE is set, skipping")
             return
 
-        logger.info("installGui.InstallOptions.upgrade {}".format(installGui.InstallOptions.upgrade))
         # Make sure we only show this window once per Session
-        if not installGui.InstallOptions.upgrade == 1:
+        if not UPGRADE_DISMISSED:
+            UPGRADE_DISMISSED = True
             temp_install_file = download_latest_installer()
             if not temp_install_file:
                 return

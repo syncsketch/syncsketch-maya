@@ -2,6 +2,7 @@ import json
 import logging
 
 from syncsketchGUI.lib import user
+from syncsketchGUI.lib.maya.menu import refresh_menu_state
 from syncsketchGUI.lib.path import get_syncsketch_url
 from syncsketchGUI.vendor.Qt import QtCore
 from syncsketchGUI.vendor.Qt import QtWebEngineWidgets, QtWebChannel
@@ -20,6 +21,7 @@ logout_url = "{}/app/logmeout/".format(get_syncsketch_url())
 def logout_view():
     logger.debug("Logout View with: {}".format(logout_url))
     logoutview.load(QtCore.QUrl(logout_url))
+    refresh_menu_state()
 
 
 class Element(QtCore.QObject):
@@ -82,7 +84,7 @@ class WebEnginePage(QtWebEngineWidgets.QWebEnginePage):
 
 
 class LoginView(QtWebEngineWidgets.QWebEngineView):
-    loggedIn = QtCore.Signal
+    logged_in = QtCore.Signal
     window_name = 'syncsketchGUI_login_window'
     window_label = 'Login to SyncSketch'
 
@@ -101,36 +103,33 @@ class LoginView(QtWebEngineWidgets.QWebEngineView):
         self.setPage(page)
 
         page.qt_object.loaded.connect(self.login)
-        # self.loggedIn.connect(self.update_login) # refactor outside of class
         self.load(QtCore.QUrl("{}/login/?next=/users/getToken/&simple=1".format(get_syncsketch_url())))
 
         self.show()
         self.activateWindow()
 
-        # qt_utils.align_to_center(self, self.parent)
-
         self.setProperty('saveWindowPref', True)
 
-    def update_login(self):
+    def update_login(self, email, token):
+
+        current_user = user.SyncSketchUser()
+        current_user.set_name(email)
+        current_user.set_token(token)
+        current_user.set_api_key(token)
+        current_user.auto_login()
+
+        logger.info("User: {} logged id".format(email))
+
+        refresh_menu_state()
+
         self.close()
-        # self.parent.update_login_ui()
-        self.parent.logged_in.emit()
-        # todo: turn this into a signal
-        # self.parent.asyncPopulateTree(withItems=False)
-        # self.parent.asyncPopulateTree(withItems=True)
-        # self.parent.restore_ui_state()
+
+        if self.parent:
+            self.parent.logged_in.emit()
 
     @QtCore.Slot()
     def login(self):
         token_data = self.page().qt_object.token_data
         if token_data:
             token_dict = json.loads(token_data)
-            current_user = user.SyncSketchUser()
-            current_user.set_name(token_dict["email"])
-            current_user.set_token(token_dict["token"])
-            current_user.set_api_key(token_dict["token"])
-            current_user.auto_login()
-            # self.loggedIn.emit()
-            logger.info("User: {} logged id".format(token_dict["email"]))
-
-            self.update_login()
+            self.update_login(email=token_dict.get('email'), token=token_dict.get('token'))

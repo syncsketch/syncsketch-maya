@@ -315,30 +315,24 @@ def refresh_menu_state():
     current_user = user.SyncSketchUser()
     username = current_user.get_name()
 
-    login_info = 'Currently not logged in'
     if username:
         login_info = 'Logged in as: [{}]'.format(username)
+        if cmds.menuItem('syncsketchLogin', exists=True):
+            cmds.deleteUI('syncsketchLogin', menuItem=True)
+    else:
+        login_info = 'Currently not logged in'
+        if not cmds.menuItem('syncsketchLogin', exists=True):
+            # delete so that it is recreated below the Login ... Item
+            cmds.deleteUI('logged_in_as', menuItem=True)
 
-    # Parse the yaml file and get the menu items as a dictionary
-    yaml_path = path.get_config_yaml(yaml_file)
-    data = database._parse_yaml(yaml_path)
+            menu_item_object = _add_menu_item('Login ...', 'ssLogin', 'SyncSketch')
+            cmds.menuItem(menu_item_object, command='ssLogin', edit=True, sourceType='mel')
 
-    if not data:
-        return
+    if not cmds.menuItem('logged_in_as', exists=True):
+        menu_top_name = _make_object_name("SyncSketch")
+        cmds.menuItem('logged_in_as', parent=menu_top_name)
 
-    if not isinstance(data, dict):
-        return
-
-    # Build menus from the parsed data
-    menu_tops = data.keys()
-
-    for menu_top in menu_tops:
-        menu_top_name = _make_object_name(menu_top)
-        if not cmds.menuItem('logged_in_as', exists=True):
-            cmds.menuItem('logged_in_as',
-                          parent=menu_top_name)
-
-        cmds.menuItem('logged_in_as',
-                      edit=True,
-                      enable=False,
-                      label=login_info)
+    cmds.menuItem('logged_in_as',
+                  edit=True,
+                  enable=False,
+                  label=login_info)

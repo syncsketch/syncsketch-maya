@@ -185,9 +185,13 @@ class SyncSketchUser():
         account_data = {'projects': [], 'reviews': [], 'media': []}
 
         try:
-            tree_data = self.host_data.getTree(withItems=withItems)
+            tree_data = self.host_data.get_tree(withItems=withItems)
         except Exception as error:
-            logger.warning('Fail to obtain connet to the server, error: {}'.format(error))
+            logger.warning('Fail to obtain connect to the server, error: {}'.format(error))
+            return
+
+        if isinstance(tree_data, dict) and tree_data.get('error'):
+            logger.warning('Fail to obtain tree data from the server, error: {}'.format(tree_data.get('error')))
             return
 
         # Return statement without indirection, pls remove

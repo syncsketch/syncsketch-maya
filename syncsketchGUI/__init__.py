@@ -1,4 +1,5 @@
 import logging
+import os
 
 try:
     from importlib import reload
@@ -6,10 +7,11 @@ except ImportError:
     pass
 
 logger = logging.getLogger('syncsketchGUI')
-print("logger: {}".format(logger))
 logger.setLevel(logging.INFO)
 ch = logging.StreamHandler()
-ch.setLevel(logging.INFO)
+
+if os.getenv("SS_DEV") == "dev":
+    logger.setLevel(logging.DEBUG)
 
 # create formatter
 formatter = logging.Formatter('[%(asctime)s - %(filename)s:%(lineno)s - %(levelname)s - %(message)s]',
