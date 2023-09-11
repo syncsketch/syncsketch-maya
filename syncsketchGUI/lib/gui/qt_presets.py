@@ -1,13 +1,18 @@
+import logging
+import tempfile
+
+import requests
+
 from syncsketchGUI.lib import path
 from syncsketchGUI.vendor.Qt import QtGui
-import urllib
-import tempfile
+
+logger = logging.getLogger("syncsketchGUI")
 
 
 def _get_qicon(icon_name='syncsketch_ui_100.png'):
-    '''
+    """
     Get logo path and return a QtGui.QIcon object
-    '''
+    """
     icon_fullname = path.get_icon(icon_name)
     if not icon_fullname:
         return QtGui.QIcon()
@@ -15,28 +20,30 @@ def _get_qicon(icon_name='syncsketch_ui_100.png'):
     qicon = QtGui.QIcon(icon_fullname)
     return qicon
 
-def _get_qicon_from_url(url):
-    '''
-    Get logo path and return a QtGui.QIcon object
-    '''
 
-    testfile = urllib.URLopener()
+def _get_qicon_from_url(url):
+    """
+    Get logo path and return a QtGui.QIcon object
+    """
     tmpname = tempfile.NamedTemporaryFile(delete=False)
     try:
-        thumb = testfile.retrieve(url, tmpname.name)
-    except:
+        icon_request = requests.get(url, stream=True)
+        with open(tmpname.name, 'wb') as file_handle:
+            for chunk in icon_request.iter_content(chunk_size=1024):
+                file_handle.write(chunk)
+        icon_fullname = tmpname.name
+    except Exception as e:
+        logger.error("error downloading from url: {}".format(url))
         icon_fullname = path.get_icon('syncsketch_ui_100.png')
-        pass
-    qicon = _get_qicon(tmpname.name)
-    # lets remove the temp image file after we have the qicon file in memory
 
+    qicon = _get_qicon(icon_fullname)
     return qicon
 
 
 # icons
 logo_icon = _get_qicon('syncsketch_ui_100.png')
 record_icon = _get_qicon('icon_record_100.png')
-play_icon   = _get_qicon('icon_play_100.png')
+play_icon = _get_qicon('icon_play_100.png')
 upload_icon = _get_qicon('icon_upload_100.png')
 preset_icon = _get_qicon('icon_manage_presets_100.png')
 target_icon = _get_qicon('icon_target_100.png')
@@ -70,13 +77,11 @@ play_color = 'rgb(86, 196, 156);'
 upload_color = 'rgb(255, 198, 82)'
 download_color = 'rgb(198, 198, 198);'
 
-
 highlight_color = QtGui.QColor(255, 198, 82)
 success_color = 'rgb(86, 196, 156);'
 warning_color = 'rgb(200, 200, 150);'
 error_color = 'rgb(230, 100, 100);'
 disabled_color = 'rgb(150, 150, 150);'
-
 
 button_color = 'rgba(43.0, 53.0   , 59.0  , 1.0);'
 button_color_hover = 'rgba(47.0, 58.0   , 65.0  , 1.0);'

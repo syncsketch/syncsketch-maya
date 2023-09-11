@@ -5,14 +5,15 @@
 # @Version  : 1.0.0
 # ======================================================================
 import contextlib
+import glob
+import logging
 import os
 import sys
 # ======================================================================
 # Module Utilities
 import tempfile
-import zipfile
 import xml.etree.ElementTree as ET
-import glob
+import zipfile
 
 from maya import cmds
 from maya import mel
@@ -21,20 +22,22 @@ from syncsketchGUI.lib import database
 from syncsketchGUI.lib import path
 from syncsketchGUI.vendor.capture import capture
 
-import logging
 logger = logging.getLogger("syncsketchGUI")
 
-
-
 GREASE_PENCIL_XML = 'greasePencil.xml'
+
 
 # ======================================================================
 # Module Functions
 
-def get_available_compressions(format = None):
-    '''
+def get_current_maya_version():
+    return int(str(cmds.about(apiVersion=True))[:4])
+
+
+def get_available_compressions(format=None):
+    """
     Get currently available compression formats in maya
-    '''
+    """
     if not format:
         if sys.platform == 'darwin':
             format = 'qt'
@@ -48,11 +51,14 @@ def get_available_compressions(format = None):
     mel_command = 'playblast -format "{}" -query -compression'.format(format)
     return mel.eval(mel_command)
 
+
 def get_available_formats():
     return cmds.playblast(query=True, format=True)
 
+
 def get_available_cameras():
     return cmds.listCameras()
+
 
 def confirm_overwrite_dialogue(message):
     result = cmds.confirmDialog(title='Confirm Overwrite',
@@ -93,9 +99,9 @@ def get_current_camera(panel=None):
                 return cam
             # camera shape is a shape type
             elif cmds.objectType(cam, isAType="shape"):
-                parent = cmds.listRelatives(cam ,
-                                          parent=True,
-                                          fullPath=True)
+                parent = cmds.listRelatives(cam,
+                                            parent=True,
+                                            fullPath=True)
                 if parent:
                     return parent[0]
 
@@ -103,57 +109,58 @@ def get_current_camera(panel=None):
     cam_shapes = cmds.ls(sl=1, type="camera")
     if cam_shapes:
         return cmds.listRelatives(cam_shapes,
-                                parent=True,
-                                fullPath=True)[0]
+                                  parent=True,
+                                  fullPath=True)[0]
 
     # Check if a transform of a camShape is selected
-    #(return cam transform if any)
+    # (return cam transform if any)
     transforms = cmds.ls(sl=1, type="transform")
     if transforms:
         cam_shapes = cmds.listRelatives(transforms,
-                                      shapes=True,
-                                      type="camera")
+                                        shapes=True,
+                                        type="camera")
         if cam_shapes:
             return cmds.listRelatives(cam_shapes,
-                                    parent=True,
-                                    fullPath=True)[0]
+                                      parent=True,
+                                      fullPath=True)[0]
+
 
 def get_all_modelPanels():
     return cmds.getPanel(type="modelPanel")
+
 
 def get_active_editor():
     """
     From BigRoy's Capture GUI
     Return the active editor panel to playblast with
     """
-    cmds.currentTime(cmds.currentTime(q=True))     # fixes `cmds.playblast` undo bug
+    cmds.currentTime(cmds.currentTime(q=True))  # fixes `cmds.playblast` undo bug
     panel = cmds.playblast(activeEditor=True)
-    #logger.info("panel %s" %panel.split('|')[-1])
+    # logger.info("panel %s" %panel.split('|')[-1])
     return panel.split('|')[-1]
 
 
-
-def get_InOutFrames(type = 'Time Slider'):
-    '''
+def get_in_out_frames(type='Time Slider'):
+    """
     Get Frame Range from maya
-    '''
+    """
     in_out = []
     if type == r"Highlighted":
         slider = mel.eval('$tmpVal=$gPlayBackSlider')
-        in_out = cmds.timeControl(slider, query=True, rangeArray = True)
-        in_out[1] = in_out[1]-1
+        in_out = cmds.timeControl(slider, query=True, rangeArray=True)
+        in_out[1] = in_out[1] - 1
 
     elif type == r"Start / End":
-        in_out.append(cmds.playbackOptions(q=True, minTime = True))
-        in_out.append(cmds.playbackOptions(q=True, maxTime = True))
+        in_out.append(cmds.playbackOptions(q=True, minTime=True))
+        in_out.append(cmds.playbackOptions(q=True, maxTime=True))
 
     elif type == r"Time Slider":
-        in_out.append(cmds.playbackOptions(q=True, animationStartTime = True))
-        in_out.append(cmds.playbackOptions(q=True, animationEndTime = True))
+        in_out.append(cmds.playbackOptions(q=True, animationStartTime=True))
+        in_out.append(cmds.playbackOptions(q=True, animationEndTime=True))
 
     elif type == r"Current Frame":
         cf = cmds.currentTime(query=True)
-        in_out = [cf,cf]
+        in_out = [cf, cf]
     else:
         start_frame = database.read_cache('frame_start')
         end_frame = database.read_cache('frame_end')
@@ -164,14 +171,65 @@ def get_InOutFrames(type = 'Time Slider'):
         pass
     return in_out
 
-def add_frame_offset_to_grease_pencil_zip(zipname, offset=0):
 
+def offset_greasepencil(original_zip_path, offset=0):
+    """
+    Its not possible to modify files in a zip file directly. Therefor we have to create a new zip file and copy
+    all images and add the modified xml.
+    """
+    if not offset:
+        return original_zip_path
+
+    offseted_zip_path = _create_tmp_zip_path()
+    offseted_zip_file = zipfile.ZipFile(offseted_zip_path, mode='w', compression=zipfile.ZIP_DEFLATED)
+    offseted_zip_file.close()
+
+    _copy_zip_file_images(original_zip_path, offseted_zip_path)
+    _offset_zip_greacepencil_xml(original_zip_path, offseted_zip_path, offset)
+
+    os.remove(original_zip_path)
+    os.rename(offseted_zip_path, original_zip_path)
+
+
+def _copy_zip_file_images(src_zip_path, dst_zip_path):
+    with zipfile.ZipFile(src_zip_path, 'r') as src_zip_file:
+        with zipfile.ZipFile(dst_zip_path, 'a') as dst_zip_file:
+            dst_zip_file.comment = src_zip_file.comment
+            for content in src_zip_file.infolist():
+                if content.filename != GREASE_PENCIL_XML:
+                    dst_zip_file.writestr(content, src_zip_file.read(content.filename))
+
+
+def _offset_zip_greacepencil_xml(src_zip_path, dst_zip_path, offset):
+    with zipfile.ZipFile(src_zip_path, 'r') as src_zip_file:
+        with zipfile.ZipFile(dst_zip_path, 'a', compression=zipfile.ZIP_DEFLATED) as dst_zip_file:
+            src_xml_file = src_zip_file.open(GREASE_PENCIL_XML)
+            tree = ET.parse(src_xml_file)
+            root = tree.getroot()
+            for neighbor in root.iter('frame'):
+                current_frame = int(neighbor.attrib.get('time'))
+                neighbor.set('time', str(current_frame + offset))
+
+            tmp_file = tempfile.TemporaryFile()
+            tree.write(tmp_file)
+            tmp_file.seek(0)
+            dst_zip_file.writestr(GREASE_PENCIL_XML, tmp_file.read())
+            tmp_file.close()
+
+
+def _create_tmp_zip_path():
+    tempdir = tempfile.mkdtemp()
+    zip_path = os.path.join(tempdir, "tmp.zip")
+    return zip_path
+
+
+def add_frame_offset_to_grease_pencil_zip(zipname, offset=0):
     if not offset:
         return zipname
 
     with zipfile.ZipFile(zipname, mode='r', compression=zipfile.ZIP_DEFLATED) as zf:
         zipFileXML = zf.open(GREASE_PENCIL_XML)
-        try: 
+        try:
             xml_data_with_offset = _create_xml_data_with_offset(zipFileXML, offset)
         finally:
             zipFileXML.close()
@@ -181,11 +239,12 @@ def add_frame_offset_to_grease_pencil_zip(zipname, offset=0):
 
     return path.sanitize(zipname)
 
-def _add_data_as_greace_pencil_xml_to_zip(zipname, data):
 
+def _add_data_as_greace_pencil_xml_to_zip(zipname, data):
     # now add filename with its new data
     with zipfile.ZipFile(zipname, mode='a', compression=zipfile.ZIP_DEFLATED) as zf:
         zf.writestr(GREASE_PENCIL_XML, data)
+
 
 def _remove_greace_pencil_xml_from_zip(zipname):
     # generate a temp file
@@ -205,13 +264,12 @@ def _remove_greace_pencil_xml_from_zip(zipname):
     os.rename(tmpname, zipname)
 
 
-def _create_xml_data_with_offset(xmlFile, offsetFrames):
-
-    tree = ET.parse(xmlFile)
+def _create_xml_data_with_offset(xml_file, offset_frames):
+    tree = ET.parse(xml_file)
     root = tree.getroot()
     for neighbor in root.iter('frame'):
         current_frame = int(neighbor.attrib.get('time'))
-        neighbor.set('time', str(current_frame + offsetFrames))
+        neighbor.set('time', str(current_frame + offset_frames))
 
     # Generate temp file name for modified xml file
     tmpname = tempfile.TemporaryFile()
@@ -223,7 +281,6 @@ def _create_xml_data_with_offset(xmlFile, offsetFrames):
         tmpname.close()
 
     return data
-
 
 
 def apply_greasepencil(filename, clear_existing_frames=False):
@@ -238,30 +295,41 @@ def apply_greasepencil(filename, clear_existing_frames=False):
         ctx = pm.greasePencilCtx(ctxName)
         pm.setToolTo(ctx)
     else:
-        nodeNames = pm.greasePencilCtx(ctxName,sequenceNodeName=True, query=True)
+        nodeNames = pm.greasePencilCtx(ctxName, sequenceNodeName=True, query=True)
         if nodeNames and clear_existing_frames:
             pm.delete(nodeNames)
             logger.info('Deleted Existing Greasepencil frames ...')
     active_panel = get_active_editor()
     cmds.modelEditor(active_panel, edit=True, greasePencils=True)
 
-    pm.greasePencilCtx(ctxName, edit = True, importArchive =  filename )
+    pm.greasePencilCtx(ctxName, edit=True, importArchive=filename)
+
+
+def import_bluepencil():
+    cmds.loadPlugin("bluePencil", quiet=True)
+    cmds.bluePencilFrame(importFrames=True)
 
 
 def apply_imageplane(filename, camera=None):
     import maya.cmds as cmds
-    #Get Camera Shapes
+    # Get Camera Shapes
     if not camera:
         ssCamera = cmds.camera()[1]
-
     else:
         # todo: there might be another camera in this hierarchy
         ssCamera = filter((lambda x: x if "Shape" in x else None), cmds.ls(camera, dag=True))[0]
 
-    imagePlane = cmds.imagePlane(camera=ssCamera)
-    cmds.setAttr("{}.type".format(imagePlane[1], 2), 2)
-    cmds.setAttr("{}.imageName".format(imagePlane[1], 2), filename, type='string')
+    image_plane_shape = cmds.imagePlane(camera=ssCamera)[1]
 
+    cmds.setAttr("{}.type".format(image_plane_shape), 2)  # set type to movie
+    cmds.setAttr("{}.imageName".format(image_plane_shape), filename, type='string')
+    _set_image_plane_frame_expression(image_plane_shape)
+
+
+def _set_image_plane_frame_expression(image_plane_shape):
+    cmds.setAttr("{}.useFrameExtension".format(image_plane_shape), True)
+    frame_expression = "{}.frameExtension=frame".format(image_plane_shape)
+    cmds.expression(s=frame_expression)
 
 
 def add_extension(file, rec_args):
@@ -283,29 +351,29 @@ def add_extension(file, rec_args):
     # Extension outputed by maya when following keys are used as expressions
     # Tested with Maya2020 on Win10
     image_extensions = {
-        "gif":      "gif",
-        "si" :      "pic", 
-        "rla":      "rla",
-        "tif":      "tif",
-        "tifu":     "tif",
-        "sgi":      "sgi",
-        "als":      "als",
-        "maya":     "iff",
-        "jpg":      "jpg",
-        "eps":      "eps",
-        "cin":      "cin",
-        "yuv":      "yuv",
-        "tga":      "tga",
-        "bmp":      "bmp",
-        "png":      "png",  
-        "psd":      "psd",
-        "dds":      "dds",
+        "gif": "gif",
+        "si": "pic",
+        "rla": "rla",
+        "tif": "tif",
+        "tifu": "tif",
+        "sgi": "sgi",
+        "als": "als",
+        "maya": "iff",
+        "jpg": "jpg",
+        "eps": "eps",
+        "cin": "cin",
+        "yuv": "yuv",
+        "tga": "tga",
+        "bmp": "bmp",
+        "png": "png",
+        "psd": "psd",
+        "dds": "dds",
         "psdLayered": "psd",
     }
 
     if file_format == "avi":
         extension = "avi"
-    elif file_format == "qt":
+    elif file_format in ["qt", 'avfoundation']:
         extension = "mov"
     elif file_format == "image":
         try:
@@ -313,12 +381,11 @@ def add_extension(file, rec_args):
         except KeyError as e:
             logger.error("No extension known for image sequence with compression {}".format(compression))
             raise e
-        extension = "####.{}".format(image_extension) #TODO: assumption frame padding 4 might fail
+        extension = "####.{}".format(image_extension)  # TODO: assumption frame padding 4 might fail
 
     else:
         logger.error("No extension known for format {}".format(file_format))
         raise KeyError
-
 
     if file.endswith(extension):
         logger.info("File {} already ends with {}. No Extension added. ".format(file, extension))
@@ -327,6 +394,7 @@ def add_extension(file, rec_args):
     file_with_ext = '{}.{}'.format(file, extension)
     logger.info("Added extension {} to file {} -> {} ".format(extension, file, file_with_ext))
     return path.sanitize(file_with_ext)
+
 
 def is_file_on_disk(file_path):
     """
@@ -340,8 +408,8 @@ def is_file_on_disk(file_path):
 
     # TODO: Assumes padding in format ####, use regex to match # before file extension
     # Replacing #### then only a single # is safer in case # is used in file path.
-    file_path_glob = file_path.replace("####", "[0-9][0-9][0-9][0-9]") 
-    
+    file_path_glob = file_path.replace("####", "[0-9][0-9][0-9][0-9]")
+
     files_on_disk = glob.glob(file_path_glob)
 
     is_file = True if files_on_disk else False
@@ -350,11 +418,11 @@ def is_file_on_disk(file_path):
     return is_file
 
 
-def playblast_with_settings( viewport_preset = None, viewport_preset_yaml = None, **recArgs):
-    '''
+def playblast_with_settings(viewport_preset=None, viewport_preset_yaml=None, **recArgs):
+    """
     Playblast with the user-defined settings
     recArgs are the arguments needed for the capture command
-    '''
+    """
 
     # get default viewport preset config
     if viewport_preset and viewport_preset_yaml:
@@ -362,7 +430,6 @@ def playblast_with_settings( viewport_preset = None, viewport_preset_yaml = None
         viewportArgs = database.read_cache(viewport_preset, cache_file)
     else:
         viewportArgs = {}
-
 
     # process filenames
     filepath = recArgs["filename"]
@@ -399,14 +466,14 @@ def playblast_with_settings( viewport_preset = None, viewport_preset_yaml = None
         logger.info("playblast_with_settings failed")
 
 
-def playblast(filepath = None, width = 1280, height = 720, start_frame = 0, end_frame = 0, view_afterward = False, force_overwrite=False):
-    '''
+def playblast(filepath=None, width=1280, height=720, start_frame=0, end_frame=0, view_afterward=False,
+              force_overwrite=False):
+    """
     Playblast with the pre-defined settings based on the user's OS
-    '''
+    """
     logger.info("Playblast this:")
     if not filepath:
         filepath = path.get_default_playblast_folder()
-
 
     if filepath:
         filepath = path.sanitize(filepath)
@@ -417,14 +484,14 @@ def playblast(filepath = None, width = 1280, height = 720, start_frame = 0, end_
             if not confirm_overwrite_dialogue(message) == 'yes':
                 return
 
-
-    recArgs = {
+    rec_args = {
         "width": width,
         "height": height,
         "start_frame": start_frame,
         "end_frame": end_frame
     }
-    logger.info("recargsplayblast (): {}".format(recArgs))
+    logger.info("rec_args playblast (): {}".format(rec_args))
+
     # record with OS specific Fallback Settings
     os_settings = {
         "darwin": [
@@ -446,61 +513,56 @@ def playblast(filepath = None, width = 1280, height = 720, start_frame = 0, end_
                 "format": 'movie',
                 "compression": '',
             }
-        ],
-        "linux2": [
-            {
-                "win32": 'qt',
-                "compression": 'H.264',
-            },
-            {
-                "format": 'movie',
-                "compression": '',
-            }
         ]
     }
 
-    for platform, settingsList in os_settings.iteritems():
+    for platform, settingsList in os_settings.items():
         if sys.platform == platform:
             for setting in settingsList:
-                recArgs["compression"]  = setting["compression"]
+                rec_args["compression"] = setting["compression"]
                 try:
-                    logger.info("recArgs playblast(): {}".format(**recArgs))
-                    playblast_file = _playblast_with_settings(**recArgs)
+                    logger.info("recArgs playblast(): {}".format(rec_args))
+                    playblast_file = playblast_with_settings(**rec_args)
                     return playblast_file
 
                 except Exception as err:
-                    logger.info(u'%s' %(err))
+                    logger.info(u'%s' % (err))
+
 
 # save active panel as a preset
-def save_viewport_preset(cache_file, presetName, panel=None):
+def save_viewport_preset(cache_file, preset_name, panel=None):
     if not panel:
         panel = get_active_editor()
-    data = {}
-    data[presetName] = capture.parse_view(panel)
+    data = {preset_name: capture.parse_view(panel)}
     database.dump_cache(data, cache_file)
 
+
 # save active panel as a preset
-def delete_viewport_preset(cache_file, presetName):
-    database.delete_key_from_cache(presetName, cache_file)
+def delete_viewport_preset(cache_file, preset_name):
+    database.delete_key_from_cache(preset_name, cache_file)
+
 
 # save active panel as a preset
 def rename_viewport_preset(cache_file, old_preset_name, new_preset_name):
     return database.rename_key_in_cache(old_preset_name, new_preset_name, cache_file)
 
-def create_unique_name(existing_keys=[], new_key=None, suffix = None):
+
+def create_unique_name(existing_keys=None, new_key=None, suffix=None):
+    if existing_keys is None:
+        existing_keys = []
+
     if not new_key:
-        strList = filter(None, ['New',suffix])
-        new_key = ' '.join(strList)
+        str_list = filter(None, ['New', suffix])
+        new_key = ' '.join(str_list)
     if existing_keys and len(existing_keys):
         while new_key in existing_keys:
-            logger.info("key exists")
-            strList = filter(None, ['Copy of',new_key])
-            new_key = ' '.join(strList)
+            str_list = filter(None, ['Copy of', new_key])
+            new_key = ' '.join(str_list)
     return new_key
+
 
 # save active panel as a preset
 def new_viewport_preset(cache_file, preset_name=None, source_preset=None, panel=None):
-
     preset_data = database._parse_yaml(cache_file)
 
     if not preset_data:
@@ -518,7 +580,7 @@ def new_viewport_preset(cache_file, preset_name=None, source_preset=None, panel=
 
     if not preset_name or preset_name in existing_keys:
         logger.info('key exists')
-        preset_name = create_unique_name(existing_keys, new_key = preset_name, suffix = 'Preset')
+        preset_name = create_unique_name(existing_keys, new_key=preset_name, suffix='Preset')
         logger.info(preset_name)
 
     if not options:
@@ -532,8 +594,11 @@ def new_viewport_preset(cache_file, preset_name=None, source_preset=None, panel=
     database.dump_cache(preset_data, cache_file)
     return preset_name
 
+
 # apply preset to panel
-def apply_viewport_preset(cache_file, presetName, panels=[]):
+def apply_viewport_preset(cache_file, presetName, panels=None):
+    if panels is None:
+        panels = []
     options = database.read_cache(presetName, cache_file)
     if not options:
         logger.info("No preset found")
@@ -542,11 +607,11 @@ def apply_viewport_preset(cache_file, presetName, panels=[]):
         panels = [get_active_editor()]
     for panel in panels:
         capture.apply_view(panel, **options)
-        logger.info("Applies preset %s to modelpanel %s"%(presetName,panel))
+        logger.info("Applies preset %s to modelpanel %s" % (presetName, panel))
 
 
 def screenshot_current_editor(cache_file, presetName, panel=None, camera=None):
-    # Nice little screentshot function from BigRoy
+    # Nice little screenshot function from BigRoy
     if not panel:
         panel = get_active_editor()
 
@@ -555,7 +620,7 @@ def screenshot_current_editor(cache_file, presetName, panel=None, camera=None):
         logger.info("No preset found")
         return
     frame = cmds.currentTime(q=1)
-    # When playblasting outside of an undo queue it seems that undoing
+    # When playblasting outside an undo queue it seems that undoing
     # actually triggers a reset to frame 0. As such we sneak in the current
     # time into the undo queue to enforce correct undoing.
     cmds.currentTime(frame, update=True)
@@ -593,6 +658,7 @@ def no_undo():
     finally:
         cmds.undoInfo(stateWithoutFlush=True)
 
+
 def get_maya_main_window():
     """Return Maya's main window"""
     for obj in QtWidgets.qApp.topLevelWidgets():
@@ -600,32 +666,40 @@ def get_maya_main_window():
             return obj
 
 
-def getShapeNodes(obj):
+def get_shape_nodes(obj):
     howManyShapes = 0
     getShape = maya.cmds.listRelatives(obj, shapes=True)
-    if(getShape == None):
+    if (getShape == None):
         logger.info('ERROR:: getShapeNodes : No Shape Nodes Connected to ' + obj + ' /n')
     else:
         howManyShapes = len(getShape[0])
-    return(getShape, howManyShapes)
+    return (getShape, howManyShapes)
+
 
 def get_render_resolution():
-    '''
-    Returns resolution (widht, height) in current render settings
-    '''
+    """
+    Returns resolution (width, height) in current render settings
+    """
     width = cmds.getAttr("defaultResolution.width")
     height = cmds.getAttr("defaultResolution.height")
     return (width, height)
 
+
 def get_playblast_format():
-    '''
+    """
     Returns the currently selected format in mayas playblast settings.
-    '''
+    """
     return cmds.optionVar(query="playblastFormat")
 
+
 def get_playblast_encoding():
-    '''
+    """
     Returns the encoding setting used for the last playblast.
     Unfortunately it doesnt return the currently selected setting in the playblast menu.
-    '''
+    """
     return cmds.optionVar(query="playblastCompression")
+
+
+def get_active_sound_node():
+    time_control = mel.eval("$gPlayBackSlider = $gPlayBackSlider")
+    return cmds.timeControl(time_control, q=True, sound=True) or None

@@ -1,7 +1,8 @@
-<!DOCTYPE RCC><RCC version="1.0">
-	<qresource>
-		<file alias="icon_manage_presets.png">manage_presets_100.png</file>
-		<file>icon_manage_presets_150.png</file>
-		<file>icon_manage_presets_200.png</file>
-	</qresource>
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource>
+        <file alias="icon_manage_presets.png">manage_presets_100.png</file>
+        <file>icon_manage_presets_150.png</file>
+        <file>icon_manage_presets_200.png</file>
+    </qresource>
 </RCC>

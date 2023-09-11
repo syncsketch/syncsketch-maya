@@ -2,25 +2,26 @@
 import sys
 import logging
 import yaml
-import codecs
 
-from syncsketchGUI.lib.gui.qt_widgets import SyncSketch_Window
-from syncsketchGUI.vendor.Qt import QtWidgets, QtCore
-from syncsketchGUI.lib.gui.qt_widgets import RegularComboBox, RegularButton, RegularToolButton, RegularGridLayout, RegularQSpinBox, InputDialog, WarningDialog
-from syncsketchGUI.lib.gui.icons import *
-from syncsketchGUI.lib.gui.qt_utils import *
-from syncsketchGUI.lib.gui import qt_utils
 from functools import partial
-from syncsketchGUI.lib.connection import is_connected, open_url
-from syncsketchGUI.lib import database, user
-from syncsketchGUI.lib.maya import scene as maya_scene
-from syncsketchGUI.lib.gui.syncsketchWidgets.mainWidget import DEFAULT_PRESET, VIEWPORT_YAML, PRESET_YAML
 
+from syncsketchGUI.vendor.Qt import QtWidgets, QtCore
+
+from syncsketchGUI.lib import database, user, path
+from syncsketchGUI.lib.connection import is_connected
+
+from syncsketchGUI.lib.maya import scene as maya_scene
+from syncsketchGUI.settings import PRESET_YAML
+
+from . import qt_windows
+from . import qt_regulars
+from . import qt_dialogs
+from . import qt_presets
 
 logger = logging.getLogger("syncsketchGUI")
 
 
-class FormatPresetWindow(SyncSketch_Window):
+class FormatPresetWindow(qt_windows.SyncSketchWindow):
     """
     Video Preset Window Class
     """
@@ -36,51 +37,48 @@ class FormatPresetWindow(SyncSketch_Window):
     def decorate_ui(self):
         self.ui.ui_formatpreset_layout = QtWidgets.QHBoxLayout()
         self.ui.ui_formatpreset_layout.setSpacing(1)
-        self.ui.ui_formatPreset_comboBox = RegularComboBox()
+        self.ui.ui_formatPreset_comboBox = qt_regulars.ComboBox()
         self.ui.ui_formatpreset_layout.addWidget(self.ui.ui_formatPreset_comboBox)
-        
 
+        self.ui.ps_new_preset_pushButton = qt_regulars.ToolButton()
+        self.ui.ps_new_preset_pushButton.setIcon(qt_presets.add_icon)
 
-        self.ui.ps_new_preset_pushButton = RegularToolButton()
-        self.ui.ps_new_preset_pushButton.setIcon(add_icon)
+        self.ui.ps_rename_preset_pushButton = qt_regulars.ToolButton()
+        self.ui.ps_rename_preset_pushButton.setIcon(qt_presets.edit_icon)
 
-        self.ui.ps_rename_preset_pushButton = RegularToolButton()
-        self.ui.ps_rename_preset_pushButton.setIcon(edit_icon)
-
-        self.ui.ps_delete_preset_pushButton = RegularToolButton()
-        self.ui.ps_delete_preset_pushButton.setIcon(delete_icon)
+        self.ui.ps_delete_preset_pushButton = qt_regulars.ToolButton()
+        self.ui.ps_delete_preset_pushButton.setIcon(qt_presets.delete_icon)
 
         self.ui.ui_formatpreset_layout.addWidget(self.ui.ps_rename_preset_pushButton)
         self.ui.ui_formatpreset_layout.addWidget(self.ui.ps_new_preset_pushButton)
         self.ui.ui_formatpreset_layout.addWidget(self.ui.ps_delete_preset_pushButton)
 
-
         # 720p HD
-        self.ui.ui_format_layout = RegularGridLayout(self, label = 'Format' )
-        self.ui.format_comboBox = RegularComboBox()
+        self.ui.ui_format_layout = qt_regulars.GridLayout(self, label='Format')
+        self.ui.format_comboBox = qt_regulars.ComboBox()
         self.ui.ui_format_layout.addWidget(self.ui.format_comboBox, 0, 1)
 
         # avi, qt
-        self.ui.ui_encoding_layout = RegularGridLayout(self, label = 'Encoding' )
-        self.ui.encoding_comboBox = RegularComboBox()
+        self.ui.ui_encoding_layout = qt_regulars.GridLayout(self, label='Encoding')
+        self.ui.encoding_comboBox = qt_regulars.ComboBox()
         self.ui.ui_encoding_layout.addWidget(self.ui.encoding_comboBox, 0, 1)
 
         # H.264
         # upload_layout - range
-        self.ui.ui_resolution_layout = RegularGridLayout(self, label = 'Resolution')
-        self.ui.ui_resolution_comboBox = RegularComboBox(self)
-        self.ui.ui_resolution_comboBox.addItems(["Custom", "From Render Settings","From Viewport"])
-        self.ui.width_spinBox  = RegularQSpinBox()
-        self.ui.ui_resolutionX_label  = QtWidgets.QLabel()
+        self.ui.ui_resolution_layout = qt_regulars.GridLayout(self, label='Resolution')
+        self.ui.ui_resolution_comboBox = qt_regulars.ComboBox(self)
+        self.ui.ui_resolution_comboBox.addItems(["Custom", "From Render Settings", "From Viewport"])
+        self.ui.width_spinBox = qt_regulars.QSpinBox()
+        self.ui.ui_resolutionX_label = QtWidgets.QLabel()
         self.ui.ui_resolutionX_label.setText("x")
         self.ui.ui_resolutionX_label.setFixedWidth(8)
-        self.ui.height_spinBox  = RegularQSpinBox()
-        self.ui.ui_resolution_layout.addWidget(self.ui.ui_resolution_comboBox,  0, 1)
-        self.ui.ui_resolution_layout.addWidget(self.ui.width_spinBox,  0, 2)
-        self.ui.ui_resolution_layout.setColumnStretch(2,0)
-        self.ui.ui_resolution_layout.addWidget(self.ui.ui_resolutionX_label,  0, 3)
-        self.ui.ui_resolution_layout.addWidget(self.ui.height_spinBox,  0, 4)
-        self.ui.ui_resolution_layout.setColumnStretch(3,0)
+        self.ui.height_spinBox = qt_regulars.QSpinBox()
+        self.ui.ui_resolution_layout.addWidget(self.ui.ui_resolution_comboBox, 0, 1)
+        self.ui.ui_resolution_layout.addWidget(self.ui.width_spinBox, 0, 2)
+        self.ui.ui_resolution_layout.setColumnStretch(2, 0)
+        self.ui.ui_resolution_layout.addWidget(self.ui.ui_resolutionX_label, 0, 3)
+        self.ui.ui_resolution_layout.addWidget(self.ui.height_spinBox, 0, 4)
+        self.ui.ui_resolution_layout.setColumnStretch(3, 0)
         self.ui.width_spinBox.setFixedWidth(45)
         self.ui.height_spinBox.setFixedWidth(45)
         self.ui.width_spinBox.setMinimum(4)
@@ -89,43 +87,38 @@ class FormatPresetWindow(SyncSketch_Window):
         self.ui.height_spinBox.setMaximum(32000)
 
         self.ui.scaleButton_layout = QtWidgets.QHBoxLayout()
-        for key,factor in {"¼":0.25, "½":0.5, "¾":0.75, "1":1.0, "2":2.0}.iteritems():
-            logger.info("key: %s\nfactor: %s"%(key, factor))
-            btn = RegularToolButton()
+        for key, factor in {"¼": 0.25, "½": 0.5, "¾": 0.75, "1": 1.0, "2": 2.0}.items():
+            btn = qt_regulars.ToolButton()
             btn.setText(key)
             self.ui.scaleButton_layout.addWidget(btn)
             btn.setFixedWidth(20)
             btn.clicked.connect(partial(self.multiply_res, factor))
 
-
-        self.ui.ui_resolution_layout.addLayout(self.ui.scaleButton_layout,  0, 5)
+        self.ui.ui_resolution_layout.addLayout(self.ui.scaleButton_layout, 0, 5)
 
         self.ui.width_spinBox.setAlignment(QtCore.Qt.AlignRight)
         self.ui.height_spinBox.setAlignment(QtCore.Qt.AlignRight)
 
-
         self.ui.buttons_horizontalLayout = QtWidgets.QHBoxLayout()
-        self.ui.cancel_pushButton = RegularButton()
+        self.ui.cancel_pushButton = qt_regulars.Button()
         self.ui.cancel_pushButton.setText("Cancel")
-        self.ui.save_pushButton = RegularButton()
+        self.ui.save_pushButton = qt_regulars.Button()
         self.ui.save_pushButton.setText("Save")
         self.ui.buttons_horizontalLayout.setSpacing(1)
         self.ui.buttons_horizontalLayout.addWidget(self.ui.cancel_pushButton)
         self.ui.buttons_horizontalLayout.addWidget(self.ui.save_pushButton)
 
-        self.ui.main_layout.addLayout(self.ui.ui_formatpreset_layout)
-        self.ui.main_layout.addLayout(self.ui.ui_format_layout)
-        self.ui.main_layout.addLayout(self.ui.ui_encoding_layout)
-        self.ui.main_layout.addLayout(self.ui.ui_resolution_layout)
-        self.ui.main_layout.addLayout(self.ui.buttons_horizontalLayout)
-        self.ui.master_layout.addLayout(self.ui.main_layout)
+        self.lay_main.addLayout(self.ui.ui_formatpreset_layout)
+        self.lay_main.addLayout(self.ui.ui_format_layout)
+        self.lay_main.addLayout(self.ui.ui_encoding_layout)
+        self.lay_main.addLayout(self.ui.ui_resolution_layout)
+        self.lay_main.addLayout(self.ui.buttons_horizontalLayout)
 
     def multiply_res(self, factor):
         height = self.ui.height_spinBox.value()
         width = self.ui.width_spinBox.value()
-        self.ui.height_spinBox.setValue(int(height*factor))
-        self.ui.width_spinBox.setValue(int(width*factor))
-
+        self.ui.height_spinBox.setValue(int(height * factor))
+        self.ui.width_spinBox.setValue(int(width * factor))
 
     def build_connections(self):
         self.ui.save_pushButton.clicked.connect(self.save)
@@ -146,11 +139,11 @@ class FormatPresetWindow(SyncSketch_Window):
         formats = maya_scene.get_available_formats()
         encodings = maya_scene.get_available_compressions()
 
-
         # Populate the preset names
         self.ui.ui_formatPreset_comboBox.clear()
 
-        self.ui.ui_formatPreset_comboBox.populate_combo_list(PRESET_YAML, defaultValue= DEFAULT_PRESET )
+        self.ui.ui_formatPreset_comboBox.populate_combo_list(PRESET_YAML,
+                                                             defaultValue=database.read_cache('current_preset'))
 
         # Populate the values to the fields based on the preset
         self.ui.format_comboBox.clear()
@@ -158,12 +151,10 @@ class FormatPresetWindow(SyncSketch_Window):
         self.ui.width_spinBox.clear()
         self.ui.height_spinBox.clear()
 
-
         self.ui.format_comboBox.addItems(formats)
         self.ui.encoding_comboBox.addItems(encodings)
         self.ui.width_spinBox.setValue(1920)
         self.ui.height_spinBox.setValue(1080)
-
 
     def update_encoding_list(self):
         """
@@ -173,27 +164,6 @@ class FormatPresetWindow(SyncSketch_Window):
         encodings = maya_scene.get_available_compressions(compressionFormat)
         self.ui.encoding_comboBox.clear()
         self.ui.encoding_comboBox.addItems(encodings)
-
-
-    def update_login_ui(self):
-        #user Login
-        self.currentUser = user.SyncSketchUser()
-        if self.currentUser.is_logged_in() and is_connected():
-            username = self.currentUser.get_name()
-            self.ui.ui_login_label.setText("Logged into SyncSketch as \n%s" % username)
-            self.ui.ui_login_label.setStyleSheet("color: white; font-size: 11px;")
-            self.ui.login_pushButton.hide()
-            self.ui.signup_pushButton.hide()
-            self.ui.logout_pushButton.show()
-        else:
-            # self.ui.ui_login_label.setText("You're not logged in")
-            # self.ui.logged_in_groupBox.hide()
-            self.ui.ui_login_label.setText("You are not logged into SyncSketch")
-            self.ui.ui_login_label.setStyleSheet("color: white; font-size: 11px;")
-            self.ui.login_pushButton.show()
-            self.ui.signup_pushButton.show()
-            self.ui.logout_pushButton.hide()
-
 
     def load_preset(self, presetName=None):
         """
@@ -212,8 +182,8 @@ class FormatPresetWindow(SyncSketch_Window):
             self.ui.height_spinBox.setValue(720)
 
 
-        elif presetName == DEFAULT_PRESET:
-            self.ui.ui_formatPreset_comboBox.set_combobox_index( selection=DEFAULT_PRESET)
+        elif presetName == database.read_cache('current_preset'):
+            self.ui.ui_formatPreset_comboBox.set_combobox_index(selection=database.read_cache('current_preset'))
 
             if sys.platform == 'darwin':
                 format = 'avfoundation'
@@ -251,7 +221,6 @@ class FormatPresetWindow(SyncSketch_Window):
         selected_preset = self.ui.ui_formatPreset_comboBox.currentText()
         self.load_preset(selected_preset)
 
-
     def save(self):
         presetFile = path.get_config_yaml(PRESET_YAML)
 
@@ -262,10 +231,10 @@ class FormatPresetWindow(SyncSketch_Window):
         height = self.ui.height_spinBox.value()
 
         newData = {presetName:
-                    {'encoding': encoding,
-                    'format': format,
-                    'height': height,
-                    'width': width}}
+                       {'encoding': encoding,
+                        'format': format,
+                        'height': height,
+                        'width': width}}
 
         database.dump_cache(newData, presetFile)
 
@@ -277,7 +246,7 @@ class FormatPresetWindow(SyncSketch_Window):
         """Create a new preset"""
         title = 'Creating Preset'
         message = 'Please choose a name for this preset.'
-        user_input = InputDialog(self, title, message)
+        user_input = qt_dialogs.InputDialog(self, title, message)
         if not user_input.response:
             return
         preset_name = user_input.response_text
@@ -287,60 +256,58 @@ class FormatPresetWindow(SyncSketch_Window):
             return
 
         preset_file = path.get_config_yaml(PRESET_YAML)
-        current_preset_names = database._parse_yaml(preset_file).keys()        
+        current_preset_names = database._parse_yaml(preset_file).keys()
         if preset_name in current_preset_names:
             title = 'Error Creating'
             message = 'It appears this name already exists.'
-            WarningDialog(self, title, message)
+            qt_dialogs.WarningDialog(self, title, message)
             return
-        
+
         width, height = maya_scene.get_render_resolution()
         encoding = maya_scene.get_playblast_encoding()
         format = maya_scene.get_playblast_format()
 
         preset_data = {preset_name:
-                        {'encoding': encoding,
-                        'format': format,
-                        'height': height,
-                        'width': width}}
+                           {'encoding': encoding,
+                            'format': format,
+                            'height': height,
+                            'width': width}}
 
         logger.info("Create Format Preset from {}".format(preset_name))
         database.dump_cache(preset_data, preset_file)
 
         self.populate_ui()
         self.ui.ui_formatPreset_comboBox.set_combobox_index(selection=preset_name)
-    
+
     def rename_preset(self):
         title = 'Renaming Preset'
         message = 'Please choose a name for this preset.'
         old_preset_name = self.ui.ui_formatPreset_comboBox.currentText()
-        new_preset_name, response =  QtWidgets.QInputDialog.getText(self, "Rename this preset",  "Please enter a new Name:", QtWidgets.QLineEdit.Normal, old_preset_name)
-
-        
+        new_preset_name, response = QtWidgets.QInputDialog.getText(self, "Rename this preset",
+                                                                   "Please enter a new Name:",
+                                                                   QtWidgets.QLineEdit.Normal, old_preset_name)
 
         if not new_preset_name:
             logger.info("No new preset name specified")
             return
 
         preset_file = path.get_config_yaml(PRESET_YAML)
-        current_preset_names = database._parse_yaml(preset_file).keys()        
+        current_preset_names = database._parse_yaml(preset_file).keys()
 
         if new_preset_name in current_preset_names:
             title = 'Error Renaming'
             message = 'It appears this name already exists.'
-            WarningDialog(self, title, message)
+            qt_dialogs.WarningDialog(self, title, message)
             return
-        
-        
+
         logger.info("Rename Preset from {} to {}".format(old_preset_name, new_preset_name))
         database.rename_key_in_cache(old_preset_name, new_preset_name, preset_file)
-        
+
         if database.read_cache("current_preset") == old_preset_name:
             self._update_current_preset(new_preset_name)
 
         self.populate_ui()
         self.ui.ui_formatPreset_comboBox.set_combobox_index(selection=new_preset_name)
-
 
     def delete_preset(self):
         preset_file = path.get_config_yaml(PRESET_YAML)
@@ -354,11 +321,10 @@ class FormatPresetWindow(SyncSketch_Window):
             self._update_current_preset(new_preset_name)
         else:
             self._update_current_preset(current_preset)
-            
+
         self.populate_ui()
         self.ui.ui_formatPreset_comboBox.set_combobox_index(0)
 
-
     def _update_current_preset(self, preset_name):
         database.save_cache("current_preset", preset_name)
-        self.parent.ui.ui_formatPreset_comboBox.populate_combo_list(PRESET_YAML, preset_name)
+        # self.parent.ui_formatPreset_comboBox.populate_combo_list(PRESET_YAML, preset_name) #FIXME: Dont call parent

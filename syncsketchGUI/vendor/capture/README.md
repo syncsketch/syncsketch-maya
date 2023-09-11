@@ -7,6 +7,7 @@ Playblast with independent viewport, camera and display options.
 - [Optional GUI](https://github.com/BigRoy/maya-capture-gui)
 
 [issues]: https://github.com/mottosso/maya-capture/issues
+
 [wiki]: https://github.com/mottosso/maya-capture/wiki
 
 ### Usage
@@ -123,7 +124,6 @@ from capture import snap
 snap(clipboard=True)
 ```
 
-
 ### Advanced Examples
 
 Building your own library of capture presets
@@ -181,7 +181,7 @@ capture.apply_view(panel, **view)
 ### Store and retrieve scene options
 
 The following will read relevant settings from your
-scene and playblast settings, let you alter it in some way - 
+scene and playblast settings, let you alter it in some way -
 such as altering the frame range - and then revert it back.
 
 ```python

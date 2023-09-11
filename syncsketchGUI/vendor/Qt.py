@@ -35,7 +35,6 @@ import shutil
 import importlib
 import json
 
-
 __version__ = "1.2.6"
 
 # Enable support for `from Qt import *`
@@ -56,7 +55,6 @@ try:
 except NameError:
     # Python 3 compatibility
     long = int
-
 
 """Common members of all bindings
 This is where each member of Qt.py is explicitly defined.
@@ -689,6 +687,7 @@ def _qInstallMessageHandler(handler):
     Args:
         handler: A function that takes 3 arguments, or None
     """
+
     def messageOutputHandler(*args):
         # In Qt4 bindings, message handlers are passed 2 arguments
         # In Qt5 bindings, message handlers are passed 3 arguments
@@ -1178,7 +1177,7 @@ _compatibility_members = {
 
 def _apply_site_config():
     try:
-        import QtSiteConfig
+        from . import QtSiteConfig
     except ImportError:
         # If no QtSiteConfig module found, no modifications
         # to _common_members are needed.
@@ -1585,6 +1584,7 @@ def _pyqt4():
     # QFileDialog QtCompat decorator
     def _standardizeQFileDialog(some_function):
         """Decorator that makes PyQt4 return conform to other bindings"""
+
         def wrapper(*args, **kwargs):
             ret = (some_function(*args, **kwargs))
 
@@ -1881,7 +1881,6 @@ Qt.QtCompat._convert = _convert
 # Enable command-line interface
 if __name__ == "__main__":
     _cli(sys.argv[1:])
-
 
 # The MIT License (MIT)
 #

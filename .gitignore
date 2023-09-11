@@ -124,4 +124,9 @@ syncsketchGUI/config/syncsketch_user.yaml
 
 ##vscode
 .vscode
-# End of https://www.gitignore.io/api/python
+
+# pycharm
+.idea
+
+# ruff
+.ruff_cache

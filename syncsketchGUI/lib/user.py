@@ -1,52 +1,51 @@
 import getpass
+import logging
 import os
-
-import yaml
-import syncsketch
-import requests
-
-from syncsketchGUI.lib import database
-from syncsketchGUI.lib import path
+import time
 from os.path import expanduser
 
+import requests
+import syncsketch
+import yaml
 
-import logging
+from syncsketchGUI.lib import database, path
+
 logger = logging.getLogger("syncsketchGUI")
-
 
 # ======================================================================
 # Global Variables
 
 yaml_file = 'syncsketch_user.yaml'
 
+
 # ======================================================================
 # Module Utilities
 
 
 def _merge_dictionaries(*dictionaries):
-    '''
+    """
     Given any number of dicts, shallow copy and merge into a new dict,
     precedence goes to key value pairs in latter dicts.
-    '''
-    result_dictionary = dict()
+    """
+    result_dictionary = {}
     for dictionary in dictionaries:
         result_dictionary.update(dictionary)
     return result_dictionary
 
 
 def _set_to_yaml_user(key, value):
-    '''
+    """
     Set the given dictionary to the user's local yaml file
-    '''
+    """
     yaml_path = path.get_config_yaml(yaml_file)
 
     if not os.path.isfile(yaml_path):
         open(yaml_path, 'w')
 
-    existing_data = dict()
-    user_data = {str(key) : str(value)}
+    existing_data = {}
+    user_data = {str(key): str(value)}
     logger.info("yamlpath: {} ".format(yaml_path))
-    logger.info("userdata: {} ".format(user_data))
+    # logger.info("userdata: {} ".format(user_data)) # Dont do this! Or sensible Data in the Output
 
     if os.path.isfile(yaml_path):
         existing_data = database._parse_yaml(yaml_path)
@@ -55,22 +54,22 @@ def _set_to_yaml_user(key, value):
         user_data = _merge_dictionaries(existing_data, user_data)
 
     with open(yaml_path, 'w') as outfile:
-        new_data = yaml.dump(user_data, default_flow_style = False)
+        new_data = yaml.dump(user_data, default_flow_style=False)
         outfile.write(new_data)
 
+
 def _get_from_yaml_user(key):
-    '''
+    """
     Get the given key's value from the user's local yaml file
-    '''
+    """
     yaml_path = path.get_config_yaml(yaml_file)
     if not os.path.isfile(yaml_path):
         return
 
     user_data = database._parse_yaml(yaml_path)
+
     return user_data.get(key)
 
-
-    return response.json()
 
 
 def download_file(url, fileName):
@@ -88,18 +87,20 @@ def download_file(url, fileName):
 # Module Classes
 
 class SyncSketchUser():
-    '''
+    """
     Class to store all user data
-    '''
-    # Class Variables
-    name        = None
-    os_user     = None
-    api_key     = None
-    password    = None
-    host_data   = None
-    token       = None
+    """
 
-    api_host    = path.api_host_url
+    def __init__(self):
+        self.name = None
+        self.os_user = None
+        self.selfapi_key = None
+        self.password = None
+        self.host_data = None
+        self.token = None
+
+        # api_host = path.api_host_url
+        self.api_host = path.get_syncsketch_url()
 
     # Set Functions
     def set_name(self, name):
@@ -146,16 +147,13 @@ class SyncSketchUser():
 
     # Auto Login
     def auto_login(self):
-        # logger.warning(  " doing autologin: %s"%self.api_host)
-
         if not self.host_data:
-            logger.info("self.get_name(): {} self.get_api_key() #### self.api_host {}".format(
-                 self.get_name(), self.api_host,))
+            logger.info("self.get_name(): '{}', self.api_host: '{}'".format(self.get_name(), self.api_host))
             self.host_data = syncsketch.SyncSketchAPI(self.get_name(),
-                                                       self.get_api_key(),
-                                                       useExpiringToken=True,
-                                                       host = self.api_host,
-                                                       debug=False)
+                                                      self.get_api_key(),
+                                                      useExpiringToken=True,
+                                                      host=self.api_host,
+                                                      debug=False)
             return self.host_data
 
     def is_logged_in(self):
@@ -164,39 +162,39 @@ class SyncSketchUser():
         else:
             return False
 
-
     def logout(self):
 
-        r = requests.get('%s/app/logmeout/' %(self.api_host))
-        result = r.text
+        requests.get('%s/app/logmeout/' % (self.api_host))
 
         # resetting the yaml file
         self.set_name('')
         self.set_api_key('')
         self.set_token('')
 
-    def get_account_data(self, match_user_with_os = False, withItems=False):
+    def get_account_data(self, match_user_with_os=False, withItems=False):
         self.auto_login()
 
         if not self.host_data:
             logger.warning('Please login first.')
             return
 
-
         if match_user_with_os and not self.get_os_user() == getpass.getuser():
             logger.warning('Please login first.')
             return
 
+        account_data = {'projects': [], 'reviews': [], 'media': []}
 
-        account_data = dict()
-        account_data['projects'] = list()
-        account_data['reviews'] = list()
-        account_data['media'] = list()
+        try:
+            tree_data = self.host_data.get_tree(withItems=withItems)
+        except Exception as error:
+            logger.warning('Fail to obtain connect to the server, error: {}'.format(error))
+            return
 
+        if isinstance(tree_data, dict) and tree_data.get('error'):
+            logger.warning('Fail to obtain tree data from the server, error: {}'.format(tree_data.get('error')))
+            return
 
-        tree_data = self.host_data.getTree(withItems = withItems)
-
-        #Return statement without indirection, pls remove
+        # Return statement without indirection, pls remove
         return tree_data
 
         if not tree_data:
@@ -222,10 +220,9 @@ class SyncSketchUser():
         review_data = self.host_data.getReviewById(review_id)
         return review_data
 
-
     def get_media_data_from_id(self, media_id):
         self.auto_login()
-        media_data = self.host_data.getAnnotations(media_id)
+        media_data = self.host_data.get_annotations(media_id)
         return media_data
 
     def get_item_info(self, media_id):
@@ -236,20 +233,22 @@ class SyncSketchUser():
         if not self.host_data:
             logger.warning('Please login first.')
             return
-        return self.host_data.getMedia({'id': media_id})
+        return self.host_data.get_media({'id': media_id})
 
-
-    def upload_media_to_review(self, review_id, filepath, noConvertFlag = False, itemParentId = False, data={}):
+    def upload_media_to_review(self, review_id, filepath, noConvertFlag=False, itemParentId=False, data=None):
+        if data is None:
+            data = {}
         self.auto_login()
         if not self.host_data:
             logger.warning('Please login first.')
             return
 
-        uploaded_item = self.host_data.addMedia(review_id, filepath, noConvertFlag=noConvertFlag, itemParentId=itemParentId)
-        uploaded_item = self.host_data.updateItem(uploaded_item["id"], data )
+        uploaded_item = self.host_data.add_media(review_id, filepath, noConvertFlag=noConvertFlag,
+                                                 itemParentId=itemParentId)
+        uploaded_item = self.host_data.update_item(uploaded_item["id"], data)
         return uploaded_item
 
-    def update_item(self, item_id, filepath, data = None):
+    def update_item(self, item_id, filepath, data=None):
         files = {'reviewFile': open(filepath)}
         if data:
             data.update(files)
@@ -261,7 +260,7 @@ class SyncSketchUser():
             logger.warning('Please login first.')
             return
 
-        return self.host_data.updateItem(item_id, data)
+        return self.host_data.update_item(item_id, data)
 
     # Todo set path properly
     def download_greasepencil(self, reviewId, itemId):
@@ -283,10 +282,9 @@ class SyncSketchUser():
             return
 
         baseDir = "{0}".format(expanduser('~'))
-        file = self.host_data.getGreasePencilOverlays(reviewId, itemId, baseDir)
+        file = self.host_data.get_grease_pencil_overlays(reviewId, itemId, baseDir)
         logger.info("Downloaded Greasepencil file to {}".format(file))
         return file
-
 
     def download_converted_video(self, itemId):
         self.auto_login()
@@ -294,16 +292,15 @@ class SyncSketchUser():
             logger.warning('Please login first.')
             return
 
-        media = self.host_data.getMedia({'id': itemId})
+        media = self.host_data.get_media({'id': itemId})
 
         logger.info("itemId: {} ".format(itemId))
         logger.info("media: {} ".format(media))
         videoURL = media['objects'][0]['url']
         fileName = videoURL.split(str(itemId) + '/')[1].split("?")[0]
 
-        #maya supports mov only
+        # maya supports mov only
         fileName = fileName.replace('mp4', 'mov')
-
 
         baseDir = "{0}".format(expanduser('~'))
         local_filename = os.path.join(baseDir, fileName)
@@ -314,4 +311,57 @@ class SyncSketchUser():
                     f.write(chunk)
         return local_filename
 
+    def download_annotated_video(self, item_id, review_id):
+        self.auto_login()
+        if not self.host_data:
+            logger.warning('Please login first.')
+            return
 
+        media = self.host_data.get_media({'id': item_id})
+        video_url = media['objects'][0]['url']
+        filename = video_url.split(str(item_id) + '/')[1].split("?")[0]
+        local_dir = "{0}".format(expanduser('~'))
+        local_filename = os.path.join(local_dir, filename)
+
+        url = "{}/api/v2/downloads/videoWithSketches/{}/{}/".format(
+            self.host_data.HOST, review_id, item_id)
+        logger.debug("Get annotated video processing id from {}".format(url))
+
+        r = requests.post(url, params=self.host_data.api_params, headers=self.host_data.headers)
+        celery_task_id = r.json()
+
+        # check the celery task
+        request_processing = True
+        check_celery_url = "{}/api/v2/downloads/videoWithSketches/{}/".format(
+            self.host_data.HOST, celery_task_id)
+        logger.debug("Check annotated video processing status at {}".format(check_celery_url))
+
+        r = requests.get(check_celery_url, params=self.host_data.api_params, headers=self.host_data.headers)
+
+        while request_processing:
+            result = r.json()
+
+            if result.get('status') == 'done':
+                data = result.get('data')
+                logger.debug(
+                    "Annotated video processing succeeded, downloading file to {}".format(local_filename))
+
+                r = requests.get(data["s3Path"], stream=True)
+                with open(local_filename, "wb") as f:
+                    for chunk in r.iter_content(chunk_size=1024):
+                        if chunk:
+                            f.write(chunk)
+
+                request_processing = False
+                return local_filename
+
+            if result.get('status') == 'failed':
+                logger.error("Annotated video processing failed for item {}".format(item_id))
+                request_processing = False
+                return False
+
+            # wait a bit
+            time.sleep(1)
+
+            # check the url again
+            r = requests.get(check_celery_url, params=self.host_data.api_params, headers=self.host_data.headers)

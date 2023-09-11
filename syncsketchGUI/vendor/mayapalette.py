@@ -1,40 +1,40 @@
 import json
 
-from Qt import QtGui
-from Qt import QtWidgets
+from .Qt import QtGui
+from .Qt import QtWidgets
 
 
 def set_palette_from_dict(dct):
     """Set palette to current QApplication based on given dictionary"""
     groups = ['Disabled', 'Active', 'Inactive', 'Normal']
     roles = [
-            'AlternateBase',
-            'Background',
-            'Base',
-            'Button',
-            'ButtonText',
-            'BrightText',
-            'Dark',
-            'Foreground',
-            'Highlight',
-            'HighlightedText',
-            'Light',
-            'Link',
-            'LinkVisited',
-            'Mid',
-            'Midlight',
-            'Shadow',
-            'ToolTipBase',
-            'ToolTipText',
-            'Text',
-            'Window',
-            'WindowText'
-            ]
+        'AlternateBase',
+        'Background',
+        'Base',
+        'Button',
+        'ButtonText',
+        'BrightText',
+        'Dark',
+        'Foreground',
+        'Highlight',
+        'HighlightedText',
+        'Light',
+        'Link',
+        'LinkVisited',
+        'Mid',
+        'Midlight',
+        'Shadow',
+        'ToolTipBase',
+        'ToolTipText',
+        'Text',
+        'Window',
+        'WindowText'
+    ]
     palette = QtGui.QPalette()
     for role in roles:
         try:
             for group in groups:
-                color = QtGui.QColor(dct['%s:%s' %(role, group)])
+                color = QtGui.QColor(dct['%s:%s' % (role, group)])
                 qGrp = getattr(QtGui.QPalette, group)
                 qRl = getattr(QtGui.QPalette, role)
                 palette.setColor(qGrp, qRl, color)
