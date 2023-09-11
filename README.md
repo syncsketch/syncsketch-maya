@@ -18,11 +18,12 @@ See a good use case, demonstrated by Zeina Masri on how to animate from referenc
 
 The easiest way to install this application is to ...
 1. Click this File Link > [installGui.py](https://github.com/syncsketch/syncsketch-maya/releases/latest/download/installGui.py) < to download the installation Python file.
-2. Drag drop it from the browser into a maya-viewport. 
+2. Drag drop it from the browser into a maya-viewport.
 This will automatically install all the dependencies without requiring admin privileges into the current version of Maya's modules folder.
-3. Hit 'Install' and on Allow this process to run python (hit 'Allow' in the popup)
-4. Start SyncSketch UI
-5. Log-In with your SyncSketch Credentials.
+3. Click 'Install' and on Allow this process to run python (press 'Allow' in the popup)
+4. Click 'Allow' in the Untrusted Plugin Loading warning dialog to load the 'SyncSketchPlugin.py' plugin
+5. Start SyncSketch UI
+6. Log-In with your SyncSketch Credentials.
 
 ![redux_maya_install](https://user-images.githubusercontent.com/10859650/72236028-0bec0e80-358a-11ea-92da-9fdc698e50e7.gif)
 
@@ -94,7 +95,7 @@ MacOS:
 
 `SS_DEV` - If this environment variable is set to `dev`, the plugin will install the latest dev release instead of the latest stable release.
 
-# Know Issues
+# Known Issues
  ### Installer crashes running in Maya 2020 
 
 Ths is due to a bug in OpenSSL affecting certain generations of Intel CPUs. See https://www.intel.com/content/www/us/en/developer/articles/troubleshooting/openssl-sha-crash-bug-requires-application-update.html for more details.
