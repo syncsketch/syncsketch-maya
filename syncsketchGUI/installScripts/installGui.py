@@ -97,7 +97,7 @@ SYNCSKETCH_MAYA_PLUGIN_VIDEO_URL = "https://vimeo.com/syncsketch/integrationmaya
 SYNCSKETCH_MAYA_PLUGIN_DOCS_URL = "https://support.syncsketch.com/hc/en-us/articles/12862858565517-Getting-started-with-the-Maya-Plugin"
 
 # ensure package that are compatible with both python2 and python3
-PY_REQUIREMENTS = ['"requests>2,<2.28.0"', '"syncsketch>1,<2.0"', '"pyyaml>5,<6.0"']
+PY_REQUIREMENTS = ['"requests>2,<2.28.0"', '"syncsketch>1,<2.0"', '"pyyaml>5,<5.4"']
 
 
 def _get_configured_log():
