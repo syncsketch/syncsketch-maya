@@ -97,7 +97,7 @@ SYNCSKETCH_MAYA_PLUGIN_VIDEO_URL = "https://vimeo.com/syncsketch/integrationmaya
 SYNCSKETCH_MAYA_PLUGIN_DOCS_URL = "https://support.syncsketch.com/hc/en-us/articles/12862858565517-Getting-started-with-the-Maya-Plugin"
 
 # ensure package that are compatible with both python2 and python3
-PY_REQUIREMENTS = ['"requests>2,<2.28.0"', '"syncsketch>1,<2.0"', '"pyyaml>5,<6.0"']
+PY_REQUIREMENTS = ['"requests>2,<2.28.0"', '"syncsketch>1,<2.0"', '"pyyaml>5,<5.4"']
 
 
 def _get_configured_log():
@@ -122,7 +122,10 @@ LOG = _get_configured_log()
 
 def get_mayapy_path():
     if Literals.PLATFORM == "Windows":
-        mayapy_path = os.path.join(os.environ["MAYA_LOCATION"], "bin", "mayapy.exe")
+        if MAYA_API_VERSION == 2022 and sys.version_info.major == 2:
+            mayapy_path = os.path.join(os.environ["MAYA_LOCATION"], "bin", "mayapy2.exe")
+        else:
+            mayapy_path = os.path.join(os.environ["MAYA_LOCATION"], "bin", "mayapy.exe")
     elif Literals.PLATFORM in ["Darwin", 'Linux']:
         mayapy_path = os.path.join(os.environ["MAYA_LOCATION"], "bin", "mayapy")
     else:
@@ -701,6 +704,8 @@ class InstallThread(QThread):
         errors = False
 
         mayapy_path = get_mayapy_path()
+        LOG.info("Using mayapy: {}".format(mayapy_path))
+
         install_folder_path = get_install_folder_path()
         maya_mod_file_path = _get_mod_file_path()
 
