@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [1.3.1] - 2023-11-03
+## [1.3.1] - 2023-11-06
 
 ## Added
 
@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixes
 
 - Fix issue where installer would install Python 3 packages when using Maya 2022 in Python 2 mode (#38).
-- Fix installer failing because of error installing PyYAML version 5.4.x (#38).
+- Fix installer failing because of an error installing PyYAML version 5.4.x (#38).
 
 ## [1.3.0] - 2023-09-11
 
