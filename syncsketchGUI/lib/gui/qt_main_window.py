@@ -48,11 +48,10 @@ class MenuWindow(qt_windows.SyncSketchWindow):
         event.accept()
 
     def _create_ui(self):
-
-        self._ui_upload = qt_upload.UploadWidget()
-        self._ui_menu = qt_menu.MenuWidget()
-        self._ui_recorder = qt_recorder.MayaPlayblastRecorderWidget()
-        self._ui_browser = qt_browser.ReviewBrowserWidget()
+        self._ui_upload = qt_upload.UploadWidget(parent=self)
+        self._ui_menu = qt_menu.MenuWidget(parent=self)
+        self._ui_recorder = qt_recorder.MayaPlayblastRecorderWidget(parent=self)
+        self._ui_browser = qt_browser.ReviewBrowserWidget(parent=self)
 
     def _connect_ui(self):
 
