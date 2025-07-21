@@ -7,7 +7,6 @@ mod_path = os.path.abspath('capture.py')
 mod = imp.load_source('capture', mod_path)
 version = mod.__version__
 
-
 classifiers = [
     'Development Status :: 3 - Alpha',
     'Intended Audience :: Developers',
@@ -19,7 +18,6 @@ classifiers = [
     'Topic :: Software Development :: Libraries :: Python Modules',
     'Topic :: Utilities'
 ]
-
 
 setup(
     name='maya-capture',

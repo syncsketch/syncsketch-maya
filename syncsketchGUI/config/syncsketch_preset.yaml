@@ -17,7 +17,7 @@ HD720p (Windows AVI):
   encoding: none
   format: avi
   height: 720
-  width: 1280  
+  width: 1280
 Small:
   encoding: H.264
   format: avfoundation
