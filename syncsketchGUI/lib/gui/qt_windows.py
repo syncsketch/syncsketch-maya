@@ -1,10 +1,31 @@
 import logging
+import sys
 
 from syncsketchGUI.lib import connection, user
 from syncsketchGUI.lib.gui import qt_presets
-from syncsketchGUI.vendor.Qt import QtCore, QtWidgets
+from syncsketchGUI.vendor.Qt import QtCompat, QtCore, QtWidgets
 
 logger = logging.getLogger("syncsketchGUI")
+
+try:
+    from maya import OpenMayaUI as omui
+
+    MAYA = True
+except ImportError:
+    MAYA = False
+
+try:
+    long
+except NameError:
+    # Python 3 compatibility
+    long = int
+
+
+def get_maya_ui_parent():
+    if sys.version_info.major == 3:
+        return QtCompat.wrapInstance(int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
+    else:
+        return QtCompat.wrapInstance(long(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
 
 
 class SyncSketchWindow(QtWidgets.QMainWindow):
@@ -16,15 +37,13 @@ class SyncSketchWindow(QtWidgets.QMainWindow):
     window_label = 'SyncSketch'
 
     def __init__(self, parent=None):
+        if parent is None and MAYA:
+            parent = get_maya_ui_parent()
+
         QtWidgets.QMainWindow.__init__(self, parent=parent)
-        MAYA = True
-        self.setWindowFlags(QtCore.Qt.Window)
-
-        #        self.ui.master_layout.setMargin(0)
-
-        # self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.parent = parent
 
+        self.setWindowFlags(QtCore.Qt.Window)
         self.setWindowTitle(self.window_label)
         self.setObjectName(self.window_name)
 
