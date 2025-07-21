@@ -243,9 +243,9 @@ class SyncSketchUser():
             logger.warning('Please login first.')
             return
 
-        uploaded_item = self.host_data.add_media(review_id, filepath, noConvertFlag=noConvertFlag,
-                                                 itemParentId=itemParentId)
-        uploaded_item = self.host_data.update_item(uploaded_item["id"], data)
+        uploaded_item = self.host_data.addMedia(review_id, filepath, noConvertFlag=noConvertFlag, itemParentId=itemParentId)
+        if uploaded_item:
+            uploaded_item = self.host_data.updateItem(uploaded_item["id"], data)
         return uploaded_item
 
     def update_item(self, item_id, filepath, data=None):
