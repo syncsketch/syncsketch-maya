@@ -2,7 +2,7 @@ import logging
 
 from syncsketchGUI.vendor.Qt import QtWidgets, QtCore
 
-from syncsketchGUI.lib import path, database, user
+from syncsketchGUI.lib import path, database
 from syncsketchGUI.settings import VIEWPORT_YAML
 
 from syncsketchGUI.lib.maya import scene as maya_scene

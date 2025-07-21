@@ -1,6 +1,6 @@
 import webbrowser
 
-from syncsketchGUI.vendor.Qt import QtCore, QtGui, QtWidgets
+from syncsketchGUI.vendor.Qt import QtCore, QtWidgets
 
 from . import qt_presets
 

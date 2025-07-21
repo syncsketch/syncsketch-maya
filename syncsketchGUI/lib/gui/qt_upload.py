@@ -1,10 +1,9 @@
 import logging
-import webbrowser
 
-from syncsketchGUI.vendor.Qt import QtCore, QtGui, QtWidgets
+from syncsketchGUI.vendor.Qt import QtCore, QtWidgets
 
 import syncsketchGUI
-from syncsketchGUI.lib import video, user, database, path
+from syncsketchGUI.lib import video, database, path
 
 from . import qt_utils
 from . import qt_regulars

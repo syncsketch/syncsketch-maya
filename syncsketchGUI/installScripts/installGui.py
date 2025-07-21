@@ -620,8 +620,8 @@ def _install_maya_mod_file():
     LOG.info("Installing Maya Mod File to {}".format(mod_file))
     with open(mod_file, "w") as f:
         f.write("+ syncsketch {version} .\syncsketch-{version} \n".format(version=_VERSION))
-        f.write("MAYA_PLUG_IN_PATH +:= scripts\syncsketchGUI\plug-ins \n".format(version=_VERSION))
-        f.write("PYTHONPATH +:= site-packages \n".format(version=_VERSION))
+        f.write("MAYA_PLUG_IN_PATH +:= scripts\syncsketchGUI\plug-ins \n".format())
+        f.write("PYTHONPATH +:= site-packages \n".format())
 
 
 def _get_mod_file_path():
@@ -756,7 +756,7 @@ class InstallThread(QThread):
             if os.path.isdir(install_folder_path):
                 try:
                     shutil.rmtree(install_folder_path, ignore_errors=True)
-                except Exception as e:
+                except Exception:
                     raise Exception(
                         "Failed to delete previous directory for a clean install {0} ".format(install_folder_path))
 

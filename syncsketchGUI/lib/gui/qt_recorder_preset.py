@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 import sys
 import logging
-import yaml
 
 from functools import partial
 
 from syncsketchGUI.vendor.Qt import QtWidgets, QtCore
 
-from syncsketchGUI.lib import database, user, path
-from syncsketchGUI.lib.connection import is_connected
+from syncsketchGUI.lib import database, path
 
 from syncsketchGUI.lib.maya import scene as maya_scene
 from syncsketchGUI.settings import PRESET_YAML

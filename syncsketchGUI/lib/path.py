@@ -3,6 +3,8 @@ import logging
 import os
 import re
 
+from syncsketchGUI.lib import database
+
 logger = logging.getLogger("syncsketchGUI")
 
 # ======================================================================
@@ -22,6 +24,7 @@ def get_syncsketch_url():
     Get the url of the syncsketch project
     """
     return home_url
+
 
 def join(*components):
     """
@@ -55,9 +58,7 @@ def make_safe(raw_path):
     norm_path = os.path.normpath(raw_path)
     path_components = norm_path.split(os.sep)
     for i, path_component in enumerate(path_components):
-        if ' ' in path_component and \
-                not path_component.endswith('"') and \
-                not path_component.startswith('"'):
+        if ' ' in path_component and not path_component.endswith('"') and not path_component.startswith('"'):
             path_components[i] = '"{}"'.format(path_component)
 
     quoted_path = '/'.join(path_components)
@@ -119,15 +120,15 @@ def parse_url_data(link=None):
         link = "/#".join(link.split("#"))
         logger.info("Modified link: {}".format(link))
 
-    if not link[0:len(baseUrl)] == baseUrl:
+    if not link[0 : len(baseUrl)] == baseUrl:
         logger.info("URL need's to start with: {}".format(baseUrl))
         return data
 
     # Find UUID
-    payload = link[len(baseUrl):].split("/")
+    payload = link[len(baseUrl) :].split("/")
 
     if len(link) > 0:
-        uuidPart = (re.findall(r"([a-zA-Z\d]{12})", payload[0]))
+        uuidPart = re.findall(r"([a-zA-Z\d]{12})", payload[0])
         if uuidPart:
             data['uuid'] = uuidPart[0]
         else:
@@ -137,8 +138,11 @@ def parse_url_data(link=None):
         if payload[1].startswith("#"):
             data['id'] = payload[1][1:]
         else:
-            print("link need's to be of the form https://www.syncsketch.com/sketch/bff609f9cbac/#711273 got {}".format(
-                link))
+            print(
+                "link need's to be of the form https://www.syncsketch.com/sketch/bff609f9cbac/#711273 got {}".format(
+                    link
+                )
+            )
 
     if len(payload) > 3:
         pass
@@ -156,6 +160,7 @@ def validate_email_address(email_address):
 
 # ======================================================================
 # Local Paths
+
 
 def get_root_folder():
     """
@@ -193,7 +198,7 @@ def get_image_folder():
     Get the full path of the image folder
     """
     root_folder = get_root_folder()
-    image_folder = os.path.join(root_folder, 'syncsketchGUI', 'ressources', 'image')
+    image_folder = os.path.join(root_folder, 'syncsketchGUI', 'resources', 'image')
     image_folder = sanitize(image_folder)
     return image_folder
 

@@ -1,10 +1,8 @@
 import logging
-import re
-import os
 
 from syncsketchGUI import literals
 
-from syncsketchGUI.vendor.Qt import QtWidgets, QtCore
+from syncsketchGUI.vendor.Qt import QtWidgets
 
 from syncsketchGUI.lib import database, user
 from syncsketchGUI.lib.maya import scene as maya_scene
@@ -24,6 +22,7 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
     """
     UI Frame to handle Download Actions
     """
+
     window_name = 'syncsketchGUI_preset_window'
     window_label = 'Download And Application'
 
@@ -182,15 +181,15 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
         self.lay_main.addWidget(self.ui.download_tabs)
 
     def download_greasepencil(self):
-        """Downloads the greasepencil """
+        """Downloads the greasepencil"""
         downloaded_greasepencile_path = downloader.download_greasepencil()
         offset = int(self.ui.ui_downloadGP_rangeIn_textEdit.value())
         if downloaded_greasepencile_path:
             if offset != 0:
                 logger.info("Offsetting by {} frames".format(offset))
                 downloaded_greasepencile_path = maya_scene.add_frame_offset_to_grease_pencil_zip(
-                    downloaded_greasepencile_path,
-                    offset)
+                    downloaded_greasepencile_path, offset
+                )
             maya_scene.apply_greasepencil(downloaded_greasepencile_path, clear_existing_frames=True)
         else:
             logger.error("Error: Could not download grease pencil file...")
@@ -209,14 +208,12 @@ class DownloadWindow(qt_windows.SyncSketchWindow):
         maya_scene.import_bluepencil()
 
     def download_video_annotated(self):
-        """Downloads the annoated video"""
+        """
+        Downloads the annotated video
+        """
 
         if not self._quicktime_available():
-            qt_dialogs.WarningDialog(
-                None,
-                literals.qtff_not_supported,
-                literals.quicktime_install_instructions
-            )
+            qt_dialogs.WarningDialog(None, literals.qtff_not_supported, literals.quicktime_install_instructions)
             return
 
         downloaded_item = downloader.download_video(media_id=self.media_id)

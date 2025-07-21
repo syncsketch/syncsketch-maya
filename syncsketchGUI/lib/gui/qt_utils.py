@@ -1,4 +1,4 @@
-from syncsketchGUI.vendor.Qt import QtWidgets, QtCore, QtGui
+from syncsketchGUI.vendor.Qt import QtGui
 
 
 class suppressedUI():

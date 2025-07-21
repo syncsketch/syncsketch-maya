@@ -22,24 +22,13 @@ logger.addHandler(ch)
 # prevent logging from bubbling up to maya's logger
 logger.propagate = 0
 
-from .settings import CACHE_YAML, VIEWPORT_YAML, PRESET_YAML
 
 # ======================================================================
 # Module Public Interface
 
-from .actions import install_shelf
 
 # These functions are used from within the Shelf Tools
-from .actions import show_main_window as show_menu_window  # Supports older shelf installations
-from .actions import show_main_window
-from .actions import record
-from .actions import play
-from .actions import upload
-from .actions import show_download_window
-from .actions import cycle_viewport_presets
-from .actions import show_viewport_preset_window
 
-from .version import __version__
 
 
 def reload_toolkit():

@@ -3,6 +3,7 @@ import logging
 import os
 import time
 from os.path import expanduser
+from six.moves.urllib_parse import urlsplit
 
 import requests
 import syncsketch
@@ -71,7 +72,6 @@ def _get_from_yaml_user(key):
     return user_data.get(key)
 
 
-
 def download_file(url, fileName):
     # NOTE the stream=True parameter
     r = requests.get(url, stream=True)
@@ -86,7 +86,8 @@ def download_file(url, fileName):
 # ======================================================================
 # Module Classes
 
-class SyncSketchUser():
+
+class SyncSketchUser:
     """
     Class to store all user data
     """
@@ -96,7 +97,7 @@ class SyncSketchUser():
         self.os_user = None
         self.selfapi_key = None
         self.password = None
-        self.host_data = None
+        self.api = None
         self.token = None
 
         # api_host = path.api_host_url
@@ -147,14 +148,13 @@ class SyncSketchUser():
 
     # Auto Login
     def auto_login(self):
-        if not self.host_data:
+        if not self.api:
             logger.info("self.get_name(): '{}', self.api_host: '{}'".format(self.get_name(), self.api_host))
-            self.host_data = syncsketch.SyncSketchAPI(self.get_name(),
-                                                      self.get_api_key(),
-                                                      useExpiringToken=True,
-                                                      host=self.api_host,
-                                                      debug=False)
-            return self.host_data
+            self.api = syncsketch.SyncSketchAPI(
+                self.get_name(), self.get_api_key(), useExpiringToken=True, host=self.api_host, debug=False
+            )
+            return self.api
+        return self.api
 
     def is_logged_in(self):
         if self.get_name() and self.get_token():
@@ -163,7 +163,6 @@ class SyncSketchUser():
             return False
 
     def logout(self):
-
         requests.get('%s/app/logmeout/' % (self.api_host))
 
         # resetting the yaml file
@@ -174,7 +173,7 @@ class SyncSketchUser():
     def get_account_data(self, match_user_with_os=False, withItems=False):
         self.auto_login()
 
-        if not self.host_data:
+        if not self.api:
             logger.warning('Please login first.')
             return
 
@@ -185,7 +184,7 @@ class SyncSketchUser():
         account_data = {'projects': [], 'reviews': [], 'media': []}
 
         try:
-            tree_data = self.host_data.get_tree(withItems=withItems)
+            tree_data = self.api.get_tree(withItems=withItems)
         except Exception as error:
             logger.warning('Fail to obtain connect to the server, error: {}'.format(error))
             return
@@ -217,12 +216,12 @@ class SyncSketchUser():
 
     def get_review_data_from_id(self, review_id):
         self.auto_login()
-        review_data = self.host_data.getReviewById(review_id)
+        review_data = self.api.getReviewById(review_id)
         return review_data
 
     def get_media_data_from_id(self, media_id):
         self.auto_login()
-        media_data = self.host_data.get_annotations(media_id)
+        media_data = self.api.get_annotations(media_id)
         return media_data
 
     def get_item_info(self, media_id):
@@ -230,22 +229,23 @@ class SyncSketchUser():
         Get the item / media info
         '''
         self.auto_login()
-        if not self.host_data:
+        if not self.api:
             logger.warning('Please login first.')
             return
-        return self.host_data.get_media({'id': media_id})
+        return self.api.get_media({'id': media_id})
 
     def upload_media_to_review(self, review_id, filepath, noConvertFlag=False, itemParentId=False, data=None):
         if data is None:
             data = {}
+
         self.auto_login()
-        if not self.host_data:
+
+        if not self.api:
             logger.warning('Please login first.')
             return
 
-        uploaded_item = self.host_data.add_media(review_id, filepath, noConvertFlag=noConvertFlag,
-                                                 itemParentId=itemParentId)
-        uploaded_item = self.host_data.update_item(uploaded_item["id"], data)
+        uploaded_item = self.api.add_media(review_id, filepath, noConvertFlag=noConvertFlag, itemParentId=itemParentId)
+        uploaded_item = self.api.update_item(uploaded_item["id"], data)
         return uploaded_item
 
     def update_item(self, item_id, filepath, data=None):
@@ -256,11 +256,11 @@ class SyncSketchUser():
             data = files
 
         self.auto_login()
-        if not self.host_data:
+        if not self.api:
             logger.warning('Please login first.')
             return
 
-        return self.host_data.update_item(item_id, data)
+        return self.api.update_item(item_id, data)
 
     # Todo set path properly
     def download_greasepencil(self, reviewId, itemId):
@@ -277,22 +277,22 @@ class SyncSketchUser():
         """
 
         self.auto_login()
-        if not self.host_data:
+        if not self.api:
             logger.warning('Please login first.')
             return
 
         baseDir = "{0}".format(expanduser('~'))
-        file = self.host_data.get_grease_pencil_overlays(reviewId, itemId, baseDir)
+        file = self.api.get_grease_pencil_overlays(reviewId, itemId, baseDir)
         logger.info("Downloaded Greasepencil file to {}".format(file))
         return file
 
     def download_converted_video(self, itemId):
         self.auto_login()
-        if not self.host_data:
+        if not self.api:
             logger.warning('Please login first.')
             return
 
-        media = self.host_data.get_media({'id': itemId})
+        media = self.api.get_media({'id': itemId})
 
         logger.info("itemId: {} ".format(itemId))
         logger.info("media: {} ".format(media))
@@ -312,39 +312,60 @@ class SyncSketchUser():
         return local_filename
 
     def download_annotated_video(self, item_id, review_id):
+        """
+        Download annotated video with sketches from SyncSketch.
+        :param int item_id:
+        :param int review_id:
+        :return: local_filename or None if failed
+        :rtype: str or None
+        """
         self.auto_login()
-        if not self.host_data:
+        if not self.api:
             logger.warning('Please login first.')
-            return
+            return None
 
-        media = self.host_data.get_media({'id': item_id})
-        video_url = media['objects'][0]['url']
-        filename = video_url.split(str(item_id) + '/')[1].split("?")[0]
-        local_dir = "{0}".format(expanduser('~'))
+        item_data = self.api.get_item(item_id)
+
+        if not item_data.get("type") == "video":
+            logger.warning("Item with id {} is not a video, cannot download annotated video.".format(item_id))
+            return None
+
+        if item_data.get("status") != "done" or not item_data.get("url"):
+            logger.warning(
+                "Item with id {} is not ready for download, status: {}, url: {}".format(
+                    item_id, item_data.get("status"), item_data.get("url")
+                )
+            )
+            return None
+
+        video_url = item_data['url']
+
+        # Get filename from url using urlsplit
+        split_url = urlsplit(video_url)
+        filename = os.path.basename(split_url.path)
+
+        local_dir = str(expanduser('~'))
         local_filename = os.path.join(local_dir, filename)
 
-        url = "{}/api/v2/downloads/videoWithSketches/{}/{}/".format(
-            self.host_data.HOST, review_id, item_id)
+        url = "{}/api/v2/downloads/videoWithSketches/{}/{}/".format(self.api.HOST, review_id, item_id)
         logger.debug("Get annotated video processing id from {}".format(url))
 
-        r = requests.post(url, params=self.host_data.api_params, headers=self.host_data.headers)
+        r = requests.post(url, params=self.api.api_params, headers=self.api.headers)
         celery_task_id = r.json()
 
         # check the celery task
         request_processing = True
-        check_celery_url = "{}/api/v2/downloads/videoWithSketches/{}/".format(
-            self.host_data.HOST, celery_task_id)
+        check_celery_url = "{}/api/v2/downloads/videoWithSketches/{}/".format(self.api.HOST, celery_task_id)
         logger.debug("Check annotated video processing status at {}".format(check_celery_url))
 
-        r = requests.get(check_celery_url, params=self.host_data.api_params, headers=self.host_data.headers)
+        r = requests.get(check_celery_url, params=self.api.api_params, headers=self.api.headers)
 
         while request_processing:
             result = r.json()
 
             if result.get('status') == 'done':
                 data = result.get('data')
-                logger.debug(
-                    "Annotated video processing succeeded, downloading file to {}".format(local_filename))
+                logger.debug("Annotated video processing succeeded, downloading file to {}".format(local_filename))
 
                 r = requests.get(data["s3Path"], stream=True)
                 with open(local_filename, "wb") as f:
@@ -358,10 +379,11 @@ class SyncSketchUser():
             if result.get('status') == 'failed':
                 logger.error("Annotated video processing failed for item {}".format(item_id))
                 request_processing = False
-                return False
+                return None
 
             # wait a bit
             time.sleep(1)
 
             # check the url again
-            r = requests.get(check_celery_url, params=self.host_data.api_params, headers=self.host_data.headers)
+            r = requests.get(check_celery_url, params=self.api.api_params, headers=self.api.headers)
+        return None

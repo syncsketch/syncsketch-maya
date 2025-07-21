@@ -18,11 +18,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     package_data={'syncsketchGUI.config': ['*.yaml']},
-    install_requires=[
-        "requests>2,<2.28.0",
-        "syncsketch>1,<2.0",
-        "pyyaml>5,<6.0"
-    ],
+    install_requires=["requests>2,<2.28.0", "syncsketch>1,<2.0", "pyyaml>5,<6.0"],
 )
 
 # This to be backward compatible with older versions (<1.3.0) of the plugin. They will fail on launch if this is

@@ -1,7 +1,6 @@
 import logging
 
-from ..lib import user
-from ..lib import database
+from syncsketchGUI.lib import user, database
 
 logger = logging.getLogger("syncsketchGUI")
 
@@ -12,7 +11,9 @@ def download_greasepencil(current_user=None):
 
     review_id = database.read_cache('target_review_id')
     media_id = database.read_cache('target_media_id')
-    logger.info("current_user: {}, target_review_id: {}, target_media_id: {}".format(current_user, review_id, media_id))
+    logger.info(
+        "current_user: {}, target_review_id: {}, target_media_id: {}".format(current_user, review_id, media_id)
+    )
 
     return current_user.download_greasepencil(review_id, media_id)
 

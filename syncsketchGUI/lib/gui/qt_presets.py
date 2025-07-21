@@ -32,7 +32,7 @@ def _get_qicon_from_url(url):
             for chunk in icon_request.iter_content(chunk_size=1024):
                 file_handle.write(chunk)
         icon_fullname = tmpname.name
-    except Exception as e:
+    except Exception:
         logger.error("error downloading from url: {}".format(url))
         icon_fullname = path.get_icon('syncsketch_ui_100.png')
 

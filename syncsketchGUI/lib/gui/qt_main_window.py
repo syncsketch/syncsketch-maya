@@ -1,7 +1,7 @@
 import os
 import time
 
-from syncsketchGUI.vendor.Qt import QtCore, QtGui, QtWidgets
+from syncsketchGUI.vendor.Qt import QtCore, QtWidgets
 
 from syncsketchGUI.lib import user
 from syncsketchGUI.literals import message_is_not_connected

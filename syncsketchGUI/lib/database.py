@@ -3,6 +3,7 @@ import os
 import yaml
 import logging
 
+from syncsketchGUI.lib.maya.menu import _show_error
 
 logger = logging.getLogger("syncsketchGUI")
 from syncsketchGUI.lib import path
@@ -12,6 +13,7 @@ from syncsketchGUI.settings import CACHE_YAML
 
 # ======================================================================
 # Module Utilities
+
 
 def _parse_yaml(yaml_file=CACHE_YAML):
     """

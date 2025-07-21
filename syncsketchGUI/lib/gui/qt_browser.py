@@ -1,13 +1,12 @@
 import logging
 import webbrowser
-import re
 
 from ..path import get_syncsketch_url, parse_url_data
 
 logger = logging.getLogger("syncsketchGUI")
 
 from syncsketchGUI.vendor.Qt import QtCore, QtGui, QtWidgets
-from syncsketchGUI.lib import video, user, database, path
+from syncsketchGUI.lib import user, database, path
 from syncsketchGUI.literals import uploadPlaceHolderStr
 
 from syncsketchGUI import actions
@@ -195,28 +194,34 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
 
         logger.debug("account_data: {}".format(account_data))
         for account in account_data:
-            account_treeWidgetItem = self._build_widget_item(parent=self._tree,
-                                                             item_name=account.get('name'),
-                                                             item_type='account',
-                                                             item_icon=qt_presets.account_icon,
-                                                             item_data=account)
+            account_treeWidgetItem = self._build_widget_item(
+                parent=self._tree,
+                item_name=account.get('name'),
+                item_type='account',
+                item_icon=qt_presets.account_icon,
+                item_data=account,
+            )
             # Add projects
             projects = account.get('projects')
             for project in projects:
-                project_treeWidgetItem = self._build_widget_item(parent=account_treeWidgetItem,
-                                                                 item_name=project.get('name'),
-                                                                 item_type='project',
-                                                                 item_icon=qt_presets.project_icon,
-                                                                 item_data=project)
+                project_treeWidgetItem = self._build_widget_item(
+                    parent=account_treeWidgetItem,
+                    item_name=project.get('name'),
+                    item_type='project',
+                    item_icon=qt_presets.project_icon,
+                    item_data=project,
+                )
                 # Add reviews
                 reviews = project.get('reviews')
 
                 for review in reviews:
-                    review_treeWidgetItem = self._build_widget_item(parent=project_treeWidgetItem,
-                                                                    item_name=review.get('name'),
-                                                                    item_type='review',
-                                                                    item_icon=qt_presets.review_icon,
-                                                                    item_data=review)
+                    review_treeWidgetItem = self._build_widget_item(
+                        parent=project_treeWidgetItem,
+                        item_name=review.get('name'),
+                        item_type='review',
+                        item_icon=qt_presets.review_icon,
+                        item_data=review,
+                    )
                     # Add items
                     items = review.get('items')
                     # * If there are no reviews, create still a dumy element to get an arrow icon
@@ -235,11 +240,13 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
                         else:
                             specified_media_icon = qt_presets.media_unknown_icon
 
-                        media_treeWidgetItem = self._build_widget_item(parent=review_treeWidgetItem,
-                                                                       item_name=media.get('name'),
-                                                                       item_type='media',
-                                                                       item_icon=specified_media_icon,
-                                                                       item_data=media)
+                        media_treeWidgetItem = self._build_widget_item(
+                            parent=review_treeWidgetItem,
+                            item_name=media.get('name'),
+                            item_type='media',
+                            item_icon=specified_media_icon,
+                            item_data=media,
+                        )
 
                         media_treeWidgetItem.sizeHint(80)
 
@@ -251,7 +258,7 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
         review = review_item.data(1, QtCore.Qt.EditRole)
 
         review_id = review['id']
-        items = self.current_user.host_data.getMediaByReviewId(review_id)['objects']
+        items = self.current_user.api.getMediaByReviewId(review_id)['objects']
 
         # Removes current child items
         review_item.takeChildren()
@@ -270,11 +277,13 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
             else:
                 specified_media_icon = qt_presets.media_unknown_icon
 
-            media_treeWidgetItem = self._build_widget_item(parent=review_item,
-                                                           item_name=media.get('name'),
-                                                           item_type='media',
-                                                           item_icon=specified_media_icon,
-                                                           item_data=media)
+            media_treeWidgetItem = self._build_widget_item(
+                parent=review_item,
+                item_name=media.get('name'),
+                item_type='media',
+                item_icon=specified_media_icon,
+                item_data=media,
+            )
 
             media_treeWidgetItem.sizeHint(80)
 
@@ -296,10 +305,13 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
         # convert qmodelindex into a treewidget item
         item = target  # self.ui.browser_treeWidget.itemFromIndex(selected_item)
         try:
-            logger.debug("item.text {} selected_item {}".format(item.data(0, QtCore.Qt.EditRole),
-                                                                item.data(1, QtCore.Qt.EditRole)))
-        except Exception as e:
-            logger.debug("Exception: ".format(e))
+            logger.debug(
+                "item.text {} selected_item {}".format(
+                    item.data(0, QtCore.Qt.EditRole), item.data(1, QtCore.Qt.EditRole)
+                )
+            )
+        except Exception:
+            logger.debug("Exception: ".format())
 
         item_type = item.data(2, QtCore.Qt.EditRole)
         if item_type == "review":
@@ -374,7 +386,7 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
         item_data = self._get_target_data(current_item)
         target_type = item_data['target_url_type']
 
-        if (target_type == "media"):
+        if target_type == "media":
             self._ui_pb_download.setEnabled(True)
         else:
             self._ui_pb_download.setEnabled(False)
@@ -457,7 +469,7 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
             'target_url': None,
             'name': item_data.get('name'),
             'target_url_item_name': item.text(0),
-            'description': item_data.get('description')
+            'description': item_data.get('description'),
         }
 
         if item_type == 'project':
@@ -466,7 +478,7 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
 
         elif item_type == 'review':  # and not item_data.get('reviewURL'):
             current_data['review_id'] = item_data.get('id')
-            current_data['target_url'] = '{0}{1}'.format(review_base_url, item_data.get('uuid'), item_data.get('id'))
+            current_data['target_url'] = '{0}{1}'.format(review_base_url, item_data.get('uuid'), )
             logger.info("in  item_type == 'review'")
 
         elif item_type == 'media':
@@ -478,8 +490,9 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
             # https://syncsketch.com/sketch/300639#692936
             # https://www.syncsketch.com/sketch/5a8d634c8447#692936/619482
             # current_data['target_url'] = '{}#{}'.format(review_base_url + str(current_data['review_id']), current_data['media_id'])
-            current_data['target_url'] = '{0}{1}#{2}'.format(review_base_url, item_data.get('uuid'),
-                                                             item_data.get('id'))
+            current_data['target_url'] = '{0}{1}#{2}'.format(
+                review_base_url, item_data.get('uuid'), item_data.get('id')
+            )
             logger.debug("current_data['target_url'] {}".format(current_data['target_url']))
 
         while item.parent():
@@ -506,7 +519,7 @@ def get_current_item_from_ids(tree, payload=None):
     if payload['uuid'] and payload['id']:
         searchType = 'id'
         searchValue = int(payload['id'])
-        logger.debug("both payload['uuid'] and payload['id'] set {}".format(payload['uuid'], payload['id']))
+        logger.debug("both payload['uuid'] and payload['id'] set {}".format(payload['uuid'], ))
 
     # Got only uuid, it's a review
     elif payload['uuid']:
