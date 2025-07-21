@@ -7,7 +7,13 @@ from os.path import expanduser
 import requests
 import syncsketch
 import yaml
-from six.moves.urllib_parse import urlsplit
+
+try:
+    # python3
+    from urllib.parse import urlsplit
+except ImportError:
+    # python2
+    from urlparse import urlsplit
 
 from syncsketchGUI.lib import database, path
 
