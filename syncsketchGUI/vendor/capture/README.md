@@ -41,15 +41,18 @@ capture('Camera3')
 capture(width=400, height=200)
 
 # Launch capture with custom viewport settings
-capture('persp', 800, 600,
-        viewport_options={
-            "displayAppearance": "wireframe",
-            "grid": False,
-            "polymeshes": True,
-        },
-        camera_options={
-            "displayResolution": True
-        }
+capture(
+    'persp',
+    800,
+    600,
+    viewport_options={
+        "displayAppearance": "wireframe",
+        "grid": False,
+        "polymeshes": True,
+    },
+    camera_options={
+        "displayResolution": True
+    }
 )
 ```
 

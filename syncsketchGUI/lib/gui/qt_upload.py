@@ -1,13 +1,10 @@
 import logging
 
+import syncsketchGUI
+from syncsketchGUI.lib import database, path, video
 from syncsketchGUI.vendor.Qt import QtCore, QtWidgets
 
-import syncsketchGUI
-from syncsketchGUI.lib import video, database, path
-
-from . import qt_utils
-from . import qt_regulars
-from . import qt_presets
+from . import qt_presets, qt_regulars, qt_utils
 
 logger = logging.getLogger("syncsketchGUI")
 

@@ -1,7 +1,7 @@
-from setuptools import setup
-
-import os
 import imp
+import os
+
+from setuptools import setup
 
 mod_path = os.path.abspath('capture.py')
 mod = imp.load_source('capture', mod_path)

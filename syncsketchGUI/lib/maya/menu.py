@@ -2,9 +2,8 @@ import uuid
 
 from maya import OpenMaya as om
 from maya import cmds
-from syncsketchGUI.lib import user, path
 
-from syncsketchGUI.lib import database
+from syncsketchGUI.lib import database, path, user
 
 # ======================================================================
 # Global Variables

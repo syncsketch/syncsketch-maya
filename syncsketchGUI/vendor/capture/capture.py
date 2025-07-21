@@ -4,18 +4,17 @@ Playblasting with independent viewport, camera and display options
 
 """
 
+import contextlib
+import logging
 import re
 import sys
-import contextlib
 
-from maya import cmds
-from maya import mel
+from maya import cmds, mel
 
 try:
     from contextlib import nested  # Python 2
 except ImportError:
     from contextlib import ExitStack
-
 
     @contextlib.contextmanager
     def nested(*contexts):
@@ -26,6 +25,7 @@ except ImportError:
             for ctx in contexts:
                 stack.enter_context(ctx)
             yield contexts
+
 
 from syncsketchGUI import literals
 
@@ -45,35 +45,36 @@ version_info = (2, 3, 0)
 __version__ = "%s.%s.%s" % version_info
 __license__ = "MIT"
 
-import logging
 
 logger = logging.getLogger("syncsketchGUI")
 
 
-def capture(camera=None,
-            width=None,
-            height=None,
-            filename=None,
-            start_frame=None,
-            end_frame=None,
-            frame=None,
-            format='qt',
-            compression='H.264',
-            quality=100,
-            off_screen=False,
-            viewer=True,
-            show_ornaments=True,
-            sound=None,
-            isolate=None,
-            maintain_aspect_ratio=False,
-            overwrite=False,
-            frame_padding=4,
-            raw_frame_numbers=False,
-            camera_options=None,
-            display_options=None,
-            viewport_options=None,
-            viewport2_options=None,
-            complete_filename=None):
+def capture(
+    camera=None,
+    width=None,
+    height=None,
+    filename=None,
+    start_frame=None,
+    end_frame=None,
+    frame=None,
+    format='qt',
+    compression='H.264',
+    quality=100,
+    off_screen=False,
+    viewer=True,
+    show_ornaments=True,
+    sound=None,
+    isolate=None,
+    maintain_aspect_ratio=False,
+    overwrite=False,
+    frame_padding=4,
+    raw_frame_numbers=False,
+    camera_options=None,
+    display_options=None,
+    viewport_options=None,
+    viewport2_options=None,
+    complete_filename=None,
+):
     """Playblast in an independent panel
 
     Arguments:
@@ -94,7 +95,7 @@ def capture(camera=None,
         viewer(bool, optional): Display results in native player
         show_ornaments(bool, optional): Whether or not model view ornaments
            (e.g. axis icon, grid and HUD) should be displayed.
-        sound(str, optional):  Specify the sound node to be used during 
+        sound(str, optional):  Specify the sound node to be used during
             playblast. When None(default) no sound will be used.
         isolate(list): List of nodes to isolate upon capturing
         maintain_aspect_ratio(bool, optional): Modify height in order to
@@ -179,8 +180,9 @@ def capture(camera=None,
     if frame and raw_frame_numbers:
         check = frame if isinstance(frame, (list, tuple)) else [frame]
         if any(f < 0 for f in check):
-            raise RuntimeError("Negative frames are not supported with "
-                               "raw frame numbers and explicit frame numbers")
+            raise RuntimeError(
+                "Negative frames are not supported with " "raw frame numbers and explicit frame numbers"
+            )
 
     # (#21) Bugfix: `maya.cmds.playblast` suffers from undo bug where it
     # always sets the currentTime to frame 1. By setting currentTime before
@@ -188,19 +190,18 @@ def capture(camera=None,
     cmds.currentTime(cmds.currentTime(query=True))
 
     padding = 10  # Extend panel to accommodate for OS window manager
-    with _independent_panel(width=width + padding,
-                            height=height + padding,
-                            off_screen=off_screen) as panel:
+    with _independent_panel(width=width + padding, height=height + padding, off_screen=off_screen) as panel:
         cmds.setFocus(panel)
         with nested(
-                _disabled_inview_messages(),
-                _maintain_camera(panel, camera),
-                _applied_viewport_options(viewport_options, panel),
-                _applied_camera_options(camera_options, panel),
-                _applied_display_options(display_options),
-                _applied_viewport2_options(viewport2_options),
-                _isolated_nodes(isolate, panel),
-                _maintained_time()):
+            _disabled_inview_messages(),
+            _maintain_camera(panel, camera),
+            _applied_viewport_options(viewport_options, panel),
+            _applied_camera_options(camera_options, panel),
+            _applied_display_options(display_options),
+            _applied_viewport2_options(viewport2_options),
+            _isolated_nodes(isolate, panel),
+            _maintained_time(),
+        ):
             try:
                 output = cmds.playblast(
                     compression=compression,
@@ -217,7 +218,8 @@ def capture(camera=None,
                     widthHeight=[width, height],
                     rawFrameNumbers=raw_frame_numbers,
                     framePadding=frame_padding,
-                    **playblast_kwargs)
+                    **playblast_kwargs
+                )
             except RuntimeError as e:
                 # This is a naive guess, but usually only happens if Quicktime libraries are missing'
                 logger.error('Error during playblast: {0}'.format(e))
@@ -253,8 +255,7 @@ def snap(*args, **kwargs):
     kwargs['frame'] = frame
 
     if not isinstance(frame, (int, float)):
-        raise TypeError("frame must be a single frame(integer or float). "
-                        "Use `capture()` for sequences.")
+        raise TypeError("frame must be a single frame(integer or float). " "Use `capture()` for sequences.")
 
     # override capture defaults
     format = kwargs.pop('format', "image")
@@ -354,7 +355,7 @@ ViewportOptions = {
     "handles": False,
     "pivots": False,
     "textures": False,
-    "strokes": False
+    "strokes": False,
 }
 
 Viewport2Options = {
@@ -385,7 +386,7 @@ Viewport2Options = {
     "transparencyAlgorithm": 1,
     "transparencyQuality": 0.33,
     "useMaximumHardwareLights": True,
-    "vertexAnimationCache": 0
+    "vertexAnimationCache": 0,
 }
 
 
@@ -474,8 +475,8 @@ def parse_view(panel):
     # Viewport options
     viewport_options = {}
 
-    # capture plugin display filters first to ensure we never override 
-    # built-in arguments if ever possible a plugin has similarly named 
+    # capture plugin display filters first to ensure we never override
+    # built-in arguments if ever possible a plugin has similarly named
     # plugin display filters(which it shouldn't!)
     plugins = cmds.pluginDisplayFilter(query=True, listFilters=True)
     for plugin in plugins:
@@ -484,8 +485,7 @@ def parse_view(panel):
         viewport_options[plugin] = state
 
     for key in ViewportOptions:
-        viewport_options[key] = cmds.modelEditor(
-            panel, query=True, **{key: True})
+        viewport_options[key] = cmds.modelEditor(panel, query=True, **{key: True})
 
     viewport2_options = {}
     for key in Viewport2Options.keys():
@@ -500,7 +500,7 @@ def parse_view(panel):
         "display_options": display_options,
         "camera_options": camera_options,
         "viewport_options": viewport_options,
-        "viewport2_options": viewport2_options
+        "viewport2_options": viewport2_options,
     }
 
 
@@ -519,15 +519,12 @@ def parse_active_scene():
         "width": cmds.getAttr("defaultResolution.width"),
         "height": cmds.getAttr("defaultResolution.height"),
         "compression": cmds.optionVar(query="playblastCompression"),
-        "filename": (cmds.optionVar(query="playblastFile")
-                     if cmds.optionVar(query="playblastSaveToFile") else None),
+        "filename": (cmds.optionVar(query="playblastFile") if cmds.optionVar(query="playblastSaveToFile") else None),
         "format": cmds.optionVar(query="playblastFormat"),
-        "off_screen": (True if cmds.optionVar(query="playblastOffscreen")
-                       else False),
-        "show_ornaments": (True if cmds.optionVar(query="playblastShowOrnaments")
-                           else False),
+        "off_screen": (True if cmds.optionVar(query="playblastOffscreen") else False),
+        "show_ornaments": (True if cmds.optionVar(query="playblastShowOrnaments") else False),
         "quality": cmds.optionVar(query="playblastQuality"),
-        "sound": cmds.timeControl(time_control, q=True, sound=True) or None
+        "sound": cmds.timeControl(time_control, q=True, sound=True) or None,
     }
 
 
@@ -555,28 +552,22 @@ def apply_scene(**options):
         cmds.setAttr("defaultResolution.height", options["height"])
 
     if "compression" in options:
-        cmds.optionVar(
-            stringValue=["playblastCompression", options["compression"]])
+        cmds.optionVar(stringValue=["playblastCompression", options["compression"]])
 
     if "filename" in options:
-        cmds.optionVar(
-            stringValue=["playblastFile", options["filename"]])
+        cmds.optionVar(stringValue=["playblastFile", options["filename"]])
 
     if "format" in options:
-        cmds.optionVar(
-            stringValue=["playblastFormat", options["format"]])
+        cmds.optionVar(stringValue=["playblastFormat", options["format"]])
 
     if "off_screen" in options:
-        cmds.optionVar(
-            intValue=["playblastFormat", options["off_screen"]])
+        cmds.optionVar(intValue=["playblastFormat", options["off_screen"]])
 
     if "show_ornaments" in options:
-        cmds.optionVar(
-            intValue=["show_ornaments", options["show_ornaments"]])
+        cmds.optionVar(intValue=["show_ornaments", options["show_ornaments"]])
 
     if "quality" in options:
-        cmds.optionVar(
-            floatValue=["playblastQuality", options["quality"]])
+        cmds.optionVar(floatValue=["playblastQuality", options["quality"]])
 
 
 @contextlib.contextmanager
@@ -608,18 +599,13 @@ def _independent_panel(width, height, off_screen=False):
 
     # center panel on screen
     screen_width, screen_height = _get_screen_size()
-    topLeft = [int((screen_height - height) / 2.0),
-               int((screen_width - width) / 2.0)]
+    topLeft = [int((screen_height - height) / 2.0), int((screen_width - width) / 2.0)]
 
-    window = cmds.window(width=width,
-                         height=height,
-                         topLeftCorner=topLeft,
-                         menuBarVisible=False,
-                         titleBar=False,
-                         visible=not off_screen)
+    window = cmds.window(
+        width=width, height=height, topLeftCorner=topLeft, menuBarVisible=False, titleBar=False, visible=not off_screen
+    )
     cmds.paneLayout()
-    panel = cmds.modelPanel(menuBarVisible=False,
-                            label='CapturePanel')
+    panel = cmds.modelPanel(menuBarVisible=False, label='CapturePanel')
 
     # Hide icons under panel menus
     bar_layout = cmds.modelPanel(panel, q=True, barLayout=True)
@@ -657,8 +643,7 @@ def _applied_camera_options(options, panel):
         try:
             old_options[opt] = cmds.getAttr(camera + "." + opt)
         except:
-            sys.stderr.write("Could not get camera attribute "
-                             "for capture: %s" % opt)
+            sys.stderr.write("Could not get camera attribute " "for capture: %s" % opt)
             options.pop(opt)
 
     for opt, value in options.items():
@@ -687,8 +672,7 @@ def _applied_display_options(options):
         original[color] = cmds.displayRGBColor(color, query=True) or []
 
     for preference in preferences:
-        original[preference] = cmds.displayPref(
-            query=True, **{preference: True})
+        original[preference] = cmds.displayPref(query=True, **{preference: True})
 
     # Apply settings
     for color in colors:
@@ -794,8 +778,7 @@ def _maintain_camera(panel, camera):
     if not _in_standalone():
         cmds.lookThru(panel, camera)
     else:
-        state = dict((camera, cmds.getAttr(camera + ".rnd"))
-                     for camera in cmds.ls(type="camera"))
+        state = dict((camera, cmds.getAttr(camera + ".rnd")) for camera in cmds.ls(type="camera"))
         cmds.setAttr(camera + ".rnd", True)
 
     try:
@@ -852,18 +835,20 @@ def _set_attribute_if_unlocked(name, value):
 try:
     version = mel.eval("getApplicationVersionAsFloat")
     if version > 2015:
-        Viewport2Options.update({
-            "hwFogAlpha": 1.0,
-            "hwFogFalloff": 0,
-            "hwFogDensity": 0.1,
-            "hwFogEnable": False,
-            "holdOutDetailMode": 1,
-            "hwFogEnd": 100.0,
-            "holdOutMode": True,
-            "hwFogColorR": 0.5,
-            "hwFogColorG": 0.5,
-            "hwFogColorB": 0.5,
-            "hwFogStart": 0.0,
-        })
+        Viewport2Options.update(
+            {
+                "hwFogAlpha": 1.0,
+                "hwFogFalloff": 0,
+                "hwFogDensity": 0.1,
+                "hwFogEnable": False,
+                "holdOutDetailMode": 1,
+                "hwFogEnd": 100.0,
+                "holdOutMode": True,
+                "hwFogColorR": 0.5,
+                "hwFogColorG": 0.5,
+                "hwFogColorB": 0.5,
+                "hwFogStart": 0.0,
+            }
+        )
 except Exception as error:
     print(error)

@@ -1,11 +1,10 @@
 import codecs
 import os
 
-from maya import cmds
-from maya import mel
+import yaml
+from maya import cmds, mel
 
 from syncsketchGUI.lib import path
-import yaml
 
 # ======================================================================
 # Global Variables
@@ -16,6 +15,7 @@ shelf_name = 'SyncSketch'
 
 # ======================================================================
 # Module Utilities
+
 
 def _sanitize_path(raw_path):
     """
@@ -83,37 +83,39 @@ def _parse_shelf_item(shelf_item):
     Return a dictionary with the default value if the user doesn't provide certain values.
     """
     item_data = list(shelf_item.values())[0]
-    parsed_item_data = {'enableCommandRepeat': True,  # 2015+
-                        'enable': True,
-                        'width': 35,
-                        'height': 35,
-                        'manage': True,
-                        'visible': True,
-                        'preventOverride': False,
-                        'annotation': '',
-                        'enableBackground': False,
-                        'align': 'center',
-                        'label': '',
-                        'labelOffset': 0,
-                        'rotation': False,  # 2015+
-                        'flipX': False,  # 2015+
-                        'flipY': False,  # 2015+
-                        'useAlpha': True,  # 2015+
-                        'font': 'plainLabelFont',  # 2015+
-                        'imageOverlayLabel': '',
-                        'overlayLabelColor': [0.8, 0.8, 0.8],
-                        'overlayLabelBackColor': [0, 0, 0, 0.5],
-                        'image': '',
-                        'image1': '',
-                        'image2': '',
-                        'image3': '',
-                        'style': 'iconOnly',
-                        'marginWidth': 1,
-                        'marginHeight': 1,
-                        'command': '',
-                        'sourceType': 'mel',
-                        'commandRepeatable': True,
-                        'flat': True}
+    parsed_item_data = {
+        'enableCommandRepeat': True,  # 2015+
+        'enable': True,
+        'width': 35,
+        'height': 35,
+        'manage': True,
+        'visible': True,
+        'preventOverride': False,
+        'annotation': '',
+        'enableBackground': False,
+        'align': 'center',
+        'label': '',
+        'labelOffset': 0,
+        'rotation': False,  # 2015+
+        'flipX': False,  # 2015+
+        'flipY': False,  # 2015+
+        'useAlpha': True,  # 2015+
+        'font': 'plainLabelFont',  # 2015+
+        'imageOverlayLabel': '',
+        'overlayLabelColor': [0.8, 0.8, 0.8],
+        'overlayLabelBackColor': [0, 0, 0, 0.5],
+        'image': '',
+        'image1': '',
+        'image2': '',
+        'image3': '',
+        'style': 'iconOnly',
+        'marginWidth': 1,
+        'marginHeight': 1,
+        'command': '',
+        'sourceType': 'mel',
+        'commandRepeatable': True,
+        'flat': True,
+    }
 
     if 'enableCommandRepeat' in item_data.keys():
         parsed_item_data['enableCommandRepeat'] = item_data.get('enableCommandRepeat')
@@ -229,16 +231,18 @@ def _parse_shelf_separator(shelf_separator):
     Return a dictionary with the default value if the user doesn't provide certain values.
     """
     item_data = list(shelf_separator.values())[0]
-    parsed_item_data = {'enable': True,
-                        'width': 12,
-                        'height': 35,
-                        'manage': True,
-                        'visible': True,
-                        'preventOverride': False,
-                        'enableBackground': False,
-                        'highlightColor': [0.321569, 0.521569, 0.65098],
-                        'style': 'shelf',
-                        'horizontal': False}
+    parsed_item_data = {
+        'enable': True,
+        'width': 12,
+        'height': 35,
+        'manage': True,
+        'visible': True,
+        'preventOverride': False,
+        'enableBackground': False,
+        'highlightColor': [0.321569, 0.521569, 0.65098],
+        'style': 'shelf',
+        'horizontal': False,
+    }
 
     if 'enable' in item_data.keys():
         parsed_item_data['enable'] = item_data.get('enable')
@@ -279,66 +283,70 @@ def _build_shelf_item(shelf_item_data, shelf):
     """
     if cmds.about(apiVersion=True) >= 201600:
         # Maya 2016 and later
-        cmds.shelfButton(enableCommandRepeat=shelf_item_data['enableCommandRepeat'],  # 2015+
-                         enable=shelf_item_data['enable'],
-                         width=shelf_item_data['width'],
-                         height=shelf_item_data['height'],
-                         manage=shelf_item_data['manage'],
-                         visible=shelf_item_data['visible'],
-                         preventOverride=shelf_item_data['preventOverride'],
-                         annotation=shelf_item_data['annotation'],
-                         enableBackground=shelf_item_data['enableBackground'],
-                         align=shelf_item_data['align'],
-                         label=shelf_item_data['label'],
-                         labelOffset=shelf_item_data['labelOffset'],
-                         rotation=shelf_item_data['rotation'],  # 2015+
-                         flipX=shelf_item_data['flipX'],  # 2015+
-                         flipY=shelf_item_data['flipY'],  # 2015+
-                         useAlpha=shelf_item_data['useAlpha'],  # 2015+
-                         font=shelf_item_data['font'],  # 2015+
-                         imageOverlayLabel=shelf_item_data['imageOverlayLabel'],
-                         overlayLabelColor=shelf_item_data['overlayLabelColor'],
-                         overlayLabelBackColor=shelf_item_data['overlayLabelBackColor'],
-                         image=shelf_item_data['image'],
-                         image1=shelf_item_data['image1'],
-                         image2=shelf_item_data['image2'],
-                         image3=shelf_item_data['image3'],
-                         style=shelf_item_data['style'],
-                         marginWidth=shelf_item_data['marginWidth'],
-                         marginHeight=shelf_item_data['marginHeight'],
-                         command=shelf_item_data['command'],
-                         sourceType=shelf_item_data['sourceType'],
-                         commandRepeatable=shelf_item_data['commandRepeatable'],
-                         flat=shelf_item_data['flat'],
-                         parent=shelf)
+        cmds.shelfButton(
+            enableCommandRepeat=shelf_item_data['enableCommandRepeat'],  # 2015+
+            enable=shelf_item_data['enable'],
+            width=shelf_item_data['width'],
+            height=shelf_item_data['height'],
+            manage=shelf_item_data['manage'],
+            visible=shelf_item_data['visible'],
+            preventOverride=shelf_item_data['preventOverride'],
+            annotation=shelf_item_data['annotation'],
+            enableBackground=shelf_item_data['enableBackground'],
+            align=shelf_item_data['align'],
+            label=shelf_item_data['label'],
+            labelOffset=shelf_item_data['labelOffset'],
+            rotation=shelf_item_data['rotation'],  # 2015+
+            flipX=shelf_item_data['flipX'],  # 2015+
+            flipY=shelf_item_data['flipY'],  # 2015+
+            useAlpha=shelf_item_data['useAlpha'],  # 2015+
+            font=shelf_item_data['font'],  # 2015+
+            imageOverlayLabel=shelf_item_data['imageOverlayLabel'],
+            overlayLabelColor=shelf_item_data['overlayLabelColor'],
+            overlayLabelBackColor=shelf_item_data['overlayLabelBackColor'],
+            image=shelf_item_data['image'],
+            image1=shelf_item_data['image1'],
+            image2=shelf_item_data['image2'],
+            image3=shelf_item_data['image3'],
+            style=shelf_item_data['style'],
+            marginWidth=shelf_item_data['marginWidth'],
+            marginHeight=shelf_item_data['marginHeight'],
+            command=shelf_item_data['command'],
+            sourceType=shelf_item_data['sourceType'],
+            commandRepeatable=shelf_item_data['commandRepeatable'],
+            flat=shelf_item_data['flat'],
+            parent=shelf,
+        )
     else:
         # Maya 2015 and earlier
-        cmds.shelfButton(enable=shelf_item_data['enable'],
-                         width=shelf_item_data['width'],
-                         height=shelf_item_data['height'],
-                         manage=shelf_item_data['manage'],
-                         visible=shelf_item_data['visible'],
-                         preventOverride=shelf_item_data['preventOverride'],
-                         annotation=shelf_item_data['annotation'],
-                         enableBackground=shelf_item_data['enableBackground'],
-                         align=shelf_item_data['align'],
-                         label=shelf_item_data['label'],
-                         labelOffset=shelf_item_data['labelOffset'],
-                         imageOverlayLabel=shelf_item_data['imageOverlayLabel'],
-                         overlayLabelColor=shelf_item_data['overlayLabelColor'],
-                         overlayLabelBackColor=shelf_item_data['overlayLabelBackColor'],
-                         image=shelf_item_data['image'],
-                         image1=shelf_item_data['image1'],
-                         image2=shelf_item_data['image2'],
-                         image3=shelf_item_data['image3'],
-                         style=shelf_item_data['style'],
-                         marginWidth=shelf_item_data['marginWidth'],
-                         marginHeight=shelf_item_data['marginHeight'],
-                         command=shelf_item_data['command'],
-                         sourceType=shelf_item_data['sourceType'],
-                         commandRepeatable=shelf_item_data['commandRepeatable'],
-                         flat=shelf_item_data['flat'],
-                         parent=shelf)
+        cmds.shelfButton(
+            enable=shelf_item_data['enable'],
+            width=shelf_item_data['width'],
+            height=shelf_item_data['height'],
+            manage=shelf_item_data['manage'],
+            visible=shelf_item_data['visible'],
+            preventOverride=shelf_item_data['preventOverride'],
+            annotation=shelf_item_data['annotation'],
+            enableBackground=shelf_item_data['enableBackground'],
+            align=shelf_item_data['align'],
+            label=shelf_item_data['label'],
+            labelOffset=shelf_item_data['labelOffset'],
+            imageOverlayLabel=shelf_item_data['imageOverlayLabel'],
+            overlayLabelColor=shelf_item_data['overlayLabelColor'],
+            overlayLabelBackColor=shelf_item_data['overlayLabelBackColor'],
+            image=shelf_item_data['image'],
+            image1=shelf_item_data['image1'],
+            image2=shelf_item_data['image2'],
+            image3=shelf_item_data['image3'],
+            style=shelf_item_data['style'],
+            marginWidth=shelf_item_data['marginWidth'],
+            marginHeight=shelf_item_data['marginHeight'],
+            command=shelf_item_data['command'],
+            sourceType=shelf_item_data['sourceType'],
+            commandRepeatable=shelf_item_data['commandRepeatable'],
+            flat=shelf_item_data['flat'],
+            parent=shelf,
+        )
 
 
 def _build_shelf_separator(shelf_separator_data, shelf):
@@ -350,17 +358,19 @@ def _build_shelf_separator(shelf_separator_data, shelf):
     if not cmds.about(apiVersion=True) >= 201600:
         return
 
-    cmds.separator(enable=shelf_item_data['enable'],
-                   width=shelf_item_data['width'],
-                   height=shelf_item_data['height'],
-                   manage=shelf_item_data['manage'],
-                   visible=shelf_item_data['visible'],
-                   preventOverride=shelf_item_data['preventOverride'],
-                   enableBackground=shelf_item_data['enableBackground'],
-                   highlightColor=shelf_item_data['highlightColor'],
-                   style=shelf_item_data['style'],
-                   horizontal=shelf_item_data['horizontal'],
-                   parent=shelf)
+    cmds.separator(
+        enable=shelf_separator_data['enable'],
+        width=shelf_separator_data['width'],
+        height=shelf_separator_data['height'],
+        manage=shelf_separator_data['manage'],
+        visible=shelf_separator_data['visible'],
+        preventOverride=shelf_separator_data['preventOverride'],
+        enableBackground=shelf_separator_data['enableBackground'],
+        highlightColor=shelf_separator_data['highlightColor'],
+        style=shelf_separator_data['style'],
+        horizontal=shelf_separator_data['horizontal'],
+        parent=shelf,
+    )
 
 
 def _get_shelf_item_data(shelf_button):
@@ -369,177 +379,109 @@ def _get_shelf_item_data(shelf_button):
     if 'separator' in shelf_button:
         if cmds.about(apiVersion=True) >= 201650:
             # Maya 2016.5 and later
-            shelf_item_data['enable'] = \
-                cmds.separator(shelf_button, query=True, enable=True)
-            shelf_item_data['width'] = \
-                cmds.separator(shelf_button, query=True, width=True)
-            shelf_item_data['height'] = \
-                cmds.separator(shelf_button, query=True, height=True)
-            shelf_item_data['manage'] = \
-                cmds.separator(shelf_button, query=True, manage=True)
-            shelf_item_data['visible'] = \
-                cmds.separator(shelf_button, query=True, visible=True)
-            shelf_item_data['preventOverride'] = \
-                cmds.separator(shelf_button, query=True, preventOverride=True)
-            shelf_item_data['enableBackground'] = \
-                cmds.separator(shelf_button, query=True, enableBackground=True)
-            shelf_item_data['highlightColor'] = \
-                cmds.separator(shelf_button, query=True, highlightColor=True)
-            shelf_item_data['style'] = \
-                cmds.separator(shelf_button, query=True, style=True)
-            shelf_item_data['horizontal'] = \
-                cmds.separator(shelf_button, query=True, horizontal=True)
+            shelf_item_data['enable'] = cmds.separator(shelf_button, query=True, enable=True)
+            shelf_item_data['width'] = cmds.separator(shelf_button, query=True, width=True)
+            shelf_item_data['height'] = cmds.separator(shelf_button, query=True, height=True)
+            shelf_item_data['manage'] = cmds.separator(shelf_button, query=True, manage=True)
+            shelf_item_data['visible'] = cmds.separator(shelf_button, query=True, visible=True)
+            shelf_item_data['preventOverride'] = cmds.separator(shelf_button, query=True, preventOverride=True)
+            shelf_item_data['enableBackground'] = cmds.separator(shelf_button, query=True, enableBackground=True)
+            shelf_item_data['highlightColor'] = cmds.separator(shelf_button, query=True, highlightColor=True)
+            shelf_item_data['style'] = cmds.separator(shelf_button, query=True, style=True)
+            shelf_item_data['horizontal'] = cmds.separator(shelf_button, query=True, horizontal=True)
         else:
             # Maya 2016 and earlier
-            shelf_item_data['enable'] = \
-                cmds.separator(shelf_button, query=True, enable=True)
-            shelf_item_data['width'] = \
-                cmds.separator(shelf_button, query=True, width=True)
-            shelf_item_data['height'] = \
-                cmds.separator(shelf_button, query=True, height=True)
-            shelf_item_data['manage'] = \
-                cmds.separator(shelf_button, query=True, manage=True)
-            shelf_item_data['visible'] = \
-                cmds.separator(shelf_button, query=True, visible=True)
-            shelf_item_data['preventOverride'] = \
-                cmds.separator(shelf_button, query=True, preventOverride=True)
-            shelf_item_data['enableBackground'] = \
-                cmds.separator(shelf_button, query=True, enableBackground=True)
-            shelf_item_data['style'] = \
-                cmds.separator(shelf_button, query=True, style=True)
-            shelf_item_data['horizontal'] = \
-                cmds.separator(shelf_button, query=True, horizontal=True)
+            shelf_item_data['enable'] = cmds.separator(shelf_button, query=True, enable=True)
+            shelf_item_data['width'] = cmds.separator(shelf_button, query=True, width=True)
+            shelf_item_data['height'] = cmds.separator(shelf_button, query=True, height=True)
+            shelf_item_data['manage'] = cmds.separator(shelf_button, query=True, manage=True)
+            shelf_item_data['visible'] = cmds.separator(shelf_button, query=True, visible=True)
+            shelf_item_data['preventOverride'] = cmds.separator(shelf_button, query=True, preventOverride=True)
+            shelf_item_data['enableBackground'] = cmds.separator(shelf_button, query=True, enableBackground=True)
+            shelf_item_data['style'] = cmds.separator(shelf_button, query=True, style=True)
+            shelf_item_data['horizontal'] = cmds.separator(shelf_button, query=True, horizontal=True)
 
         return {'separator': shelf_item_data}
 
     if cmds.about(apiVersion=True) >= 201600:
         # Maya 2016 and later
-        shelf_item_data['enableCommandRepeat'] = \
-            cmds.shelfButton(shelf_button, query=True, enableCommandRepeat=True)  # 2015+
-        shelf_item_data['enable'] = \
-            cmds.shelfButton(shelf_button, query=True, enable=True)
-        shelf_item_data['width'] = \
-            cmds.shelfButton(shelf_button, query=True, width=True)
-        shelf_item_data['height'] = \
-            cmds.shelfButton(shelf_button, query=True, height=True)
-        shelf_item_data['manage'] = \
-            cmds.shelfButton(shelf_button, query=True, manage=True)
-        shelf_item_data['visible'] = \
-            cmds.shelfButton(shelf_button, query=True, visible=True)
-        shelf_item_data['preventOverride'] = \
-            cmds.shelfButton(shelf_button, query=True, preventOverride=True)
-        shelf_item_data['annotation'] = \
-            cmds.shelfButton(shelf_button, query=True, annotation=True)
-        shelf_item_data['enableBackground'] = \
-            cmds.shelfButton(shelf_button, query=True, enableBackground=True)
-        shelf_item_data['align'] = \
-            cmds.shelfButton(shelf_button, query=True, align=True)
-        shelf_item_data['label'] = \
-            cmds.shelfButton(shelf_button, query=True, label=True)
-        shelf_item_data['labelOffset'] = \
-            cmds.shelfButton(shelf_button, query=True, labelOffset=True)
-        shelf_item_data['rotation'] = \
-            cmds.shelfButton(shelf_button, query=True, rotation=True)  # 2015+
-        shelf_item_data['flipX'] = \
-            cmds.shelfButton(shelf_button, query=True, flipX=True)  # 2015+
-        shelf_item_data['flipY'] = \
-            cmds.shelfButton(shelf_button, query=True, flipY=True)  # 2015+
-        shelf_item_data['useAlpha'] = \
-            cmds.shelfButton(shelf_button, query=True, useAlpha=True)  # 2015+
-        shelf_item_data['font'] = \
-            cmds.shelfButton(shelf_button, query=True, font=True)  # 2015+
-        shelf_item_data['imageOverlayLabel'] = \
-            cmds.shelfButton(shelf_button, query=True, imageOverlayLabel=True)
-        shelf_item_data['overlayLabelColor'] = \
-            cmds.shelfButton(shelf_button, query=True, overlayLabelColor=True)
-        shelf_item_data['overlayLabelBackColor'] = \
-            cmds.shelfButton(shelf_button, query=True, overlayLabelBackColor=True)
+        shelf_item_data['enableCommandRepeat'] = cmds.shelfButton(
+            shelf_button, query=True, enableCommandRepeat=True
+        )  # 2015+
+        shelf_item_data['enable'] = cmds.shelfButton(shelf_button, query=True, enable=True)
+        shelf_item_data['width'] = cmds.shelfButton(shelf_button, query=True, width=True)
+        shelf_item_data['height'] = cmds.shelfButton(shelf_button, query=True, height=True)
+        shelf_item_data['manage'] = cmds.shelfButton(shelf_button, query=True, manage=True)
+        shelf_item_data['visible'] = cmds.shelfButton(shelf_button, query=True, visible=True)
+        shelf_item_data['preventOverride'] = cmds.shelfButton(shelf_button, query=True, preventOverride=True)
+        shelf_item_data['annotation'] = cmds.shelfButton(shelf_button, query=True, annotation=True)
+        shelf_item_data['enableBackground'] = cmds.shelfButton(shelf_button, query=True, enableBackground=True)
+        shelf_item_data['align'] = cmds.shelfButton(shelf_button, query=True, align=True)
+        shelf_item_data['label'] = cmds.shelfButton(shelf_button, query=True, label=True)
+        shelf_item_data['labelOffset'] = cmds.shelfButton(shelf_button, query=True, labelOffset=True)
+        shelf_item_data['rotation'] = cmds.shelfButton(shelf_button, query=True, rotation=True)  # 2015+
+        shelf_item_data['flipX'] = cmds.shelfButton(shelf_button, query=True, flipX=True)  # 2015+
+        shelf_item_data['flipY'] = cmds.shelfButton(shelf_button, query=True, flipY=True)  # 2015+
+        shelf_item_data['useAlpha'] = cmds.shelfButton(shelf_button, query=True, useAlpha=True)  # 2015+
+        shelf_item_data['font'] = cmds.shelfButton(shelf_button, query=True, font=True)  # 2015+
+        shelf_item_data['imageOverlayLabel'] = cmds.shelfButton(shelf_button, query=True, imageOverlayLabel=True)
+        shelf_item_data['overlayLabelColor'] = cmds.shelfButton(shelf_button, query=True, overlayLabelColor=True)
+        shelf_item_data['overlayLabelBackColor'] = cmds.shelfButton(
+            shelf_button, query=True, overlayLabelBackColor=True
+        )
 
         # Resolve the image paths to just get the names if possible
-        shelf_item_data['image'] = \
-            _shorten_icon_path(cmds.shelfButton(shelf_button, query=True, image=True))
-        shelf_item_data['image1'] = \
-            _shorten_icon_path(cmds.shelfButton(shelf_button, query=True, image1=True))
-        shelf_item_data['image2'] = \
-            _shorten_icon_path(cmds.shelfButton(shelf_button, query=True, image2=True))
-        shelf_item_data['image3'] = \
-            _shorten_icon_path(cmds.shelfButton(shelf_button, query=True, image3=True))
+        shelf_item_data['image'] = _shorten_icon_path(cmds.shelfButton(shelf_button, query=True, image=True))
+        shelf_item_data['image1'] = _shorten_icon_path(cmds.shelfButton(shelf_button, query=True, image1=True))
+        shelf_item_data['image2'] = _shorten_icon_path(cmds.shelfButton(shelf_button, query=True, image2=True))
+        shelf_item_data['image3'] = _shorten_icon_path(cmds.shelfButton(shelf_button, query=True, image3=True))
 
-        shelf_item_data['style'] = \
-            cmds.shelfButton(shelf_button, query=True, style=True)
-        shelf_item_data['marginWidth'] = \
-            cmds.shelfButton(shelf_button, query=True, marginWidth=True)
-        shelf_item_data['marginHeight'] = \
-            cmds.shelfButton(shelf_button, query=True, marginHeight=True)
-        shelf_item_data['command'] = \
-            cmds.shelfButton(shelf_button, query=True, command=True)
-        shelf_item_data['sourceType'] = \
-            cmds.shelfButton(shelf_button, query=True, sourceType=True)
-        shelf_item_data['commandRepeatable'] = \
-            cmds.shelfButton(shelf_button, query=True, commandRepeatable=True)
-        shelf_item_data['flat'] = \
-            cmds.shelfButton(shelf_button, query=True, flat=True)
+        shelf_item_data['style'] = cmds.shelfButton(shelf_button, query=True, style=True)
+        shelf_item_data['marginWidth'] = cmds.shelfButton(shelf_button, query=True, marginWidth=True)
+        shelf_item_data['marginHeight'] = cmds.shelfButton(shelf_button, query=True, marginHeight=True)
+        shelf_item_data['command'] = cmds.shelfButton(shelf_button, query=True, command=True)
+        shelf_item_data['sourceType'] = cmds.shelfButton(shelf_button, query=True, sourceType=True)
+        shelf_item_data['commandRepeatable'] = cmds.shelfButton(shelf_button, query=True, commandRepeatable=True)
+        shelf_item_data['flat'] = cmds.shelfButton(shelf_button, query=True, flat=True)
     else:
         # Maya 2015 and earlier
-        shelf_item_data['enable'] = \
-            cmds.shelfButton(shelf_button, query=True, enable=True)
-        shelf_item_data['width'] = \
-            cmds.shelfButton(shelf_button, query=True, width=True)
-        shelf_item_data['height'] = \
-            cmds.shelfButton(shelf_button, query=True, height=True)
-        shelf_item_data['manage'] = \
-            cmds.shelfButton(shelf_button, query=True, manage=True)
-        shelf_item_data['visible'] = \
-            cmds.shelfButton(shelf_button, query=True, visible=True)
-        shelf_item_data['preventOverride'] = \
-            cmds.shelfButton(shelf_button, query=True, preventOverride=True)
-        shelf_item_data['annotation'] = \
-            cmds.shelfButton(shelf_button, query=True, annotation=True)
-        shelf_item_data['enableBackground'] = \
-            cmds.shelfButton(shelf_button, query=True, enableBackground=True)
-        shelf_item_data['align'] = \
-            cmds.shelfButton(shelf_button, query=True, align=True)
-        shelf_item_data['label'] = \
-            cmds.shelfButton(shelf_button, query=True, label=True)
-        shelf_item_data['labelOffset'] = \
-            cmds.shelfButton(shelf_button, query=True, labelOffset=True)
-        shelf_item_data['imageOverlayLabel'] = \
-            cmds.shelfButton(shelf_button, query=True, imageOverlayLabel=True)
-        shelf_item_data['overlayLabelColor'] = \
-            cmds.shelfButton(shelf_button, query=True, overlayLabelColor=True)
-        shelf_item_data['overlayLabelBackColor'] = \
-            cmds.shelfButton(shelf_button, query=True, overlayLabelBackColor=True)
+        shelf_item_data['enable'] = cmds.shelfButton(shelf_button, query=True, enable=True)
+        shelf_item_data['width'] = cmds.shelfButton(shelf_button, query=True, width=True)
+        shelf_item_data['height'] = cmds.shelfButton(shelf_button, query=True, height=True)
+        shelf_item_data['manage'] = cmds.shelfButton(shelf_button, query=True, manage=True)
+        shelf_item_data['visible'] = cmds.shelfButton(shelf_button, query=True, visible=True)
+        shelf_item_data['preventOverride'] = cmds.shelfButton(shelf_button, query=True, preventOverride=True)
+        shelf_item_data['annotation'] = cmds.shelfButton(shelf_button, query=True, annotation=True)
+        shelf_item_data['enableBackground'] = cmds.shelfButton(shelf_button, query=True, enableBackground=True)
+        shelf_item_data['align'] = cmds.shelfButton(shelf_button, query=True, align=True)
+        shelf_item_data['label'] = cmds.shelfButton(shelf_button, query=True, label=True)
+        shelf_item_data['labelOffset'] = cmds.shelfButton(shelf_button, query=True, labelOffset=True)
+        shelf_item_data['imageOverlayLabel'] = cmds.shelfButton(shelf_button, query=True, imageOverlayLabel=True)
+        shelf_item_data['overlayLabelColor'] = cmds.shelfButton(shelf_button, query=True, overlayLabelColor=True)
+        shelf_item_data['overlayLabelBackColor'] = cmds.shelfButton(
+            shelf_button, query=True, overlayLabelBackColor=True
+        )
 
         # Resolve the image paths to just get the names if possible
-        shelf_item_data['image'] = \
-            _shorten_icon_path(cmds.shelfButton(shelf_button, query=True, image=True))
-        shelf_item_data['image1'] = \
-            _shorten_icon_path(cmds.shelfButton(shelf_button, query=True, image1=True))
-        shelf_item_data['image2'] = \
-            _shorten_icon_path(cmds.shelfButton(shelf_button, query=True, image2=True))
-        shelf_item_data['image3'] = \
-            _shorten_icon_path(cmds.shelfButton(shelf_button, query=True, image3=True))
+        shelf_item_data['image'] = _shorten_icon_path(cmds.shelfButton(shelf_button, query=True, image=True))
+        shelf_item_data['image1'] = _shorten_icon_path(cmds.shelfButton(shelf_button, query=True, image1=True))
+        shelf_item_data['image2'] = _shorten_icon_path(cmds.shelfButton(shelf_button, query=True, image2=True))
+        shelf_item_data['image3'] = _shorten_icon_path(cmds.shelfButton(shelf_button, query=True, image3=True))
 
-        shelf_item_data['style'] = \
-            cmds.shelfButton(shelf_button, query=True, style=True)
-        shelf_item_data['marginWidth'] = \
-            cmds.shelfButton(shelf_button, query=True, marginWidth=True)
-        shelf_item_data['marginHeight'] = \
-            cmds.shelfButton(shelf_button, query=True, marginHeight=True)
-        shelf_item_data['command'] = \
-            cmds.shelfButton(shelf_button, query=True, command=True)
-        shelf_item_data['sourceType'] = \
-            cmds.shelfButton(shelf_button, query=True, sourceType=True)
-        shelf_item_data['commandRepeatable'] = \
-            cmds.shelfButton(shelf_button, query=True, commandRepeatable=True)
-        shelf_item_data['flat'] = \
-            cmds.shelfButton(shelf_button, query=True, flat=True)
+        shelf_item_data['style'] = cmds.shelfButton(shelf_button, query=True, style=True)
+        shelf_item_data['marginWidth'] = cmds.shelfButton(shelf_button, query=True, marginWidth=True)
+        shelf_item_data['marginHeight'] = cmds.shelfButton(shelf_button, query=True, marginHeight=True)
+        shelf_item_data['command'] = cmds.shelfButton(shelf_button, query=True, command=True)
+        shelf_item_data['sourceType'] = cmds.shelfButton(shelf_button, query=True, sourceType=True)
+        shelf_item_data['commandRepeatable'] = cmds.shelfButton(shelf_button, query=True, commandRepeatable=True)
+        shelf_item_data['flat'] = cmds.shelfButton(shelf_button, query=True, flat=True)
 
     return {'shelfButton': shelf_item_data}
 
 
 # ======================================================================
 # Module Functions
+
 
 def install():
     """

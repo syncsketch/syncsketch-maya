@@ -4,8 +4,7 @@ import logging
 from syncsketchGUI.lib import user
 from syncsketchGUI.lib.maya.menu import refresh_menu_state
 from syncsketchGUI.lib.path import get_syncsketch_url
-from syncsketchGUI.vendor.Qt import QtCore
-from syncsketchGUI.vendor.Qt import QtWebEngineWidgets, QtWebChannel
+from syncsketchGUI.vendor.Qt import QtCore, QtWebChannel, QtWebEngineWidgets
 
 logger = logging.getLogger("syncsketchGUI")
 

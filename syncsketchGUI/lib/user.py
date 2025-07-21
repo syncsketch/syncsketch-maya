@@ -3,11 +3,11 @@ import logging
 import os
 import time
 from os.path import expanduser
-from six.moves.urllib_parse import urlsplit
 
 import requests
 import syncsketch
 import yaml
+from six.moves.urllib_parse import urlsplit
 
 from syncsketchGUI.lib import database, path
 
@@ -245,7 +245,9 @@ class SyncSketchUser:
             return
 
         uploaded_item = self.api.add_media(review_id, filepath, noConvertFlag=noConvertFlag, itemParentId=itemParentId)
-        uploaded_item = self.api.update_item(uploaded_item["id"], data)
+        if uploaded_item:
+            uploaded_item = self.api.update_item(uploaded_item["id"], data)
+
         return uploaded_item
 
     def update_item(self, item_id, filepath, data=None):

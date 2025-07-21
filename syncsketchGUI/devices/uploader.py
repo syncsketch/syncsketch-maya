@@ -25,7 +25,9 @@ def upload(open_after_upload=None, show_success_msg=False):
 
     if open_after_upload:
         url = path.make_url_offlineMode(uploaded_item['reviewURL'])
-        logger.debug("url: {}, uploaded_item: {}, reviewURL: {}".format(url, uploaded_item, uploaded_item['reviewURL']))
+        logger.debug(
+            "url: {}, uploaded_item: {}, reviewURL: {}".format(url, uploaded_item, uploaded_item['reviewURL'])
+        )
         webbrowser.open(url, new=2, autoraise=True)
 
     if not open_after_upload:
@@ -35,7 +37,9 @@ def upload(open_after_upload=None, show_success_msg=False):
     return uploaded_item
 
 
-def _upload(current_user=None, ):
+def _upload(
+    current_user=None,
+):
     error_log = None
     if not current_user:
         current_user = user.SyncSketchUser()
@@ -75,17 +79,22 @@ def _upload(current_user=None, ):
 
     if item_type == 'review':
         logger.info('Uploading {} to {} with review_id {}'.format(upload_file, upload_to_value, review_id))
-        uploaded_item = current_user.upload_media_to_review(review_id, upload_file, noConvertFlag=no_convert_flag,
-                                                            itemParentId=False, data=post_data)
+        uploaded_item = current_user.upload_media_to_review(
+            review_id, upload_file, noConvertFlag=no_convert_flag, itemParentId=False, data=post_data
+        )
     elif item_type == 'media':
         logger.info("Trying to upload {} to item_id {}, review {}".format(upload_file, item_id, review_id))
-        uploaded_item = current_user.upload_media_to_review(review_id, upload_file, noConvertFlag=no_convert_flag,
-                                                            itemParentId=item_id, data=post_data)
+        uploaded_item = current_user.upload_media_to_review(
+            review_id, upload_file, noConvertFlag=no_convert_flag, itemParentId=item_id, data=post_data
+        )
         logger.info(pformat(uploaded_item))
     else:
         uploaded_item = None
-        error_log = 'You cannot upload to {} "{}" directly.\nPlease select a review in the tree widget to upload to!\n'.format(
-            item_type, item_name)
+        error_log = (
+            'You cannot upload to {} "{}" directly.\nPlease select a review in the tree widget to upload to!\n'.format(
+                item_type, item_name
+            )
+        )
 
     if not uploaded_item:
         if not error_log:
@@ -114,10 +123,7 @@ def _show_success_message(uploaded_item):
     title = 'Upload Successful'
     info_message = 'Your file has successfully been uploaded. Please follow this link:'
 
-    uploaded_media_dialog = qt_dialogs.InfoDialog(None,
-                                                  title,
-                                                  info_message,
-                                                  uploaded_item)
+    uploaded_media_dialog = qt_dialogs.InfoDialog(None, title, info_message, uploaded_item)
     uploaded_media_dialog.exec_()
 
 

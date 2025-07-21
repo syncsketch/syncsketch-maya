@@ -1,22 +1,15 @@
+import logging
 import os
 import time
 
-from syncsketchGUI.vendor.Qt import QtCore, QtWidgets
-
+from syncsketchGUI.installScripts.maintenance import \
+    get_latest_setup_py_file_from_local
 from syncsketchGUI.lib import user
 from syncsketchGUI.literals import message_is_not_connected
+from syncsketchGUI.vendor.Qt import QtCore, QtWidgets
 
-from syncsketchGUI.installScripts.maintenance import get_latest_setup_py_file_from_local
-
-from . import qt_browser
-from . import qt_menu
-from . import qt_recorder
-from . import qt_upload
-from . import qt_presets
-from . import qt_utils
-from . import qt_windows
-
-import logging
+from . import (qt_browser, qt_menu, qt_presets, qt_recorder, qt_upload,
+               qt_utils, qt_windows)
 
 logger = logging.getLogger("syncsketchGUI")
 

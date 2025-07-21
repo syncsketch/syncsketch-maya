@@ -1,19 +1,13 @@
 import logging
 
 from syncsketchGUI import literals
-
-from syncsketchGUI.vendor.Qt import QtWidgets
-
+from syncsketchGUI.devices import downloader
 from syncsketchGUI.lib import database, user
 from syncsketchGUI.lib.maya import scene as maya_scene
+from syncsketchGUI.vendor.Qt import QtWidgets
 
-from syncsketchGUI.devices import downloader
-
-from . import qt_windows
-from . import qt_presets
-from . import qt_regulars
-from . import qt_dialogs
 from ..path import parse_url_data
+from . import qt_dialogs, qt_presets, qt_regulars, qt_windows
 
 logger = logging.getLogger("syncsketchGUI")
 

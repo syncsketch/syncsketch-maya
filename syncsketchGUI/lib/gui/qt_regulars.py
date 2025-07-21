@@ -1,11 +1,9 @@
-from syncsketchGUI.vendor.Qt import QtWidgets, QtCore
+import logging
 
-from syncsketchGUI.lib import path
-from syncsketchGUI.lib import database
+from syncsketchGUI.lib import database, path
+from syncsketchGUI.vendor.Qt import QtCore, QtWidgets
 
 from . import qt_presets
-
-import logging
 
 logger = logging.getLogger("syncsketchGUI")
 

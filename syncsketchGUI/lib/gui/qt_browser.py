@@ -1,19 +1,15 @@
 import logging
 import webbrowser
 
+from syncsketchGUI import actions
+from syncsketchGUI.lib import database, path, user
+from syncsketchGUI.literals import uploadPlaceHolderStr
+from syncsketchGUI.vendor.Qt import QtCore, QtGui, QtWidgets
+
 from ..path import get_syncsketch_url, parse_url_data
+from . import qt_presets, qt_regulars, qt_utils
 
 logger = logging.getLogger("syncsketchGUI")
-
-from syncsketchGUI.vendor.Qt import QtCore, QtGui, QtWidgets
-from syncsketchGUI.lib import user, database, path
-from syncsketchGUI.literals import uploadPlaceHolderStr
-
-from syncsketchGUI import actions
-
-from . import qt_regulars
-from . import qt_presets
-from . import qt_utils
 
 # FIXME
 USER_ACCOUNT_DATA = None
@@ -478,7 +474,10 @@ class ReviewBrowserWidget(QtWidgets.QWidget):
 
         elif item_type == 'review':  # and not item_data.get('reviewURL'):
             current_data['review_id'] = item_data.get('id')
-            current_data['target_url'] = '{0}{1}'.format(review_base_url, item_data.get('uuid'), )
+            current_data['target_url'] = '{0}{1}'.format(
+                review_base_url,
+                item_data.get('uuid'),
+            )
             logger.info("in  item_type == 'review'")
 
         elif item_type == 'media':
@@ -519,7 +518,11 @@ def get_current_item_from_ids(tree, payload=None):
     if payload['uuid'] and payload['id']:
         searchType = 'id'
         searchValue = int(payload['id'])
-        logger.debug("both payload['uuid'] and payload['id'] set {}".format(payload['uuid'], ))
+        logger.debug(
+            "both payload['uuid'] and payload['id'] set {}".format(
+                payload['uuid'],
+            )
+        )
 
     # Got only uuid, it's a review
     elif payload['uuid']:

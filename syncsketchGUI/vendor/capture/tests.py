@@ -8,9 +8,13 @@ Example:
 
 """
 
+import capture
 from maya import cmds
 
-import capture
+try:
+    string_types = basestring
+except NameError:
+    string_types = str
 
 
 def test_capture():
@@ -44,7 +48,6 @@ def test_parse_active_view():
     # Set focus to modelPanel1(assume it exists)
     # Otherwise the panel with focus(temporary panel from capture)
     # got deleted and there's no "active panel"
-    import maya.cmds as cmds
     cmds.setFocus("modelPanel1")
 
     options = capture.parse_active_view()
@@ -72,7 +75,6 @@ def test_apply_parsed_view():
 def test_apply_parsed_view_exact():
     """Apply parsed view sanity check works"""
 
-    import maya.cmds as cmds
     panel = "modelPanel1"
 
     cmds.modelEditor(panel, edit=True, displayAppearance="wireframe")
@@ -88,11 +90,8 @@ def test_apply_parsed_view_exact():
     display = parsed["viewport_options"]["displayAppearance"]
     assert display == "smoothShaded"
 
-    capture.apply_view(panel,
-                       viewport_options={"displayAppearance": "wireframe"})
-    assert cmds.modelEditor(panel,
-                            query=True,
-                            displayAppearance=True) == "wireframe"
+    capture.apply_view(panel, viewport_options={"displayAppearance": "wireframe"})
+    assert cmds.modelEditor(panel, query=True, displayAppearance=True) == "wireframe"
 
 
 def test_apply_parsed_view_all():
@@ -111,8 +110,7 @@ def test_apply_parsed_view_all():
         elif isinstance(value, (int, float)):
             value = value + 1
         else:
-            raise Exception("Unexpected value in CameraOptions: %s=%s"
-                            % (key, value))
+            raise Exception("Unexpected value in CameraOptions: %s=%s" % (key, value))
 
     for key, value in capture.DisplayOptions.items():
         if isinstance(value, bool):
@@ -120,8 +118,7 @@ def test_apply_parsed_view_all():
         elif isinstance(value, tuple):
             value = (1, 0, 1)
         else:
-            raise Exception("Unexpected value in DisplayOptions: %s=%s"
-                            % (key, value))
+            raise Exception("Unexpected value in DisplayOptions: %s=%s" % (key, value))
 
     for key, value in capture.ViewportOptions.items():
         if isinstance(value, bool):
@@ -130,11 +127,10 @@ def test_apply_parsed_view_all():
             value = value + 1
         elif isinstance(value, tuple):
             value = (1, 0, 1)
-        elif isinstance(value, basestring):
+        elif isinstance(value, string_types):
             pass  # Don't bother, for now
         else:
-            raise Exception("Unexpected value in ViewportOptions: %s=%s"
-                            % (key, value))
+            raise Exception("Unexpected value in ViewportOptions: %s=%s" % (key, value))
 
     for key, value in capture.Viewport2Options.items():
         if isinstance(value, bool):
@@ -143,11 +139,10 @@ def test_apply_parsed_view_all():
             value = value + 1
         elif isinstance(value, tuple):
             value = (1, 0, 1)
-        elif isinstance(value, basestring):
+        elif isinstance(value, string_types):
             pass  # Don't bother, for now
         else:
-            raise Exception("Unexpected value in Viewport2Options: %s=%s"
-                            % (key, value))
+            raise Exception("Unexpected value in Viewport2Options: %s=%s" % (key, value))
 
     defaults = {
         "camera_options": capture.CameraOptions.copy(),
@@ -187,8 +182,7 @@ def test_apply_parsed_view_all():
                         return False
                 elif isinstance(value, (tuple, list)):
                     # Assuming for now that any tuple or list contains floats
-                    if not all((abs(a - b) < precision)
-                               for a, b in zip(value, other_value)):
+                    if not all((abs(a - b) < precision) for a, b in zip(value, other_value)):
                         return False
                 else:
                     if value != other_value:
@@ -213,15 +207,9 @@ def test_preset():
     preset = {
         "width": 320,
         "height": 240,
-        "camera_options": {
-            "displayGateMask": False
-        },
-        "viewport_options": {
-            "wireframeOnShaded": True
-        },
-        "display_options": {
-            "displayGateMask": False
-        }
+        "camera_options": {"displayGateMask": False},
+        "viewport_options": {"wireframeOnShaded": True},
+        "display_options": {"displayGateMask": False},
     }
 
     capture.capture(**preset)
@@ -237,14 +225,11 @@ def test_parse_active_scene():
         "width": cmds.getAttr("defaultResolution.width"),
         "height": cmds.getAttr("defaultResolution.height"),
         "compression": cmds.optionVar(query="playblastCompression"),
-        "filename": (cmds.optionVar(query="playblastFile")
-                     if cmds.optionVar(query="playblastSaveToFile") else None),
+        "filename": (cmds.optionVar(query="playblastFile") if cmds.optionVar(query="playblastSaveToFile") else None),
         "format": cmds.optionVar(query="playblastFormat"),
-        "off_screen": (True if cmds.optionVar(query="playblastOffscreen")
-                       else False),
-        "show_ornaments": (True if cmds.optionVar(query="playblastShowOrnaments")
-                           else False),
-        "quality": cmds.optionVar(query="playblastQuality")
+        "off_screen": (True if cmds.optionVar(query="playblastOffscreen") else False),
+        "show_ornaments": (True if cmds.optionVar(query="playblastShowOrnaments") else False),
+        "quality": cmds.optionVar(query="playblastQuality"),
     }
 
     for key, value in reference.items():

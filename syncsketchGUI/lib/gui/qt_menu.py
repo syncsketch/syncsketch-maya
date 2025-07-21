@@ -4,13 +4,11 @@ import webbrowser
 from syncsketchGUI.installScripts.maintenance import get_version_difference
 from syncsketchGUI.lib import path, user
 from syncsketchGUI.lib.connection import is_connected
-from syncsketchGUI.literals import message_is_not_loggedin, message_is_not_connected
+from syncsketchGUI.literals import (message_is_not_connected,
+                                    message_is_not_loggedin)
 from syncsketchGUI.vendor.Qt import QtCore, QtWidgets
-from . import qt_dialogs
-from . import qt_presets
-from . import qt_regulars
-from . import qt_utils
-from . import web
+
+from . import qt_dialogs, qt_presets, qt_regulars, qt_utils, web
 
 logger = logging.getLogger("syncsketchGUI")
 
@@ -138,6 +136,7 @@ class MenuWidget(QtWidgets.QWidget):
 
     def upgrade_plugin(self):
         from syncsketchGUI.installScripts.maintenance import handle_upgrade
+
         # attach the upgrader to the mainWindow so it doesn't go out of scope
         self.installer = handle_upgrade()
 

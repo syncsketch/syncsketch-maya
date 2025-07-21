@@ -1,10 +1,9 @@
+import logging
 import webbrowser
 
 from syncsketchGUI.vendor.Qt import QtCore, QtWidgets
 
 from . import qt_presets
-
-import logging
 
 logger = logging.getLogger("syncsketchGUI")
 

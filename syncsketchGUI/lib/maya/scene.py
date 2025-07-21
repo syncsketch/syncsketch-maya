@@ -9,18 +9,18 @@ import glob
 import logging
 import os
 import sys
+
 # ======================================================================
 # Module Utilities
 import tempfile
 import xml.etree.ElementTree as ET
 import zipfile
 
-from maya import cmds
-from maya import mel
+from maya import cmds, mel
 
-from syncsketchGUI.lib import database
-from syncsketchGUI.lib import path
+from syncsketchGUI.lib import database, path
 from syncsketchGUI.vendor.capture import capture
+from syncsketchGUI.vendor.Qt import QtWidgets
 
 logger = logging.getLogger("syncsketchGUI")
 
@@ -29,6 +29,7 @@ GREASE_PENCIL_XML = 'greasePencil.xml'
 
 # ======================================================================
 # Module Functions
+
 
 def get_current_maya_version():
     return int(str(cmds.about(apiVersion=True))[:4])
@@ -61,13 +62,15 @@ def get_available_cameras():
 
 
 def confirm_overwrite_dialogue(message):
-    result = cmds.confirmDialog(title='Confirm Overwrite',
-                                button=['Yes', 'No'],
-                                defaultButton='Yes',
-                                dismissString='No',
-                                cancelButton='No',
-                                message=message,
-                                icon='warning')
+    result = cmds.confirmDialog(
+        title='Confirm Overwrite',
+        button=['Yes', 'No'],
+        defaultButton='Yes',
+        dismissString='No',
+        cancelButton='No',
+        message=message,
+        icon='warning',
+    )
 
     return result.lower()
 
@@ -99,30 +102,22 @@ def get_current_camera(panel=None):
                 return cam
             # camera shape is a shape type
             elif cmds.objectType(cam, isAType="shape"):
-                parent = cmds.listRelatives(cam,
-                                            parent=True,
-                                            fullPath=True)
+                parent = cmds.listRelatives(cam, parent=True, fullPath=True)
                 if parent:
                     return parent[0]
 
     # Check if a camShape is selected(if so use that)
     cam_shapes = cmds.ls(sl=1, type="camera")
     if cam_shapes:
-        return cmds.listRelatives(cam_shapes,
-                                  parent=True,
-                                  fullPath=True)[0]
+        return cmds.listRelatives(cam_shapes, parent=True, fullPath=True)[0]
 
     # Check if a transform of a camShape is selected
     # (return cam transform if any)
     transforms = cmds.ls(sl=1, type="transform")
     if transforms:
-        cam_shapes = cmds.listRelatives(transforms,
-                                        shapes=True,
-                                        type="camera")
+        cam_shapes = cmds.listRelatives(transforms, shapes=True, type="camera")
         if cam_shapes:
-            return cmds.listRelatives(cam_shapes,
-                                      parent=True,
-                                      fullPath=True)[0]
+            return cmds.listRelatives(cam_shapes, parent=True, fullPath=True)[0]
 
 
 def get_all_modelPanels():
@@ -285,6 +280,7 @@ def _create_xml_data_with_offset(xml_file, offset_frames):
 
 def apply_greasepencil(filename, clear_existing_frames=False):
     import pymel.core as pm
+
     ctxName = 'syncSketchGreasePencil'
 
     # file path must be unix style otherwise IO Error by Maya Python zip.py
@@ -311,7 +307,6 @@ def import_bluepencil():
 
 
 def apply_imageplane(filename, camera=None):
-    import maya.cmds as cmds
     # Get Camera Shapes
     if not camera:
         ssCamera = cmds.camera()[1]
@@ -398,10 +393,10 @@ def add_extension(file, rec_args):
 
 def is_file_on_disk(file_path):
     """
-    Extended version of os.path.isFile, since it also checks for frames specified with #### pattern. 
+    Extended version of os.path.isFile, since it also checks for frames specified with #### pattern.
 
     Args:
-        file_path (string): file path 
+        file_path (string): file path
     Returns:
         bool: if file exists already on disk
     """
@@ -466,8 +461,9 @@ def playblast_with_settings(viewport_preset=None, viewport_preset_yaml=None, **r
         logger.info("playblast_with_settings failed")
 
 
-def playblast(filepath=None, width=1280, height=720, start_frame=0, end_frame=0, view_afterward=False,
-              force_overwrite=False):
+def playblast(
+    filepath=None, width=1280, height=720, start_frame=0, end_frame=0, view_afterward=False, force_overwrite=False
+):
     """
     Playblast with the pre-defined settings based on the user's OS
     """
@@ -484,12 +480,7 @@ def playblast(filepath=None, width=1280, height=720, start_frame=0, end_frame=0,
             if not confirm_overwrite_dialogue(message) == 'yes':
                 return
 
-    rec_args = {
-        "width": width,
-        "height": height,
-        "start_frame": start_frame,
-        "end_frame": end_frame
-    }
+    rec_args = {"width": width, "height": height, "start_frame": start_frame, "end_frame": end_frame}
     logger.info("rec_args playblast (): {}".format(rec_args))
 
     # record with OS specific Fallback Settings
@@ -502,7 +493,7 @@ def playblast(filepath=None, width=1280, height=720, start_frame=0, end_frame=0,
             {
                 "format": 'avfoundation',
                 "compression": 'H.264',
-            }
+            },
         ],
         "linux2": [
             {
@@ -512,8 +503,8 @@ def playblast(filepath=None, width=1280, height=720, start_frame=0, end_frame=0,
             {
                 "format": 'movie',
                 "compression": '',
-            }
-        ]
+            },
+        ],
     }
 
     for platform, settingsList in os_settings.items():
@@ -664,12 +655,13 @@ def get_maya_main_window():
     for obj in QtWidgets.qApp.topLevelWidgets():
         if obj.objectName() == 'MayaWindow':
             return obj
+    return None
 
 
 def get_shape_nodes(obj):
     howManyShapes = 0
-    getShape = maya.cmds.listRelatives(obj, shapes=True)
-    if (getShape == None):
+    getShape = cmds.listRelatives(obj, shapes=True)
+    if getShape is None:
         logger.info('ERROR:: getShapeNodes : No Shape Nodes Connected to ' + obj + ' /n')
     else:
         howManyShapes = len(getShape[0])

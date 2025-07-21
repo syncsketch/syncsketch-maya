@@ -4,15 +4,15 @@ Playblasting with independent viewport, camera and display options
 
 """
 
+import contextlib
+import json
 import os
 import re
-import sys
-import json
 import shutil
+import subprocess
+import sys
 import tempfile
 import threading
-import subprocess
-import contextlib
 
 from maya import cmds
 

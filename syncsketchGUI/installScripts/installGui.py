@@ -69,13 +69,15 @@ if os.environ.get("SYNCSKETCH_GUI_SOURCE_PATH"):
     SYNCSKETCH_GUI_SOURCE_PATH = os.environ.get("SYNCSKETCH_GUI_SOURCE_PATH")
 else:
     SYNCSKETCH_GUI_SOURCE_PATH = "https://github.com/syncsketch/syncsketch-maya/archive/refs/tags/{}.zip".format(
-        VERSION_TAG)
+        VERSION_TAG
+    )
 
 
 def _get_install_version():
     if SYNCSKETCH_GUI_SOURCE_PATH.startswith("https"):
         url = "https://raw.githubusercontent.com/syncsketch/syncsketch-maya/{}/syncsketchGUI/version.py".format(
-            VERSION_TAG)
+            VERSION_TAG
+        )
     else:
         url = "file:///{}/syncsketchGUI/version.py".format(SYNCSKETCH_GUI_SOURCE_PATH)
     try:
@@ -94,7 +96,9 @@ FFMPEG_API_ENDPOINT = "https://ffbinaries.com/api/v1/version/4.4.1"
 
 SYNCSKETCH_MAYA_PLUGIN_REPO_URL = "https://github.com/syncsketch/syncsketch-maya"
 SYNCSKETCH_MAYA_PLUGIN_VIDEO_URL = "https://vimeo.com/syncsketch/integrationmaya"
-SYNCSKETCH_MAYA_PLUGIN_DOCS_URL = "https://support.syncsketch.com/hc/en-us/articles/12862858565517-Getting-started-with-the-Maya-Plugin"
+SYNCSKETCH_MAYA_PLUGIN_DOCS_URL = (
+    "https://support.syncsketch.com/hc/en-us/articles/12862858565517-Getting-started-with-the-Maya-Plugin"
+)
 
 # ensure package that are compatible with both python2 and python3
 PY_REQUIREMENTS = ['"requests>2,<2.28.0"', '"syncsketch>1,<2.0"', '"pyyaml>5,<5.4"']
@@ -105,9 +109,9 @@ def _get_configured_log():
     log.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()
 
-    formatter = logging.Formatter('[%(asctime)s - %(filen'
-                                  'ame)s:%(lineno)s - %(levelname)s - %(message)s]',
-                                  "%Y-%m-%d %H:%M:%S")
+    formatter = logging.Formatter(
+        '[%(asctime)s - %(filen' 'ame)s:%(lineno)s - %(levelname)s - %(message)s]', "%Y-%m-%d %H:%M:%S"
+    )
     ch.setFormatter(formatter)
 
     log.addHandler(ch)
@@ -314,7 +318,8 @@ class SyncSketchInstaller(QDialog):
         device = None
         if not Resources.GIFDEVICE.isOpen():
             LOG.debug(
-                'Resources.GIFDEVICE successfully opened: {0}'.format(Resources.GIFDEVICE.open(QIODevice.ReadOnly)))
+                'Resources.GIFDEVICE successfully opened: {0}'.format(Resources.GIFDEVICE.open(QIODevice.ReadOnly))
+            )
             if Resources.GIFDEVICE.isOpen():
                 device = Resources.GIFDEVICE
         else:
@@ -339,10 +344,12 @@ class SyncSketchInstaller(QDialog):
         logo.setMargin(15)
         self.outer.addWidget(logo, 0)
         self.subtext = QLabel(
-            u"Update Available: Would you like to upgrade to the latest?"
-            if InstallOptions.upgrade
-            else "SyncSketch Integration for Maya [{} cut]".format(VERSION_TAG),
-            objectName='subtext'
+            (
+                u"Update Available: Would you like to upgrade to the latest?"
+                if InstallOptions.upgrade
+                else "SyncSketch Integration for Maya [{} cut]".format(VERSION_TAG)
+            ),
+            objectName='subtext',
         )
         self.outer.addWidget(self.subtext)
         self.subtext.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
@@ -466,6 +473,7 @@ class SyncSketchInstaller(QDialog):
         # Install the Shelf
         if InstallOptions.install_shelf:
             from syncsketchGUI.actions import install_shelf, uninstall_shelf
+
             uninstall_shelf()
             install_shelf()
 
@@ -474,8 +482,11 @@ class SyncSketchInstaller(QDialog):
             cmds.loadPlugin("SyncSketchPlugin")
             cmds.pluginInfo("SyncSketchPlugin", edit=True, autoload=True)
         except RuntimeError as error:
-            LOG.error("Error while loading plugin: '{}'. MAYA_PLUG_IN_PATH: {}".format(
-                error, os.environ.get("MAYA_PLUG_IN_PATH")))
+            LOG.error(
+                "Error while loading plugin: '{}'. MAYA_PLUG_IN_PATH: {}".format(
+                    error, os.environ.get("MAYA_PLUG_IN_PATH")
+                )
+            )
 
         # Create Default's for current OS
         self.create_good_defaults()
@@ -491,8 +502,7 @@ class SyncSketchInstaller(QDialog):
         self.subtext.setText("Error during installation:")
         self.subtext.setStyleSheet("QLabel#subtext {color: orangered; font: 14pt}")
 
-        self.upgrade_info.setText(
-            "{}\n\nSee the Maya Script Editor for more information".format(msg))
+        self.upgrade_info.setText("{}\n\nSee the Maya Script Editor for more information".format(msg))
         self.upgrade_info.setStyleSheet("QLabel#upgradeInfo {color: darkgray; font: 10pt}")
         self.upgrade_info.setWordWrap(True)
 
@@ -542,6 +552,7 @@ class SyncSketchInstaller(QDialog):
         self.close()
         # Open UI
         import syncsketchGUI
+
         reload(syncsketchGUI)
         syncsketchGUI.show_main_window()
 
@@ -598,7 +609,9 @@ def _make_temp_path(name):
 
 def _download_to_path(source_url, save_to_path):
     LOG.info("Download from {} to {}".format(source_url, save_to_path))
-    with closing(urlopen(source_url, context=unverified_ssl_context)) as response, open(save_to_path, 'wb') as out_file:
+    with closing(urlopen(source_url, context=unverified_ssl_context)) as response, open(
+        save_to_path, 'wb'
+    ) as out_file:
         shutil.copyfileobj(response, out_file)
 
 
@@ -648,6 +661,7 @@ def _run_subprocess(cmd, error_msg=None):
 
 class InstallThread(QThread):
     """Main Process that drives all installation"""
+
     success = Signal(str)
     error = Signal(str)
 
@@ -713,9 +727,12 @@ class InstallThread(QThread):
             msg = "Version {} is already installed, skipping installation.".format(_VERSION)
             LOG.info(msg)
             LOG.info(
-                ("If you want to reinstall, "
-                 "please delete the folder {} and the file {} "
-                 "and then run the installer again.").format(install_folder_path, maya_mod_file_path))
+                (
+                    "If you want to reinstall, "
+                    "please delete the folder {} and the file {} "
+                    "and then run the installer again."
+                ).format(install_folder_path, maya_mod_file_path)
+            )
             self.error.emit(msg)
             return
 
@@ -758,12 +775,14 @@ class InstallThread(QThread):
                     shutil.rmtree(install_folder_path, ignore_errors=True)
                 except Exception:
                     raise Exception(
-                        "Failed to delete previous directory for a clean install {0} ".format(install_folder_path))
+                        "Failed to delete previous directory for a clean install {0} ".format(install_folder_path)
+                    )
 
             # Install Dependencies
             LOG.info("Installing dependencies [{}] ...".format(PY_REQUIREMENTS))
             cmd = "\"{mayapy}\" -m pip install --target=\"{target}\" {packages}".format(
-                mayapy=mayapy_path, target=module_site_packages_path, packages=" ".join(PY_REQUIREMENTS))
+                mayapy=mayapy_path, target=module_site_packages_path, packages=" ".join(PY_REQUIREMENTS)
+            )
             if not INSTALL_SSGUI_ONLY:
                 _run_subprocess(cmd, "Failed to install dependencies")
 
@@ -771,7 +790,8 @@ class InstallThread(QThread):
 
             # pathsep is ; on windows and : on linux/macOS
             os.environ["MAYA_PLUG_IN_PATH"] = os.pathsep.join(
-                [module_plugin_path, os.environ.get("MAYA_PLUG_IN_PATH", "")])
+                [module_plugin_path, os.environ.get("MAYA_PLUG_IN_PATH", "")]
+            )
             LOG.info("Added module plugin path [{}] to MAYA_PLUG_IN_PATH".format(module_plugin_path))
 
             self._prepend_to_sys_path(module_script_path)
@@ -787,8 +807,10 @@ class InstallThread(QThread):
                 print(e)
 
             if SYNCSKETCH_GUI_SOURCE_PATH.startswith("https"):
-                cmd = "\"{mayapy}\" -m pip install --upgrade --no-deps --target=\"{target}\" \"{package_path}\"".format(
-                    mayapy=mayapy_path, target=module_script_path, package_path=SYNCSKETCH_GUI_SOURCE_PATH
+                cmd = (
+                    "\"{mayapy}\" -m pip install --upgrade --no-deps --target=\"{target}\" \"{package_path}\"".format(
+                        mayapy=mayapy_path, target=module_script_path, package_path=SYNCSKETCH_GUI_SOURCE_PATH
+                    )
                 )
             else:
                 # for testing purposes, install from local source as an editable package
@@ -804,8 +826,9 @@ class InstallThread(QThread):
             # Download FFMPeg Binaries
             if not INSTALL_SSGUI_ONLY:
                 LOG.info("Install FFMPEG Binaries to {}".format(ffmpeg_bin_folder_path))
-                download_and_install_ffmpeg_to_disc(platform=Literals.PLATFORM,
-                                                    move_to_location=ffmpeg_bin_folder_path)
+                download_and_install_ffmpeg_to_disc(
+                    platform=Literals.PLATFORM, move_to_location=ffmpeg_bin_folder_path
+                )
                 LOG.info("Finished Installing FFMPEG Binaries")
 
         except Exception as e:

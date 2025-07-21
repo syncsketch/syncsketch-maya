@@ -1,14 +1,14 @@
 import codecs
-import os
-import yaml
 import logging
+import os
 
+import yaml
+
+from syncsketchGUI.lib import path
 from syncsketchGUI.lib.maya.menu import _show_error
+from syncsketchGUI.settings import CACHE_YAML
 
 logger = logging.getLogger("syncsketchGUI")
-from syncsketchGUI.lib import path
-
-from syncsketchGUI.settings import CACHE_YAML
 
 
 # ======================================================================

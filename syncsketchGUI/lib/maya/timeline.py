@@ -1,5 +1,4 @@
-from maya import cmds
-from maya import mel
+from maya import cmds, mel
 
 
 def _add_context_menu_item(menu_name='TimeSliderMenu'):

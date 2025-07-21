@@ -1,18 +1,15 @@
 # -*- coding: UTF-8 -*-
+
+from maya import OpenMayaMPx as ommpx
+from maya import OpenMaya as om
+import logging
+
 # ======================================================================
 author = 'SyncSketch LLC'
 email = 'dev@syncsketchGUI.com'
 version = '1.0.0'
 # ======================================================================
-from maya import OpenMayaMPx as ommpx
-from maya import OpenMaya as om
 
-import logging
-
-try:
-    from importlib import reload
-except ImportError:
-    pass
 
 logger = logging.getLogger("syncsketchGUI")
 
@@ -34,6 +31,7 @@ login_cmd_name = 'ssLogin'
 
 # ======================================================================
 # Module Utilities
+
 
 def _show_info(message):
     """
@@ -103,6 +101,7 @@ def _get_command_pairs():
 # ======================================================================
 # Command Classes
 
+
 class Playblast(ommpx.MPxCommand):
     """
     SyncSketch Playblast
@@ -113,6 +112,7 @@ class Playblast(ommpx.MPxCommand):
 
     def doIt(self, *arg):
         import syncsketchGUI.actions
+
         syncsketchGUI.actions.playblast()  # FIXME: playblast method not available
 
 
@@ -126,6 +126,7 @@ class PlayblastOption(ommpx.MPxCommand):
 
     def doIt(self, *arg):
         import syncsketchGUI.actions
+
         syncsketchGUI.actions.playblast_with_options()
 
 
@@ -139,6 +140,7 @@ class PlayblastAndUpload(ommpx.MPxCommand):
 
     def doIt(self, *arg):
         import syncsketchGUI.actions
+
         syncsketchGUI.actions.playblast_and_upload()
 
 
@@ -152,6 +154,7 @@ class PlayblastAndUploadOption(ommpx.MPxCommand):
 
     def doIt(self, *arg):
         import syncsketchGUI.actions
+
         syncsketchGUI.actions.playblast_and_upload_with_options()
 
 
@@ -192,11 +195,13 @@ class Login(ommpx.MPxCommand):
     def doIt(self, *arg):
         # TO DO: Replace with syncsketchGUI custom command
         import syncsketchGUI.actions
+
         syncsketchGUI.actions.show_login_window()
 
 
 # ======================================================================
 # Command Creators
+
 
 def playblast_cmd_creator():
     return ommpx.asMPxPtr(Playblast())
@@ -222,7 +227,6 @@ def export_obj_cmd_creator():
     return ommpx.asMPxPtr(ExportObj())
 
 
-
 def login_cmd_creator():
     return ommpx.asMPxPtr(Login())
 
@@ -230,20 +234,20 @@ def login_cmd_creator():
 # ======================================================================
 # Plugin Initializer
 
+
 def initializePlugin(mobject):
     if om.MGlobal.mayaState() == om.MGlobal.kBatch:
         return
 
     # Add the menu
     import syncsketchGUI.actions
+
     syncsketchGUI.actions.build_menu()
     syncsketchGUI.actions.refresh_menu_state()
     syncsketchGUI.actions.add_timeline_context_menu()
 
     # Register command pairs
-    mplugin = ommpx.MFnPlugin(mobject,
-                              author,
-                              version)
+    mplugin = ommpx.MFnPlugin(mobject, author, version)
 
     command_pairs = _get_command_pairs()
     for pair in command_pairs:
@@ -253,9 +257,11 @@ def initializePlugin(mobject):
 # ======================================================================
 # Plugin Uninitializer
 
+
 def uninitializePlugin(mobject):
     # Remove the menu
     import syncsketchGUI
+
     syncsketchGUI.actions.delete_menu()
 
     # Deregister command pairs

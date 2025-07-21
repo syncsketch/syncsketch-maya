@@ -1,19 +1,13 @@
-import os
 import logging
-
-from syncsketchGUI.vendor.Qt import QtWidgets, QtCore, QtGui
+import os
 
 import syncsketchGUI
-
-from syncsketchGUI.lib import path
-from syncsketchGUI.lib import database
-
+from syncsketchGUI.lib import database, path
 from syncsketchGUI.lib.maya import scene as maya_scene
-from syncsketchGUI.settings import VIEWPORT_YAML, PRESET_YAML
+from syncsketchGUI.settings import PRESET_YAML, VIEWPORT_YAML
+from syncsketchGUI.vendor.Qt import QtCore, QtGui, QtWidgets
 
-from . import qt_regulars
-from . import qt_presets
-from . import qt_utils
+from . import qt_presets, qt_regulars, qt_utils
 
 logger = logging.getLogger("syncsketchGUI")
 

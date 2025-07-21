@@ -1,7 +1,8 @@
 import logging
 
+from syncsketchGUI.lib import connection, user
 from syncsketchGUI.lib.gui import qt_presets
-from syncsketchGUI.vendor.Qt import QtWidgets, QtCore
+from syncsketchGUI.vendor.Qt import QtCore, QtWidgets
 
 logger = logging.getLogger("syncsketchGUI")
 
@@ -10,6 +11,7 @@ class SyncSketchWindow(QtWidgets.QMainWindow):
     """
     SyncSketch Main Preset Window Class
     """
+
     window_name = 'syncsketch_window'
     window_label = 'SyncSketch'
 
@@ -70,8 +72,10 @@ class SyncSketchWindow(QtWidgets.QMainWindow):
         self.current_user = user.SyncSketchUser()
         if self.current_user.is_logged_in() and connection.is_connected():
             logger.info(
-                "self.current_user.is_logged_in() {} is_connected() {} ".format(self.current_user.is_logged_in(),
-                                                                                is_connected()))
+                "self.current_user.is_logged_in() {} is_connected() {} ".format(
+                    self.current_user.is_logged_in(), connection.is_connected()
+                )
+            )
             username = self.current_user.get_name()
             self.ui.ui_login_label.setText("Logged into SyncSketch as \n%s" % username)
             self.ui.ui_login_label.setStyleSheet("color: white; font-size: 11px;")
