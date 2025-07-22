@@ -4,8 +4,7 @@ import webbrowser
 from syncsketchGUI.installScripts.maintenance import get_version_difference
 from syncsketchGUI.lib import path, user
 from syncsketchGUI.lib.connection import is_connected
-from syncsketchGUI.literals import (message_is_not_connected,
-                                    message_is_not_loggedin)
+from syncsketchGUI.literals import message_is_not_connected, message_is_not_loggedin
 from syncsketchGUI.vendor.Qt import QtCore, QtWidgets
 
 from . import qt_dialogs, qt_presets, qt_regulars, qt_utils, web
@@ -121,7 +120,6 @@ class MenuWidget(QtWidgets.QWidget):
         webbrowser.open(path.support_url)
 
     def connect_account(self):
-
         if is_connected():
             login = qt_utils.get_persistent_widget(web.LoginView, self)
             login.show()
@@ -185,7 +183,7 @@ class MenuWidget(QtWidgets.QWidget):
             self.isloggedIn(loggedIn=False)
 
     # loggedin window
-    # todo: this is similar to is_logged_in, we might wan't to move it there
+    # todo: this is similar to is_logged_in, we might want to move it there
     def isloggedIn(self, loggedIn=False):
         current_user = user.SyncSketchUser()
         if loggedIn:

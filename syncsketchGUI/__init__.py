@@ -6,6 +6,10 @@ try:
 except ImportError:
     pass
 
+from .actions import show_main_window, show_download_window, record, play, upload
+
+from .version import __version__
+
 logger = logging.getLogger('syncsketchGUI')
 logger.setLevel(logging.INFO)
 ch = logging.StreamHandler()
@@ -14,8 +18,9 @@ if os.getenv("SS_DEV") == "dev":
     logger.setLevel(logging.DEBUG)
 
 # create formatter
-formatter = logging.Formatter('[%(asctime)s - %(filename)s:%(lineno)s - %(levelname)s - %(message)s]',
-                              "%Y-%m-%d %H:%M:%S")
+formatter = logging.Formatter(
+    '[%(asctime)s - %(filename)s:%(lineno)s - %(levelname)s - %(message)s]', "%Y-%m-%d %H:%M:%S"
+)
 ch.setFormatter(formatter)
 
 logger.addHandler(ch)
@@ -30,7 +35,6 @@ logger.propagate = 0
 # These functions are used from within the Shelf Tools
 
 
-
 def reload_toolkit():
     """
     Exists to support older shelf installations. Might become deprecated.
@@ -40,6 +44,7 @@ def reload_toolkit():
 
 # ======================================================================
 # Module Utilities
+
 
 def _reload_toolkit():
     """

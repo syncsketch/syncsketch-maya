@@ -1,10 +1,70 @@
 import json
 import logging
 
+import maya.cmds as cmds
+
 from syncsketchGUI.lib import user
 from syncsketchGUI.lib.maya.menu import refresh_menu_state
 from syncsketchGUI.lib.path import get_syncsketch_url
-from syncsketchGUI.vendor.Qt import QtCore, QtWebChannel, QtWebEngineWidgets
+
+# from syncsketchGUI.vendor.Qt import QtCore, QtWebChannel, QtWebEngineWidgets
+
+try:
+    MAYA_API_VERSION = int(str(cmds.about(apiVersion=True))[:4])
+except Exception as error:
+    print("Error: {}".format(error))
+    MAYA_API_VERSION = 2022
+
+# Standard Qt.py imports
+from syncsketchGUI.vendor.Qt import QtCore
+
+
+# Web engine compatibility layer
+class WebEngineCompat:
+    QWebEngineView = None
+    QWebEnginePage = None
+    QWebChannel = None
+
+
+if MAYA_API_VERSION >= 2025:
+    try:
+        from PySide6 import QtWebChannel
+
+        WebEngineCompat.QWebChannel = QtWebChannel.QWebChannel
+    except ImportError:
+        pass
+
+    try:
+        from PySide6 import QtWebEngineWidgets
+
+        WebEngineCompat.QWebEngineView = QtWebEngineWidgets.QWebEngineView
+    except ImportError:
+        pass
+
+    try:
+        from PySide6 import QtWebEngineCore
+
+        WebEngineCompat.QWebEnginePage = QtWebEngineCore.QWebEnginePage
+    except ImportError:
+        pass
+
+elif MAYA_API_VERSION >= 2017:
+    try:
+        from PySide2 import QtWebChannel
+
+        WebEngineCompat.QWebChannel = QtWebChannel.QWebChannel
+    except ImportError:
+        pass
+
+    try:
+        from PySide2 import QtWebEngineWidgets
+
+        WebEngineCompat.QWebEngineView = QtWebEngineWidgets.QWebEngineView
+        WebEngineCompat.QWebEnginePage = QtWebEngineWidgets.QWebEnginePage
+    except ImportError:
+        pass
+
+# Usage: WebEngineCompat.QWebEnginePage instead of QtWebEngineWidgets.QWebEnginePage
 
 logger = logging.getLogger("syncsketchGUI")
 
@@ -13,7 +73,7 @@ Although not ideal, logoutview has to be a global variable in order to be persis
 Otherwise when declared in logout_view function, logoutview will run out of scope before url is fully loaded, since
 load method runs asynchron. 
  """
-logoutview = QtWebEngineWidgets.QWebEngineView()
+logoutview = WebEngineCompat.QWebEngineView()
 logout_url = "{}/app/logmeout/".format(get_syncsketch_url())
 
 
@@ -45,7 +105,7 @@ class Element(QtCore.QObject):
         self._token_data = value
 
 
-class WebEnginePage(QtWebEngineWidgets.QWebEnginePage):
+class WebEnginePage(WebEngineCompat.QWebEnginePage):
     def __init__(self, *args, **kwargs):
         super(WebEnginePage, self).__init__(*args, **kwargs)
         self.loadFinished.connect(self.onLoadFinished)
@@ -64,7 +124,7 @@ class WebEnginePage(QtWebEngineWidgets.QWebEnginePage):
             file.close()
             self.runJavaScript(content.data().decode("utf8"))
         if self.webChannel() is None:
-            channel = QtWebChannel.QWebChannel(self)
+            channel = WebEngineCompat.QWebChannel(self)
             self.setWebChannel(channel)
 
     def load_objects(self):
@@ -82,7 +142,7 @@ class WebEnginePage(QtWebEngineWidgets.QWebEnginePage):
             self.runJavaScript(_script)
 
 
-class LoginView(QtWebEngineWidgets.QWebEngineView):
+class LoginView(WebEngineCompat.QWebEngineView):
     logged_in = QtCore.Signal
     window_name = 'syncsketchGUI_login_window'
     window_label = 'Login to SyncSketch'

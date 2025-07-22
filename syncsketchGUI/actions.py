@@ -11,16 +11,19 @@ logger = logging.getLogger("syncsketchGUI")
 
 def record():
     from .devices import recoder
+
     return recoder.record()
 
 
 def play():
     from .devices import player
+
     player.play()
 
 
 def upload():
     from .devices import uploader
+
     return uploader.upload()
 
 
@@ -89,47 +92,56 @@ def cycle_viewport_presets():
 
 def show_login_window():
     from .lib.gui.web import LoginView
+
     _show_persistent_widget(LoginView)
 
 
 def show_syncsketch_browser_window():
     from .lib.gui import qt_browser
+
     _show_persistent_widget(qt_browser.ReviewBrowserWidget)
 
 
 def show_main_window():
     from .lib.gui import qt_main_window
+
     _show_persistent_widget(qt_main_window.MenuWindow)
 
 
 def show_download_window():
     from .lib.gui import qt_download
+
     _show_persistent_widget(qt_download.DownloadWindow)
 
 
 def show_viewport_preset_window():
     from .lib.gui import qt_viewport_preset
+
     _show_persistent_widget(qt_viewport_preset.ViewportPresetWindow)
 
 
 def playblast():
     from .devices import recoder
+
     return recoder.record(upload_after_creation=False, play_after_creation=None, show_success_msg=True)
 
 
 def playblast_with_options():
     import syncsketchGUI
-    syncsketchGUI.show_menu_window()
+
+    syncsketchGUI.show_main_window()
 
 
 def playblast_and_upload():
     from .devices import recoder
+
     return recoder.record(upload_after_creation=True, play_after_creation=False, show_success_msg=True)
 
 
 def playblast_and_upload_with_options():
     import syncsketchGUI
-    syncsketchGUI.show_menu_window()
+
+    syncsketchGUI.show_main_window()
 
 
 def _show_persistent_widget(widget_cls):

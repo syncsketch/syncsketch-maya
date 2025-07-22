@@ -36,13 +36,19 @@ except Exception as error:
     print("Error: {}".format(error))
     MAYA_API_VERSION = 2022
 
+
 # Mac does not have certificates installed by default, so we need to disable SSL verification
 unverified_ssl_context = ssl.create_default_context()
 unverified_ssl_context.check_hostname = False
 unverified_ssl_context.verify_mode = ssl.CERT_NONE
 
 # cant use Qt.py as we have not installed requirements yet
-if MAYA_API_VERSION >= 2017:
+if MAYA_API_VERSION >= 2025:
+    from PySide6.QtCore import *
+    from PySide6.QtWidgets import *
+    from PySide6.QtGui import *
+    from shiboken6 import wrapInstance
+elif MAYA_API_VERSION >= 2017:
     from PySide2.QtCore import *
     from PySide2.QtWidgets import *
     from PySide2.QtGui import *
@@ -67,6 +73,18 @@ else:
 
 if os.environ.get("SYNCSKETCH_GUI_SOURCE_PATH"):
     SYNCSKETCH_GUI_SOURCE_PATH = os.environ.get("SYNCSKETCH_GUI_SOURCE_PATH")
+
+    # Get the directory containing this script
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Navigate up to project root (app/)
+    # Current: app/gui/install/setup_project.py
+    # Target:  app/
+    project_root = os.path.dirname(os.path.dirname(current_dir))
+
+    # Add to Python path if not already there
+    if project_root not in sys.path:
+        sys.path.insert(0, project_root)
 else:
     SYNCSKETCH_GUI_SOURCE_PATH = "https://github.com/syncsketch/syncsketch-maya/archive/refs/tags/{}.zip".format(
         VERSION_TAG
@@ -262,6 +280,30 @@ class IconButton(QPushButton):
             return QPixmap(self.icon)
 
 
+def get_screen_at_cursor():
+    """Get the geometry of the screen where the cursor is currently located."""
+    # PySide6/PyQt6 approach
+    try:
+        current_screen = QApplication.screenAt(QCursor.pos())
+        if current_screen:
+            return current_screen.geometry()
+        else:
+            # Fallback to primary screen
+            return QApplication.primaryScreen().geometry()
+        print("Hello from PySide6/PyQt6")
+    except AttributeError as e:
+        print(e)
+        LOG.info("Using fallback method for screen geometry: {}".format(e))
+        # PySide2/PyQt5 fallback
+        desktop = QApplication.desktop()
+        screen_number = desktop.screenNumber(QCursor.pos())
+        return desktop.screenGeometry(screen_number)
+    except Exception as e:
+        # General fallback in case of any other issues
+        LOG.error("Error getting screen geometry: {}".format(e))
+        raise RuntimeError("Could not determine screen geometry at cursor position.")
+
+
 class SyncSketchInstaller(QDialog):
     def __init__(self, parent=None, *args, **kwargs):
         if parent is None:
@@ -273,9 +315,7 @@ class SyncSketchInstaller(QDialog):
 
         width = size[0]
         height = size[1]
-        desktop = QApplication.desktop()
-        screen_number = desktop.screenNumber(QCursor.pos())
-        screen_rect = desktop.screenGeometry(screen_number)
+        screen_rect = get_screen_at_cursor()
         width_center = screen_rect.width() / 2 - width / 2
         height_center = screen_rect.height() / 2 - height / 2
         self.setMinimumSize(QSize(*size))

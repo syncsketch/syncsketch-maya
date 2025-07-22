@@ -3,11 +3,21 @@ breadcrumb: ''
 current_preset: HD720p (Windows)
 current_range_type: Start / End
 current_viewport_preset: Animation
-frame_end: '200'
+frame_end: '120'
 frame_start: '1'
-last_recorded: { camera: persp, compression: H.264, end_frame: '200', filename: '',
-                 format: avfoundation, height: 720, off_screen: true, overwrite: false, show_ornaments: false,
-                 start_frame: '1', viewer: false, width: 1280 }
+last_recorded:
+  camera: persp
+  compression: H.264
+  end_frame: '200'
+  filename: ''
+  format: avfoundation
+  height: 720
+  off_screen: true
+  overwrite: false
+  show_ornaments: false
+  start_frame: '1'
+  viewer: false
+  width: 1280
 last_recorded_selection: ''
 ps_clipname_lineEdit: ''
 ps_directory_lineEdit: ''
@@ -24,4 +34,3 @@ target_url_username: ''
 upload_to_value: null
 us_filename_lineEdit: playblast
 us_last_upload_url_pushButton: ''
-selected_camera: persp

@@ -29,13 +29,23 @@ except ImportError:
 
 from syncsketchGUI import literals
 
-# TODO: Remove QT Dependency
 try:
+    MAYA_API_VERSION = int(str(cmds.about(apiVersion=True))[:4])
+except Exception as error:
+    print("Error: {}".format(error))
+    MAYA_API_VERSION = 2022
+
+# TODO: Remove QT Dependency
+if MAYA_API_VERSION >= 2025:
+    from PySide6 import QtWidgets, QtGui
+elif MAYA_API_VERSION >= 2017:
     from PySide2 import QtGui, QtWidgets
-except ImportError:
+else:
+    # Unsupported version
     from PySide import QtGui
 
     QtWidgets = QtGui
+
 
 # TODO: Remove QT Dependency
 from syncsketchGUI.lib.gui import qt_dialogs

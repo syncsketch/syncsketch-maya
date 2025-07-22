@@ -9,11 +9,12 @@ from syncsketchGUI.lib import database, path, user
 # Global Variables
 
 yaml_file = 'syncsketch_menu.yaml'
-menu_prefix = 'syncsketch'
+MENU_PREFIX = 'syncsketch'
 
 
 # ======================================================================
 # Module Utilities
+
 
 def _show_info(message):
     om.MGlobal.displayInfo(message)
@@ -61,7 +62,6 @@ def _make_object_name(string):
     Convert the given string into a python usable object name.
     If non ascii characters are found, generate a uuid
     and attach it behind the string 'MenuItem'
-
     """
     if string:
         string = _remove_special_characters(string)
@@ -72,7 +72,7 @@ def _make_object_name(string):
 
         string = '{}{}'.format('MenuItem_', unique_id)
 
-    return '{}{}'.format(menu_prefix, string)
+    return '{}{}'.format(MENU_PREFIX, string)
 
 
 def _add_menu_top(menu_top_label):
@@ -85,10 +85,7 @@ def _add_menu_top(menu_top_label):
     if cmds.menu(menu_top_object, exists=True):
         cmds.deleteUI(menu_top_object, menu=True)
 
-    menu_top = cmds.menu(menu_top_object,
-                         parent=main_menu_bar,
-                         label=menu_top_label,
-                         tearOff=True)
+    menu_top = cmds.menu(menu_top_object, parent=main_menu_bar, label=menu_top_label, tearOff=True)
     return menu_top
 
 
@@ -110,11 +107,7 @@ def _add_menu(menu_label, menu_parent_label):
     if cmds.menuItem(menu_object, exists=True):
         cmds.deleteUI(menu_object, menuItem=True)
 
-    menu = cmds.menuItem(menu_object,
-                         parent=menu_parent_object,
-                         label=menu_label,
-                         tearOff=True,
-                         subMenu=True)
+    menu = cmds.menuItem(menu_object, parent=menu_parent_object, label=menu_label, tearOff=True, subMenu=True)
     return menu
 
 
@@ -125,10 +118,7 @@ def _add_divider(divider_label, divider_parent_label):
     if cmds.menuItem(divider_object, exists=True):
         cmds.deleteUI(divider_object, menuItem=True)
 
-    divider = cmds.menuItem(divider_object,
-                            parent=divider_parent_object,
-                            divider=True,
-                            label=divider_label)
+    divider = cmds.menuItem(divider_object, parent=divider_parent_object, divider=True, label=divider_label)
     return divider
 
 
@@ -140,16 +130,17 @@ def _add_menu_item(menu_item_label, menu_item_command, menu_item_parent_label):
         cmds.deleteUI(menu_item_object, menuItem=True)
 
     if not menu_item_command:
-        menu_item = cmds.menuItem(menu_item_object,
-                                  parent=menu_item_parent_object,
-                                  label=menu_item_label,
-                                  tearOff=True)
+        menu_item = cmds.menuItem(
+            menu_item_object, parent=menu_item_parent_object, label=menu_item_label, tearOff=True
+        )
     else:
-        menu_item = cmds.menuItem(menu_item_object,
-                                  parent=menu_item_parent_object,
-                                  command=menu_item_command,
-                                  label=menu_item_label,
-                                  tearOff=True)
+        menu_item = cmds.menuItem(
+            menu_item_object,
+            parent=menu_item_parent_object,
+            command=menu_item_command,
+            label=menu_item_label,
+            tearOff=True,
+        )
     return menu_item
 
 
@@ -161,18 +152,18 @@ def _add_menu_item_option(menu_item_label, menu_item_command, menu_item_parent_l
         cmds.deleteUI(menu_item_object, menuItem=True)
 
     if not menu_item_command:
-        menu_item = cmds.menuItem(menu_item_object,
-                                  parent=menu_item_parent_object,
-                                  label=menu_item_label,
-                                  optionBox=True,
-                                  tearOff=True)
+        menu_item = cmds.menuItem(
+            menu_item_object, parent=menu_item_parent_object, label=menu_item_label, optionBox=True, tearOff=True
+        )
     else:
-        menu_item = cmds.menuItem(menu_item_object,
-                                  parent=menu_item_parent_object,
-                                  command=menu_item_command,
-                                  label=menu_item_label,
-                                  optionBox=True,
-                                  tearOff=True)
+        menu_item = cmds.menuItem(
+            menu_item_object,
+            parent=menu_item_parent_object,
+            command=menu_item_command,
+            label=menu_item_label,
+            optionBox=True,
+            tearOff=True,
+        )
     return menu_item
 
 
@@ -208,13 +199,9 @@ def _populate_menus(menu_data, menu_parent):
             menu_item_parent_label = menu_parent
 
             if 'option' in menu_item_label.lower():
-                menu_item_object = _add_menu_item_option(menu_item_label,
-                                                         menu_item_command,
-                                                         menu_item_parent_label)
+                menu_item_object = _add_menu_item_option(menu_item_label, menu_item_command, menu_item_parent_label)
             else:
-                menu_item_object = _add_menu_item(menu_item_label,
-                                                  menu_item_command,
-                                                  menu_item_parent_label)
+                menu_item_object = _add_menu_item(menu_item_label, menu_item_command, menu_item_parent_label)
 
             menu_item_command = _sanitize_mel_command(menu_item_command)
             if menu_item_command:
@@ -223,6 +210,7 @@ def _populate_menus(menu_data, menu_parent):
 
 # ======================================================================
 # Module Functions
+
 
 def delete_menu():
     """
@@ -322,7 +310,8 @@ def refresh_menu_state():
         login_info = 'Currently not logged in'
         if not cmds.menuItem('syncsketchLogin', exists=True):
             # delete so that it is recreated below the Login ... Item
-            cmds.deleteUI('logged_in_as', menuItem=True)
+            if cmds.menuItem('logged_in_as', exists=True):
+                cmds.deleteUI('logged_in_as', menuItem=True)
 
             menu_item_object = _add_menu_item('Login ...', 'ssLogin', 'SyncSketch')
             cmds.menuItem(menu_item_object, command='ssLogin', edit=True, sourceType='mel')
@@ -331,7 +320,4 @@ def refresh_menu_state():
         menu_top_name = _make_object_name("SyncSketch")
         cmds.menuItem('logged_in_as', parent=menu_top_name)
 
-    cmds.menuItem('logged_in_as',
-                  edit=True,
-                  enable=False,
-                  label=login_info)
+    cmds.menuItem('logged_in_as', edit=True, enable=False, label=login_info)

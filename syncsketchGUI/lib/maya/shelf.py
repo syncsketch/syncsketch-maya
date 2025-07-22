@@ -1,8 +1,9 @@
 import codecs
 import os
-
+import logging
 import yaml
-from maya import cmds, mel
+from maya import mel
+import maya.cmds as cmds
 
 from syncsketchGUI.lib import path
 
@@ -12,6 +13,7 @@ from syncsketchGUI.lib import path
 yaml_shelf = 'syncsketch_shelf.yaml'
 shelf_name = 'SyncSketch'
 
+log = logging.getLogger("syncsketchGUI.maya.shelf")
 
 # ======================================================================
 # Module Utilities
@@ -505,6 +507,11 @@ def load(yaml_shelf_file, custom_shelf_name=None):
     """
     Dynamically create and load the shelf in maya
     """
+    global shelf_name
+
+    log.info("Loading {}".format(yaml_shelf_file))
+    log.info("Using shelf name: {}".format(custom_shelf_name or shelf_name))
+
     if custom_shelf_name:
         shelf_name = custom_shelf_name
     else:
@@ -550,9 +557,19 @@ def load(yaml_shelf_file, custom_shelf_name=None):
     # Give a name and save the shelf
     cmds.tabLayout(shelf_top_level, edit=True, tabLabel=[custom_shelf, shelf_name])
 
-    user_shelf_dir = cmds.internalVar(userShelfDir=True)
+    user_shelf_dirs = cmds.internalVar(userShelfDir=True)
+
+    log.info("user_shelf_dirs: {}".format(user_shelf_dirs))
+
+    user_shelf_dir = user_shelf_dirs.split(":")[-1]
+
+    log.info("user_shelf_dir: {}".format(user_shelf_dir))
+
     user_shelf_fullname = os.path.join(user_shelf_dir, 'shelf_' + shelf_name)
     user_shelf_fullname = _sanitize_path(user_shelf_fullname)
+
+    log.info("Saving shelf to: {}".format(user_shelf_fullname))
+    log.info("Shelf name: {}".format(shelf_name))
     cmds.saveShelf(custom_shelf, user_shelf_fullname)
 
 
